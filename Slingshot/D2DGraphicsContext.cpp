@@ -64,12 +64,12 @@ LRESULT D2DGraphicsContext::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lPara
 	break;
 	case WM_SYSCHAR:
 		break;
-	case WM_SETCURSOR:
-		if (LOWORD(lParam) == HTCLIENT) {
-			SetCursor(m_hCursor);
-			return TRUE;
-		}
-		break;
+	//case WM_SETCURSOR:
+	//	if (LOWORD(lParam) == HTCLIENT) {
+	//		SetCursor(m_hCursor);
+	//		return TRUE;
+	//	}
+	//	break;
 	case WM_DESTROY:
 	{
 		PostQuitMessage(0);
@@ -84,8 +84,9 @@ LRESULT D2DGraphicsContext::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lPara
 	}
 }
 
-void D2DGraphicsContext::OnCreate()
+void D2DGraphicsContext::OnCreate(HWND hwnd)
 {
+	m_hWnd = hwnd;
 	if (SUCCEEDED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &pFactory))) {
 		RetrieveDPIScale();
 		m_CaptureCursor = true;

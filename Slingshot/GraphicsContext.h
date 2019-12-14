@@ -23,39 +23,14 @@ public:
 	GraphicsContext();
 	~GraphicsContext();
 
-	LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	//D2D
-	ID2D1Factory* pFactory = NULL;
-	ID2D1HwndRenderTarget* pRenderTarget = NULL;
-	ID2D1SolidColorBrush* pBrush = NULL;
-
-	D2D1_ELLIPSE ellipse;
-
-	void OnCreate();
-	void OnDestroy();
-	void OnPaint();
-	void OnResize();
-	void OnLButtonDown(int pixelX, int pixelY, DWORD flags);
-	void OnLButtonUp();
-	void OnMouseMove(int pixelX, int pixelY, DWORD flags);
-
-	void CalculateLayout();
-	HRESULT CreateGraphicsResources();
-	void DiscardGraphicsResources();
-	void CaptureCursor();
-
-	//DPI - Dots Per Inch (MS graphics measurement - 96 points Per Inch)
-	//Alternative to DIP - Device-Independant Pixels D2D graphics metric
-	void RetrieveDPIScale();
-	D2D1_POINT_2F PixelsToDips(FLOAT xCoord, FLOAT yCoord);
-
-	HWND m_hWnd;
-	RECT m_ClientRect;
-
-	float m_DPIScaleX = 1.0f; 
-	float m_DPIScaleY = 1.0f;
-	D2D1_POINT_2F m_ptMouse = D2D1::Point2F();
-	bool m_CaptureCursor = false;
+	virtual void OnCreate(HWND hwnd);
+	virtual void OnDestroy();
+	virtual void OnPaint();
+	virtual void OnResize();
+	virtual void OnLButtonDown(int pixelX, int pixelY, DWORD flags);
+	virtual void OnLButtonUp();
+	virtual void OnMouseMove(int pixelX, int pixelY, DWORD flags);
 };
 

@@ -8,8 +8,9 @@ D3D11GraphicsContext::~D3D11GraphicsContext()
 {
 }
 
-void D3D11GraphicsContext::OnCreate()
+void D3D11GraphicsContext::OnCreate(HWND hwnd)
 {
+	m_hWnd = hwnd;
 	CreateDevice();
 	CreateSwapChain();
 }

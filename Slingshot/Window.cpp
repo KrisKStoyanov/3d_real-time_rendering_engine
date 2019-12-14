@@ -1,19 +1,19 @@
 #include "Window.h"
 
-Window::Window(GContext gc)
+Window::Window(GC gc)
 {
 	switch (gc) {
-	case GContext::D2D:
+	case GC::D2D:
 	{
 		m_GC = new D2DGraphicsContext();
 	}
 	break;
-	case GContext::D3D11:
+	case GC::D3D11:
 	{
 		m_GC = new D3D11GraphicsContext();
 	}
 	break;
-	case GContext::D3D12:
+	case GC::D3D12:
 	{
 
 	}

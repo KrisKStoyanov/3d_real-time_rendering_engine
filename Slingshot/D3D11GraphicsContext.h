@@ -16,7 +16,7 @@ public:
 	std::vector<IDXGIAdapter*> EnumerateAdapters();
 	DXGI_MODE_DESC* GetAdapterDisplayMode(IDXGIAdapter* adapter, DXGI_FORMAT format);
 	
-	void OnCreate();
+	void OnCreate(HWND hwnd);
 	void OnDestroy();
 	void OnPaint();
 	void OnResize();

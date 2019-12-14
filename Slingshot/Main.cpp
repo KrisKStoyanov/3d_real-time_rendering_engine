@@ -580,7 +580,7 @@ int CALLBACK wWinMain(
 	_In_ PWSTR lpCmdLine, 
 	_In_ int nCmdShow) 
 {
-	Window* win = new Window(GContext::D3D11);
+	Window* win = new Window(GC::D2D);
 	win->Create(L"Slingshot D3D12", WS_OVERLAPPEDWINDOW);
 	win->Show(nCmdShow);
 	win->OnUpdate();

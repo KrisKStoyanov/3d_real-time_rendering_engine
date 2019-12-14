@@ -16,7 +16,7 @@
 #include "D2DGraphicsContext.h"
 #include "D3D11GraphicsContext.h"
 
-enum class GContext {
+enum class GC {
 	D2D = 0,
 	D3D11,
 	D3D12
@@ -33,8 +33,7 @@ public:
 			CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
 			gc = reinterpret_cast<GraphicsContext*>(pCreate->lpCreateParams);
 			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)gc);
-			gc->m_hWnd = hwnd;
-			gc->OnCreate();
+			gc->OnCreate(hwnd);
 		}
 		else {
 			gc = (GraphicsContext*)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
@@ -48,7 +47,7 @@ public:
 		}
 	}
 
-	Window(GContext gc);
+	Window(GC gc);
 	~Window();
 
 	BOOL Create(
