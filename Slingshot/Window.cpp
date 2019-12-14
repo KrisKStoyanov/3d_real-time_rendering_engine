@@ -1,8 +1,29 @@
 #include "Window.h"
 
-Window::Window(GraphicsContext* gc)
+Window::Window(GContext gc)
 {
-	m_GC = gc;
+	switch (gc) {
+	case GContext::D2D:
+	{
+		m_GC = new D2DGraphicsContext();
+	}
+	break;
+	case GContext::D3D11:
+	{
+		m_GC = new D3D11GraphicsContext();
+	}
+	break;
+	case GContext::D3D12:
+	{
+
+	}
+	break;
+	default:
+	{
+		m_GC = new D2DGraphicsContext();
+	}
+	break;
+	}
 }
 
 Window::~Window()
@@ -31,8 +52,6 @@ BOOL Window::Create(PCWSTR lpWindowName, DWORD dwStyle, DWORD dwExStyle, int xCo
 	wc.hIconSm = NULL;
 
 	RegisterClassExW(&wc);
-
-	m_GC = new (std::nothrow) GraphicsContext;
 
 	m_hWnd = CreateWindowExW(
 		dwExStyle,

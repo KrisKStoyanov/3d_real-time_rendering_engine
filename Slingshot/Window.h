@@ -13,7 +13,14 @@
 #include <windef.h>
 
 #include "Helpers.h"
-#include "GraphicsContext.h"
+#include "D2DGraphicsContext.h"
+#include "D3D11GraphicsContext.h"
+
+enum class GContext {
+	D2D = 0,
+	D3D11,
+	D3D12
+};
 
 class Window
 {
@@ -41,7 +48,7 @@ public:
 		}
 	}
 
-	Window(GraphicsContext* gc);
+	Window(GContext gc);
 	~Window();
 
 	BOOL Create(

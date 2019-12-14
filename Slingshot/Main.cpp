@@ -27,6 +27,10 @@
 #include "Helpers.h"
 //-----
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~
+#include "Window.h"
+//~~~~~~~~~~~~~~~~~~~~~~~~~
+
 //The number of swap chain back buffers
 const uint8_t g_NumFrames = 3;
 //Use WARP adapter 
@@ -42,10 +46,6 @@ bool g_IsInitialized = false;
 HWND g_hWnd;
 //Window rectangle (used to toggle fullscreen state)
 RECT g_WindowRect;
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~
-#include "Window.h"
-//~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //DirectX 12 Objects
 Microsoft::WRL::ComPtr<ID3D12Device2> g_Device;
@@ -95,7 +95,7 @@ void EnableDebugLayer() {
 	//so all possible errors generated while creating DX12 objects
 	//are caught by the debug layer
 	Microsoft::WRL::ComPtr<ID3D12Debug> debugInterface;
-	ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)));
+	DX::ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)));
 	debugInterface->EnableDebugLayer();
 #endif
 }
@@ -157,14 +157,14 @@ Microsoft::WRL::ComPtr<IDXGIAdapter4> GetAdapter(bool useWarp) {
 #if defined(_DEBUG)
 	createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 #endif
-	ThrowIfFailed(CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(&dxgiFactory)));
+	DX::ThrowIfFailed(CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(&dxgiFactory)));
 	
 	Microsoft::WRL::ComPtr<IDXGIAdapter1> dxgiAdapter1;
 	Microsoft::WRL::ComPtr<IDXGIAdapter4> dxgiAdapter4;
 
 	if (useWarp) {
-		ThrowIfFailed(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&dxgiAdapter1)));
-		ThrowIfFailed(dxgiAdapter1.As(&dxgiAdapter4));
+		DX::ThrowIfFailed(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&dxgiAdapter1)));
+		DX::ThrowIfFailed(dxgiAdapter1.As(&dxgiAdapter4));
 	}
 	else {
 		SIZE_T maxDedicatedVideoMemory = 0;
@@ -178,7 +178,7 @@ Microsoft::WRL::ComPtr<IDXGIAdapter4> GetAdapter(bool useWarp) {
 				dxgiAdapterDesc1.DedicatedVideoMemory > maxDedicatedVideoMemory) 
 			{
 				maxDedicatedVideoMemory = dxgiAdapterDesc1.DedicatedVideoMemory;
-				ThrowIfFailed(dxgiAdapter1.As(&dxgiAdapter4));
+				DX::ThrowIfFailed(dxgiAdapter1.As(&dxgiAdapter4));
 			}
 		}
 	}
@@ -187,7 +187,7 @@ Microsoft::WRL::ComPtr<IDXGIAdapter4> GetAdapter(bool useWarp) {
 
 Microsoft::WRL::ComPtr<ID3D12Device2> CreateDevice(Microsoft::WRL::ComPtr<IDXGIAdapter4> adapter) {
 	Microsoft::WRL::ComPtr<ID3D12Device2> d3d12Device2;
-	ThrowIfFailed(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3d12Device2)));
+	DX::ThrowIfFailed(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3d12Device2)));
 #if defined(_DEBUG)
 	Microsoft::WRL::ComPtr<ID3D12InfoQueue> pInfoQueue;
 	if (SUCCEEDED(d3d12Device2.As(&pInfoQueue))) {
@@ -211,7 +211,7 @@ Microsoft::WRL::ComPtr<ID3D12Device2> CreateDevice(Microsoft::WRL::ComPtr<IDXGIA
 		NewFilter.DenyList.NumIDs = _countof(DenyIds);
 		NewFilter.DenyList.pIDList = DenyIds;
 
-		ThrowIfFailed(pInfoQueue->PushStorageFilter(&NewFilter));
+		DX::ThrowIfFailed(pInfoQueue->PushStorageFilter(&NewFilter));
 	}
 #endif
 	return d3d12Device2;
@@ -228,7 +228,7 @@ Microsoft::WRL::ComPtr<ID3D12CommandQueue> CreateCommandQueue(
 	desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	desc.NodeMask = 0;
 
-	ThrowIfFailed(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&d3d12CommandQueue)));
+	DX::ThrowIfFailed(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&d3d12CommandQueue)));
 
 	return d3d12CommandQueue;
 }
@@ -261,7 +261,7 @@ Microsoft::WRL::ComPtr<IDXGISwapChain4> CreateSwapChain(
 #if defined(_DEBUG)
 	createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 #endif
-	ThrowIfFailed(CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(&dxgiFactory4)));
+	DX::ThrowIfFailed(CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(&dxgiFactory4)));
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 	swapChainDesc.Width = width;
 	swapChainDesc.Height = height;
@@ -276,7 +276,7 @@ Microsoft::WRL::ComPtr<IDXGISwapChain4> CreateSwapChain(
 	swapChainDesc.Flags = CheckTearingSupport() ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> swapChain1;
-	ThrowIfFailed(dxgiFactory4->CreateSwapChainForHwnd(
+	DX::ThrowIfFailed(dxgiFactory4->CreateSwapChainForHwnd(
 		commandQueue.Get(),
 		hWnd,
 		&swapChainDesc,
@@ -285,9 +285,9 @@ Microsoft::WRL::ComPtr<IDXGISwapChain4> CreateSwapChain(
 		&swapChain1
 	));
 	//Disable the Alt+Enter fullscreen toggle feature. Switching will be handled manually
-	ThrowIfFailed(dxgiFactory4->MakeWindowAssociation(hWnd, DXGI_MWA_NO_ALT_ENTER));
+	DX::ThrowIfFailed(dxgiFactory4->MakeWindowAssociation(hWnd, DXGI_MWA_NO_ALT_ENTER));
 
-	ThrowIfFailed(swapChain1.As(&dxgiSwapChain4));
+	DX::ThrowIfFailed(swapChain1.As(&dxgiSwapChain4));
 
 	return dxgiSwapChain4;
 }
@@ -302,7 +302,7 @@ Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(
 	desc.NumDescriptors = numDescriptors;
 	desc.Type = type;
 
-	ThrowIfFailed(device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap)));
+	DX::ThrowIfFailed(device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap)));
 
 	return descriptorHeap;
 }
@@ -316,7 +316,7 @@ void UpdateRenderTargetViews(
 
 	for (int i = 0; i < g_NumFrames; ++i) {
 		Microsoft::WRL::ComPtr<ID3D12Resource> backBuffer;
-		ThrowIfFailed(swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer)));
+		DX::ThrowIfFailed(swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer)));
 		device->CreateRenderTargetView(backBuffer.Get(), nullptr, rtvHandle);
 
 		g_BackBuffers[i] = backBuffer;
@@ -329,7 +329,7 @@ Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CreateCommandAllocator(
 	D3D12_COMMAND_LIST_TYPE type) 
 {
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;
-	ThrowIfFailed(device->CreateCommandAllocator(type, IID_PPV_ARGS(&commandAllocator)));
+	DX::ThrowIfFailed(device->CreateCommandAllocator(type, IID_PPV_ARGS(&commandAllocator)));
 
 	return commandAllocator;
 }
@@ -339,16 +339,16 @@ Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> CreateCommandList(
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator,
 	D3D12_COMMAND_LIST_TYPE type) {
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList;
-	ThrowIfFailed(device->CreateCommandList(0, type, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList)));
+	DX::ThrowIfFailed(device->CreateCommandList(0, type, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList)));
 
-	ThrowIfFailed(commandList->Close());
+	DX::ThrowIfFailed(commandList->Close());
 	return commandList;
 }
 
 Microsoft::WRL::ComPtr<ID3D12Fence> CreateFence(
 	Microsoft::WRL::ComPtr<ID3D12Device2> device) {
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence;
-	ThrowIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
+	DX::ThrowIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
 
 	return fence;
 }
@@ -364,7 +364,7 @@ uint64_t Signal(
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence,
 	uint64_t& fenceValue) {
 	uint64_t fenceValueForSignal = ++fenceValue;
-	ThrowIfFailed(commandQueue->Signal(fence.Get(), fenceValueForSignal));
+	DX::ThrowIfFailed(commandQueue->Signal(fence.Get(), fenceValueForSignal));
 	return fenceValueForSignal;
 }
 
@@ -374,7 +374,7 @@ void WaitForFenceValue(
 	HANDLE fenceEvent,
 	std::chrono::milliseconds duration = std::chrono::milliseconds::max()) {
 	if (fence->GetCompletedValue() < fenceValue) {
-		ThrowIfFailed(fence->SetEventOnCompletion(fenceValue, fenceEvent));
+		DX::ThrowIfFailed(fence->SetEventOnCompletion(fenceValue, fenceEvent));
 		::WaitForSingleObject(fenceEvent, static_cast<DWORD>(duration.count()));
 	}
 }
@@ -435,7 +435,7 @@ void Render() {
 		D3D12_RESOURCE_STATE_PRESENT);
 	g_CommandList->ResourceBarrier(1, &barrier);
 
-	ThrowIfFailed(g_CommandList->Close());
+	DX::ThrowIfFailed(g_CommandList->Close());
 	ID3D12CommandList* const commandLists[] = {
 		g_CommandList.Get()
 	};
@@ -443,7 +443,7 @@ void Render() {
 	
 	UINT syncInterval = g_VSync ? 1 : 0;
 	UINT presentFlags = g_TearingSupported && !g_VSync ? DXGI_PRESENT_ALLOW_TEARING : 0;
-	ThrowIfFailed(g_SwapChain->Present(syncInterval, presentFlags));
+	DX::ThrowIfFailed(g_SwapChain->Present(syncInterval, presentFlags));
 
 	g_FrameFenceValues[g_CurrentBackBufferIndex] = Signal(g_CommandQueue, g_Fence, g_FenceValue);
 	g_CurrentBackBufferIndex = g_SwapChain->GetCurrentBackBufferIndex();
@@ -462,8 +462,8 @@ void Resize(uint32_t width, uint32_t height) {
 		}
 
 		DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
-		ThrowIfFailed(g_SwapChain->GetDesc(&swapChainDesc));
-		ThrowIfFailed(g_SwapChain->ResizeBuffers(g_NumFrames, g_ClientWidth, g_ClientHeight,
+		DX::ThrowIfFailed(g_SwapChain->GetDesc(&swapChainDesc));
+		DX::ThrowIfFailed(g_SwapChain->ResizeBuffers(g_NumFrames, g_ClientWidth, g_ClientHeight,
 			swapChainDesc.BufferDesc.Format, swapChainDesc.Flags));
 
 		g_CurrentBackBufferIndex = g_SwapChain->GetCurrentBackBufferIndex();
@@ -580,8 +580,7 @@ int CALLBACK wWinMain(
 	_In_ PWSTR lpCmdLine, 
 	_In_ int nCmdShow) 
 {
-	GraphicsContext* gc = new GraphicsContext();
-	Window* win = new Window(gc);
+	Window* win = new Window(GContext::D3D11);
 	win->Create(L"Slingshot D3D12", WS_OVERLAPPEDWINDOW);
 	win->Show(nCmdShow);
 	win->OnUpdate();
