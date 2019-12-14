@@ -12,16 +12,25 @@ Window::~Window()
 BOOL Window::Create(PCWSTR lpWindowName, DWORD dwStyle, DWORD dwExStyle, int xCoord, int yCoord, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu)
 {
 	//Behaviour template for extended window class template (supporting Unicode (W) chars)
-	WNDCLASS wc = {};
+	WNDCLASSEXW wc = {};
 
 	//Obtain application instance signature
 	HINSTANCE hInstance = GetModuleHandleW(NULL);
 
+	wc.cbSize = sizeof(WNDCLASSEX);
+	wc.style = dwExStyle;
 	wc.lpfnWndProc = &WindowProc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
 	wc.hInstance = hInstance;
+	wc.hIcon = NULL;
+	wc.hCursor = LoadCursorW(NULL, IDC_ARROW);
+	wc.hbrBackground = NULL;
+	wc.lpszMenuName = NULL;
 	wc.lpszClassName = m_wcName;
+	wc.hIconSm = NULL;
 
-	RegisterClassW(&wc);
+	RegisterClassExW(&wc);
 
 	m_GC = new (std::nothrow) GraphicsContext;
 
