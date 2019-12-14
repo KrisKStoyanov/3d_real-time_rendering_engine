@@ -1,19 +1,9 @@
+//Prevent C-like min & max func declaration
+#define NOMINMAX
 //Windows(OS) Headers
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <shellapi.h>
-
-#if defined(min)
-#undef min
-#endif
-
-#if defined(max)
-#undef max
-#endif
-
-#if defined(CreateWindow)
-#undef CreateWindow
-#endif
 
 #include <wrl.h>
 //D3D12 Headers
@@ -33,7 +23,7 @@
 //Portable data types and translation macros
 //#include <tchar.h>
 
-//-----
+//-----	
 #include "Helpers.h"
 //-----
 
@@ -52,6 +42,10 @@ bool g_IsInitialized = false;
 HWND g_hWnd;
 //Window rectangle (used to toggle fullscreen state)
 RECT g_WindowRect;
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~
+#include "Window.h"
+//~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //DirectX 12 Objects
 Microsoft::WRL::ComPtr<ID3D12Device2> g_Device;
@@ -115,18 +109,18 @@ void RegisterWindowClass(HINSTANCE hInst, const wchar_t* windowClassName) {
 	windowClass.cbClsExtra = 0;
 	windowClass.cbWndExtra = 0;
 	windowClass.hInstance = hInst;
-	windowClass.hIcon = ::LoadIcon(hInst, NULL);
+	windowClass.hIcon = ::LoadIconA(hInst, NULL);
 	windowClass.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 	windowClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	windowClass.lpszMenuName = NULL;
 	windowClass.lpszClassName = windowClassName;
-	windowClass.hIconSm = ::LoadIcon(hInst, NULL);
+	windowClass.hIconSm = ::LoadIconA(hInst, NULL);
 
 	static ATOM atom = ::RegisterClassExW(&windowClass);
 	assert(atom > 0);
 }
 
-HWND CreateWindow(const wchar_t* windowClassName, HINSTANCE hInst,
+HWND CreateWindowDX(const wchar_t* windowClassName, HINSTANCE hInst,
 	const wchar_t* windowTitle, uint32_t width, uint32_t height) {
 	int screenWidth = ::GetSystemMetrics(SM_CXSCREEN);
 	int screenHeight = ::GetSystemMetrics(SM_CYSCREEN);
@@ -360,7 +354,7 @@ Microsoft::WRL::ComPtr<ID3D12Fence> CreateFence(
 }
 
 HANDLE CreateEventHandle() {
-	HANDLE fenceEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
+	HANDLE fenceEvent = ::CreateEventA(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent && "Failed to create fence event.");
 	return fenceEvent;
 }
@@ -497,7 +491,7 @@ void SetFullscreen(bool fullscreen) {
 			HMONITOR hMonitor = ::MonitorFromWindow(g_hWnd, MONITOR_DEFAULTTONEAREST);
 			MONITORINFOEX monitorInfo = {};
 			monitorInfo.cbSize = sizeof(MONITORINFOEX);
-			::GetMonitorInfo(hMonitor, &monitorInfo);
+			::GetMonitorInfoA(hMonitor, &monitorInfo);
 
 			::SetWindowPos(g_hWnd, HWND_TOP,
 				monitorInfo.rcMonitor.left,
@@ -509,7 +503,7 @@ void SetFullscreen(bool fullscreen) {
 			::ShowWindow(g_hWnd, SW_MAXIMIZE);
 		}
 		else {
-			::SetWindowLong(g_hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+			::SetWindowLongA(g_hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
 
 			::SetWindowPos(g_hWnd, HWND_NOTOPMOST,
 				g_WindowRect.left,
@@ -578,54 +572,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	return 0;
 }
 
-int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR lpCmdLine, int nCmdShow) {
-	SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-
-	const wchar_t* windowClassName = L"Slingshot";
-	ParseCommandLineArguments();
-
-	EnableDebugLayer();
-	g_TearingSupported = CheckTearingSupport();
-	RegisterWindowClass(hInstance, windowClassName);
-	g_hWnd = CreateWindow(windowClassName, hInstance, L"Slingshot Engine", g_ClientWidth, g_ClientHeight);
-
-	::GetWindowRect(g_hWnd, &g_WindowRect);
-
-	Microsoft::WRL::ComPtr<IDXGIAdapter4> dxgiAdapter4 = GetAdapter(g_UseWarp);
-	g_Device = CreateDevice(dxgiAdapter4);
-	g_CommandQueue = CreateCommandQueue(g_Device, D3D12_COMMAND_LIST_TYPE_DIRECT);
-	g_SwapChain = CreateSwapChain(g_hWnd, g_CommandQueue, g_ClientWidth, g_ClientHeight, g_NumFrames);
-	g_CurrentBackBufferIndex = g_SwapChain->GetCurrentBackBufferIndex();
-	g_RTVDescriptorHeap = CreateDescriptorHeap(g_Device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, g_NumFrames);
-	g_RTVDescriptorSize = g_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-	UpdateRenderTargetViews(g_Device, g_SwapChain, g_RTVDescriptorHeap);
-
-	for (int i = 0; i < g_NumFrames; ++i) {
-		g_CommandAllocators[i] = CreateCommandAllocator(g_Device, D3D12_COMMAND_LIST_TYPE_DIRECT);
-	}
-	g_CommandList = CreateCommandList(
-		g_Device, 
-		g_CommandAllocators[g_CurrentBackBufferIndex], 
-		D3D12_COMMAND_LIST_TYPE_DIRECT);
-
-	g_Fence = CreateFence(g_Device);
-	g_FenceEvent = CreateEventHandle();
-
-	g_IsInitialized = true;
-
-	::ShowWindow(g_hWnd, SW_SHOW);
-	MSG msg = {};
-
-	while (msg.message != WM_QUIT) {
-		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			::TranslateMessage(&msg);
-			::DispatchMessage(&msg);
-		}
-	}
-
-	Flush(g_CommandQueue, g_Fence, g_FenceValue, g_FenceEvent);
-	::CloseHandle(g_FenceEvent);
+//SAL annotations for entry point parameter config 
+//(https://docs.microsoft.com/en-us/visualstudio/code-quality/understanding-sal?view=vs-2015)
+int CALLBACK wWinMain(
+	_In_ HINSTANCE hInstance, 
+	_In_opt_ HINSTANCE hPrevInstance, 
+	_In_ PWSTR lpCmdLine, 
+	_In_ int nCmdShow) 
+{
+	GraphicsContext* gc = new GraphicsContext();
+	Window* win = new Window(gc);
+	win->Create(L"Slingshot D3D12", WS_OVERLAPPEDWINDOW);
+	win->Show(nCmdShow);
+	win->OnUpdate();
 
 	return 0;
+
 }
