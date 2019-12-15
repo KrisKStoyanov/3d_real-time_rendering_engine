@@ -15,7 +15,12 @@ Window::Window(GC gc)
 	break;
 	case GC::D3D12:
 	{
-
+		m_GC = new D3D12GraphicsContext();
+	}
+	break;
+	case GC::CUDA:
+	{
+		m_GC = new CUDAGraphicsContext();
 	}
 	break;
 	default:

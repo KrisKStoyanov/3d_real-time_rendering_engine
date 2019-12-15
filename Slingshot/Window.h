@@ -1,25 +1,18 @@
 #pragma once
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
 
-#include <Windows.h>
-#include <shellapi.h>
-
-#include <wrl.h>
-#include <algorithm>
-#include <cassert>
-#include <chrono>
-
-#include <windef.h>
-
-#include "Helpers.h"
 #include "D2DGraphicsContext.h"
 #include "D3D11GraphicsContext.h"
+#include "D3D12GraphicsContext.h"
+#include "CUDAGraphicsContext.h"
 
-enum class GC {
+enum class GC : UINT {
 	D2D = 0,
 	D3D11,
-	D3D12
+	D3D12,
+	CUDA,
+	OpenCL,
+	OpenGL,
+	Vulkan
 };
 
 class Window

@@ -1,4 +1,6 @@
 #pragma once
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
 #include "GraphicsContext.h"
 
 #include <d3d11.h>
@@ -16,21 +18,29 @@ public:
 	std::vector<IDXGIAdapter*> EnumerateAdapters();
 	DXGI_MODE_DESC* GetAdapterDisplayMode(IDXGIAdapter* adapter, DXGI_FORMAT format);
 	
-	void OnCreate(HWND hwnd);
-	void OnDestroy();
-	void OnPaint();
-	void OnResize();
-	void OnLButtonDown(int pixelX, int pixelY, DWORD flags);
-	void OnLButtonUp();
-	void OnMouseMove(int pixelX, int pixelY, DWORD flags);
+	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	virtual void OnCreate(HWND hwnd);
+	virtual void OnDestroy();
+	virtual void OnPaint();
+	virtual void OnResize();
+	virtual void OnLButtonDown(int pixelX, int pixelY, DWORD flags);
+	virtual void OnLButtonUp();
+	virtual void OnMouseMove(int pixelX, int pixelY, DWORD flags);
 
 	void CreateDevice();
 	void CreateSwapChain();
+	void CreateRenderTargetView();
+	void SetupViewport();
+
+	void CaptureCursor();
 
 	HWND m_hWnd;
+	bool m_CaptureCursor = true;
 
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pDeviceContext;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_pRenderTargetView;
 
 	Microsoft::WRL::ComPtr<IDXGIAdapter> m_pAdapter;
 	Microsoft::WRL::ComPtr<IDXGIOutput> m_pOutput;

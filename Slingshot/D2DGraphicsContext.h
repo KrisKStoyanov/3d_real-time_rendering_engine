@@ -1,23 +1,10 @@
 #pragma once
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
-
-#include <Windows.h>
-#include <shellapi.h>
-
-#include <windef.h>
-#include <windowsx.h>
-
-//D2D
 #include <d2d1.h>
 
-//STD
-#include <wrl.h>
-#include <algorithm>
-#include <cassert>
-#include <chrono>
-
 #include "GraphicsContext.h"
+#include "Helpers.h"
 
 enum class UserMode {
 	Draw,
@@ -65,7 +52,7 @@ public:
 	float m_DPIScaleX = 1.0f;
 	float m_DPIScaleY = 1.0f;
 	D2D1_POINT_2F m_ptMouse = D2D1::Point2F();
-	bool m_CaptureCursor = false;
+	bool m_CaptureCursor = true;
 	HCURSOR m_hCursor;
 
 	UserMode m_Mode = UserMode::Draw;

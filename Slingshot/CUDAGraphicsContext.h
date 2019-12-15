@@ -1,23 +1,12 @@
 #pragma once
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
+#include "GraphicsContext.h"
+#include "CUDAContextScheduler.cuh"
 
-#include <Windows.h>
-#include <shellapi.h>
-
-#include <windef.h>
-#include <windowsx.h>
-
-#include <wrl.h>
-#include <algorithm>
-#include <cassert>
-#include <chrono>
-
-class GraphicsContext
+class CUDAGraphicsContext : public GraphicsContext
 {
 public:
-	GraphicsContext();
-	~GraphicsContext();
+	CUDAGraphicsContext();
+	~CUDAGraphicsContext();
 
 	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -28,5 +17,9 @@ public:
 	virtual void OnLButtonDown(int pixelX, int pixelY, DWORD flags);
 	virtual void OnLButtonUp();
 	virtual void OnMouseMove(int pixelX, int pixelY, DWORD flags);
+
+	HWND m_hWnd;
+private:
+
 };
 

@@ -89,7 +89,6 @@ void D2DGraphicsContext::OnCreate(HWND hwnd)
 	m_hWnd = hwnd;
 	if (SUCCEEDED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &pFactory))) {
 		RetrieveDPIScale();
-		m_CaptureCursor = true;
 	}
 }
 

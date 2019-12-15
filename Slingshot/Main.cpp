@@ -1,34 +1,6 @@
-//Prevent C-like min & max func declaration
-#define NOMINMAX
-//Windows(OS) Headers
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <shellapi.h>
-
-#include <wrl.h>
-//D3D12 Headers
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#include <d3dcompiler.h>
-#include <DirectXMath.h>
-
-//D3D12 Extension Library (MS Open Source extension)
-#include "d3dx12.h"
-
-//Standard Template Library
-#include <algorithm>
-#include <cassert>
-#include <chrono>
-
-//Portable data types and translation macros
-//#include <tchar.h>
-
-//-----	
-#include "Helpers.h"
-//-----
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~
 #include "Window.h"
+#include "GUIConsole.h"
 //~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //The number of swap chain back buffers
@@ -580,11 +552,13 @@ int CALLBACK wWinMain(
 	_In_ PWSTR lpCmdLine, 
 	_In_ int nCmdShow) 
 {
-	Window* win = new Window(GC::D2D);
+#if defined(_DEBUG)
+	StreamToConsole();
+#endif
+	Window* win = new Window(GC::CUDA);
 	win->Create(L"Slingshot D3D12", WS_OVERLAPPEDWINDOW);
 	win->Show(nCmdShow);
 	win->OnUpdate();
 
 	return 0;
-
 }

@@ -30,14 +30,17 @@
     <ClCompile Include="D3D11GraphicsContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D3D12GraphicsContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="GraphicsContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CUDAGraphicsContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="d3dx12.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Vertex.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -59,5 +62,25 @@
     <ClInclude Include="D2DGraphicsContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="D3D12GraphicsContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CUDAGraphicsContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CUDAContextScheduler.cuh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIConsole.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dx12.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="CUDAContextScheduler.cu">
+      <Filter>Source Files</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>
