@@ -3,6 +3,7 @@
 namespace HC {
 	__global__ void k_Render(vec3* frameBuffer, const int areaW, const int areaH,
 		vec3 rayOrigin) {
+		//Thread ID offset by CTA ID with blockdim number of threads inside the grid 
 		int tidX = threadIdx.x + blockIdx.x * blockDim.x;
 		int tidY = threadIdx.y + blockIdx.y * blockDim.y;
 		if ((tidX >= areaW) || (tidY >= areaH)) {
@@ -20,21 +21,24 @@ namespace HC {
 		dim3 gridSize(1280 / CTAsize.x + 1, 720 / CTAsize.y + 1);
 
 		int numPixels = areaW * areaH;
-		size_t frameBufferSize = numPixels * sizeof(vec3);
-		vec3* deviceFrameBuffer;
+		size_t fBufSize = numPixels * sizeof(vec3);
+
+		vec3* hostFBuf = (vec3*)(malloc(fBufSize));
+		vec3* deviceFBuf;
+		
 		vec3 rayOrigin = vec3(areaW / 2, areaH / 2, 0.0f);
 		
-		checkCudaErrors(cudaMallocManaged((void**)&deviceFrameBuffer, frameBufferSize));
-		k_Render << <gridSize, CTAsize >> > (deviceFrameBuffer, areaW, areaH, rayOrigin);
+		checkCudaErrors(cudaMalloc((void**)&deviceFBuf, 111));
+		k_Render << <gridSize, CTAsize >> > (deviceFBuf, areaW, areaH, rayOrigin);
 		checkCudaErrors(cudaGetLastError());
-		checkCudaErrors(cudaDeviceSynchronize());
+		checkCudaErrors(cudaMemcpy(hostFBuf, deviceFBuf, fBufSize, cudaMemcpyDeviceToHost));
 
 		std::ofstream ofs("./cudaRaytraceGfx.ppm", std::ios::out | std::ios::binary);
 		ofs << "P6\n" << areaW << " " << areaH << "\n255\n";
 		for (int yOffset = areaH - 1; yOffset >= 0; --yOffset) {
 			for (int xOffset = 0; xOffset < areaW; ++xOffset) {
 				size_t pixelId = yOffset * areaW + xOffset;
-				vec3 v = deviceFrameBuffer[pixelId];
+				vec3 v = hostFBuf[pixelId];
 				int r = int(255.99f * v.r());
 				int g = int(255.99f * v.g());
 				int b = int(255.99f * v.b());
@@ -44,15 +48,19 @@ namespace HC {
 		}
 		ofs.close();
 
-		checkCudaErrors(cudaFree(deviceFrameBuffer));
+		free(hostFBuf);
+		checkCudaErrors(cudaFree(deviceFBuf));
 	}
 
 	void CheckError(cudaError_t result, char const* const func, const char* const file, int const line) {
 		if (result) {
 			unsigned int errId = static_cast<unsigned int>(result);
+			const char* errName = cudaGetErrorName(result);
+			const char* errDesc = cudaGetErrorString(result);
 			std::string errStr =
-				std::string("CUDA Error: ") + std::to_string(errId) +
-				std::string(":\nFile: ") + file +
+				std::string("CUDA Error: ") + std::to_string(errId) + "\n" +
+				std::string(errName) + ": " + std::string(errDesc) +
+				std::string("\nFile: ") + file +
 				std::string("\nLine: ") + std::to_string(line);
 			StreamOutputToConsole(errStr.c_str(), stderr, 3000);
 			cudaDeviceReset();
