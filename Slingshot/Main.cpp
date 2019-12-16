@@ -552,11 +552,8 @@ int CALLBACK wWinMain(
 	_In_ PWSTR lpCmdLine, 
 	_In_ int nCmdShow) 
 {
-#if defined(_DEBUG)
-	StreamToConsole();
-#endif
 	Window* win = new Window(GC::CUDA);
-	win->Create(L"Slingshot D3D12", WS_OVERLAPPEDWINDOW);
+	win->Create(L"Slingshot Graphics", WS_OVERLAPPEDWINDOW);
 	win->Show(nCmdShow);
 	win->OnUpdate();
 

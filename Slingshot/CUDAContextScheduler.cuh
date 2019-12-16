@@ -1,13 +1,13 @@
 #pragma once
-#include <iostream>
-#include <fstream>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
+
+#include "GUIConsole.h"
 
 #define checkCudaErrors(val) CheckError((val),#val, __FILE__, __LINE__)
 
 namespace HC {
-	void ScheduleRenderKernel(int areaWidth, int areaHeight, dim3 CTAsize);
+	void ScheduleRenderKernel(int areaW, int areaH, dim3 CTAsize);
 	void CheckError(cudaError_t result, char const* const func, const char* const file, int const line);
 
 	class vec3 {
@@ -68,20 +68,20 @@ namespace HC {
 		float e[4];
 	};
 
-	__host__ __device__ inline vec3 operator+ (vec3 lhs, const vec3 rhs) { vec3 v(lhs.x() + rhs.x(), lhs.y() + rhs.y(), lhs.z() + rhs.z()); return v; }
-	__host__ __device__ inline vec3 operator* (float lhs, const vec3 rhs) { vec3 v(lhs * rhs.x(), lhs * rhs.y(), lhs * rhs.z()); return v; }
-	__host__ __device__ inline vec4 operator+ (vec4 lhs, const vec4 rhs) { vec4 v(lhs.x() + rhs.x(), lhs.y() + rhs.y(), lhs.z() + rhs.z(), lhs.w() + rhs.w()); return v; }
-	__host__ __device__ inline vec4 operator* (float lhs, const vec4 rhs) { vec4 v(lhs * rhs.x(), lhs * rhs.y(), lhs * rhs.z(), lhs * rhs.w()); return v; }
+	__host__ __device__ inline vec3 operator+ (const vec3 lhs, const vec3 rhs) { vec3 v(lhs.x() + rhs.x(), lhs.y() + rhs.y(), lhs.z() + rhs.z()); return v; }
+	__host__ __device__ inline vec3 operator* (const float lhs, const vec3 rhs) { vec3 v(lhs * rhs.x(), lhs * rhs.y(), lhs * rhs.z()); return v; }
+	__host__ __device__ inline vec4 operator+ (const vec4 lhs, const vec4 rhs) { vec4 v(lhs.x() + rhs.x(), lhs.y() + rhs.y(), lhs.z() + rhs.z(), lhs.w() + rhs.w()); return v; }
+	__host__ __device__ inline vec4 operator* (const float lhs, const vec4 rhs) { vec4 v(lhs * rhs.x(), lhs * rhs.y(), lhs * rhs.z(), lhs * rhs.w()); return v; }
 
-	__host__ __device__ inline float hcSqrt(float v, int prec = 1)
+	__host__ __device__ inline float hcSqrt(const float v, const int prec = 1)
 	{
 		int iV = (int)v;
 		float s = iV;
 		for (int j = iV; j > 0; --j) {
 			for (int i = 1; i < iV; ++i) {
-				float tS = j / i;
-				if (tS == 0) {
-					s = tS;
+				float tR = i * i;
+				if (tR == j) {
+					s = i;
 					goto endloop;
 				}
 			}
@@ -98,8 +98,10 @@ namespace HC {
 		return s;
 	}
 
-	__host__ __device__ inline float hcMag(vec3 v) { return (hcSqrt(v.x() * v.x() + v.y() * v.y() + v.z() * v.z())); }
-	__host__ __device__ inline vec3 hcNorm(vec3 v) { float vMag = hcMag(v); float d = 1.f / vMag; return vec3(v.x() * d, v.y() * d, v.z() * d); }
+	__host__ __device__ inline float hcMag(const vec3 v) { return (hcSqrt(v.x() * v.x() + v.y() * v.y() + v.z() * v.z())); }
+	__host__ __device__ inline vec3 hcNorm(const vec3 v) { float d = hcMag(v); return d > 0 ? (vec3(v.x() / d, v.y() / d, v.z() / d)) : vec3(0.0f); }
+	__host__ __device__ inline float hcDot(const vec3 a, const vec3 b) { return ((a.x() * b.x() + a.y() * b.y() + a.z() * b.z())); }
+	__host__ __device__ inline vec3 hcCross(const vec3 a, const vec3 b) { return vec3((a.y() * b.z() - a.z() * b.y()),(a.z() * b.x() - a.x() * b.z()),(a.x() * b.y() - a.y() * b.x())); }
 
 	class ray {
 	public:
@@ -112,4 +114,10 @@ namespace HC {
 		vec3 A;
 		vec3 B;
 	};
+
+	__device__ inline vec3 d_color(const ray& r) {
+		vec3 rayDir = hcNorm(r.direction());
+		float t = 0.5f * (rayDir.y() + 1.0f);
+		return (1.0f - t) * vec3(1.0f) + t * vec3(0.5f, 0.7f, 1.0f);
+	}
 }

@@ -6,24 +6,15 @@
 #include <io.h>
 #include <iostream>
 #include <fstream>
+#include <thread>
+#include <string>
 
-void StreamToConsole() {
-	static const WORD maxLines = 500;
-	FILE* pFile;
-	CONSOLE_SCREEN_BUFFER_INFO info;
-	if (AllocConsole()) {
-		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-		if (GetConsoleScreenBufferInfo(h, &info)) {
-			info.dwSize.Y = maxLines;
-			SetConsoleScreenBufferSize(h, info.dwSize);
+//Pending C++20 Stable Release Refactor
+//#include <concepts>
 
-			unsigned long long lStdHandle = (unsigned long long)h;
-			int hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-			
-			pFile = _fdopen(hConHandle, "w");
-			*stdin = *pFile;
-			setvbuf(stdin, NULL, _IONBF, 0);
-			std::ios::sync_with_stdio(true);
-		}
-	}
-}
+//template<class From, class To>
+//concept convertible_to = std::is_convertible<From, To> &&
+//requires(From(&f)()) {
+//	static_cast<To>(f());
+//};
+void StreamOutputToConsole(const char* output, FILE* stdStream, const unsigned int conSleepMs = 1000);
