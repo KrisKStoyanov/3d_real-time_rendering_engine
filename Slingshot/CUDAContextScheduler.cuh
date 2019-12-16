@@ -70,38 +70,36 @@ namespace HC {
 
 	__host__ __device__ inline vec3 operator+ (const vec3 lhs, const vec3 rhs) { vec3 v(lhs.x() + rhs.x(), lhs.y() + rhs.y(), lhs.z() + rhs.z()); return v; }
 	__host__ __device__ inline vec3 operator* (const float lhs, const vec3 rhs) { vec3 v(lhs * rhs.x(), lhs * rhs.y(), lhs * rhs.z()); return v; }
+	__host__ __device__ inline bool operator== (const vec3 lhs, const vec3 rhs) { return (lhs.x() == rhs.x() || lhs.y() == rhs.y() || lhs.z() == rhs.z()); }
+	__host__ __device__ inline bool operator!= (const vec3 lhs, const vec3 rhs) { return !(lhs.x() == rhs.x() || lhs.y() == rhs.y() || lhs.z() == rhs.z()); }
 	__host__ __device__ inline vec4 operator+ (const vec4 lhs, const vec4 rhs) { vec4 v(lhs.x() + rhs.x(), lhs.y() + rhs.y(), lhs.z() + rhs.z(), lhs.w() + rhs.w()); return v; }
 	__host__ __device__ inline vec4 operator* (const float lhs, const vec4 rhs) { vec4 v(lhs * rhs.x(), lhs * rhs.y(), lhs * rhs.z(), lhs * rhs.w()); return v; }
 
-	__host__ __device__ inline float hcSqrt(const float v, const int prec = 1)
+	__host__ __device__ inline float sqrt(const float v, double accuracy = 0.001)
 	{
-		int iV = (int)v;
-		float s = iV;
-		for (int j = iV; j > 0; --j) {
-			for (int i = 1; i < iV; ++i) {
-				float tR = i * i;
-				if (tR == j) {
-					s = i;
-					goto endloop;
-				}
-			}
-		}
-	endloop:
-		if (s * s == v) {
-			return s;
-		}
-		for (int i = 0; i < prec; ++i) {
-			float d = v / s;
-			s = (d + s) / 2;
+		float h = v / 2;
+
+		float g = v / h;
+		float s = (g + h) / 2;
+		float d = h - s;
+		float p;
+
+		d < 0 ? d = -d : d;
+
+		while (d > accuracy) {
+			p = s;
+			g = v / s;
+			s = (g + s) / 2;
+			d = p - s;
 		}
 
 		return s;
 	}
 
-	__host__ __device__ inline float hcMag(const vec3 v) { return (hcSqrt(v.x() * v.x() + v.y() * v.y() + v.z() * v.z())); }
-	__host__ __device__ inline vec3 hcNorm(const vec3 v) { float d = hcMag(v); return d > 0 ? (vec3(v.x() / d, v.y() / d, v.z() / d)) : vec3(0.0f); }
-	__host__ __device__ inline float hcDot(const vec3 a, const vec3 b) { return ((a.x() * b.x() + a.y() * b.y() + a.z() * b.z())); }
-	__host__ __device__ inline vec3 hcCross(const vec3 a, const vec3 b) { return vec3((a.y() * b.z() - a.z() * b.y()),(a.z() * b.x() - a.x() * b.z()),(a.x() * b.y() - a.y() * b.x())); }
+	__host__ __device__ inline float mag(const vec3 v) { return (sqrt(v.x() * v.x() + v.y() * v.y() + v.z() * v.z())); }
+	__host__ __device__ inline vec3 norm(const vec3 v) { float d = 1.0f / mag(v); return (vec3(v.x() * d, v.y() * d, v.z() * d)); }
+	__host__ __device__ inline float dot(const vec3 a, const vec3 b) { return ((a.x() * b.x() + a.y() * b.y() + a.z() * b.z())); }
+	__host__ __device__ inline vec3 cross(const vec3 a, const vec3 b) { return vec3((a.y() * b.z() - a.z() * b.y()),(a.z() * b.x() - a.x() * b.z()),(a.x() * b.y() - a.y() * b.x())); }
 
 	class ray {
 	public:
@@ -116,7 +114,7 @@ namespace HC {
 	};
 
 	__device__ inline vec3 d_color(const ray& r) {
-		vec3 rayDir = hcNorm(r.direction());
+		vec3 rayDir = norm(r.direction());
 		float t = 0.5f * (rayDir.y() + 1.0f);
 		return (1.0f - t) * vec3(1.0f) + t * vec3(0.5f, 0.7f, 1.0f);
 	}

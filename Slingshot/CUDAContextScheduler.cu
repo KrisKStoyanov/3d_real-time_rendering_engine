@@ -23,7 +23,7 @@ namespace HC {
 		size_t frameBufferSize = numPixels * sizeof(vec3);
 		vec3* deviceFrameBuffer;
 		vec3 rayOrigin = vec3(areaW / 2, areaH / 2, 0.0f);
-
+		
 		checkCudaErrors(cudaMallocManaged((void**)&deviceFrameBuffer, frameBufferSize));
 		k_Render << <gridSize, CTAsize >> > (deviceFrameBuffer, areaW, areaH, rayOrigin);
 		checkCudaErrors(cudaGetLastError());
@@ -49,19 +49,14 @@ namespace HC {
 
 	void CheckError(cudaError_t result, char const* const func, const char* const file, int const line) {
 		if (result) {
-
-			if (AllocConsole()) {
-				unsigned int errId = static_cast<unsigned int>(result);
-				std::string errStr =
-					std::string("CUDA Error: ") + std::to_string(errId) +
-					std::string(":\nFile: ") + file +
-					std::string("\nLine: ") + std::to_string(line);
-				StreamOutputToConsole(errStr.c_str(), stderr, 3000);
-				cudaDeviceReset();
-				exit(99);
-				
-				FreeConsole();
-			}
+			unsigned int errId = static_cast<unsigned int>(result);
+			std::string errStr =
+				std::string("CUDA Error: ") + std::to_string(errId) +
+				std::string(":\nFile: ") + file +
+				std::string("\nLine: ") + std::to_string(line);
+			StreamOutputToConsole(errStr.c_str(), stderr, 3000);
+			cudaDeviceReset();
+			exit(99);
 		}
 	}
 }
