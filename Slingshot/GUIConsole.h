@@ -17,4 +17,4 @@
 //requires(From(&f)()) {
 //	static_cast<To>(f());
 //};
-void StreamOutputToConsole(const char* output, FILE* stdStream, const unsigned int conSleepMs = 1000);
+void StreamOutputToConsole(const char* output, const unsigned int conSleepMs = 1000, FILE* stdStream = stdout);

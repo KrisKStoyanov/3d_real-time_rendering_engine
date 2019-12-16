@@ -1,6 +1,6 @@
 #include "GUIConsole.h"
 
-void StreamOutputToConsole(const char* output, FILE* stdStream, const unsigned int conSleepMs) {
+void StreamOutputToConsole(const char* output, const unsigned int conSleepMs, FILE* stdStream) {
 
 	if (AllocConsole()) {
 
@@ -8,7 +8,7 @@ void StreamOutputToConsole(const char* output, FILE* stdStream, const unsigned i
 			
 			FILE* pFstdout = stdout;
 			freopen_s(&pFstdout, "CONOUT$", "w", stdout);
-			std::cout << output << std::endl;
+			std::cout << output << std::flush;
 			fclose(stdout);
 			std::this_thread::sleep_for(std::chrono::milliseconds(conSleepMs));
 			
@@ -17,7 +17,7 @@ void StreamOutputToConsole(const char* output, FILE* stdStream, const unsigned i
 
 			FILE* pFstderr = stderr;
 			freopen_s(&pFstderr, "CONOUT$", "w", stderr);
-			std::cerr << output << std::endl;
+			std::cerr << output << std::flush;
 			fclose(stderr);
 			std::this_thread::sleep_for(std::chrono::milliseconds(conSleepMs));
 		}

@@ -83,7 +83,7 @@ LRESULT CUDAGraphicsContext::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lPar
 void CUDAGraphicsContext::OnCreate(HWND hwnd)
 {
 	m_hWnd = hwnd;
-	HC::ScheduleRenderKernel(1280, 720, dim3(8,8));
+	HC::ScheduleRenderKernel(1280, 720);
 }
 
 void CUDAGraphicsContext::OnDestroy()
