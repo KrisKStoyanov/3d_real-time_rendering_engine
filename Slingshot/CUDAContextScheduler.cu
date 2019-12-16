@@ -29,17 +29,49 @@ namespace HC {
 		
 		vec3 rayOrigin = vec3(areaW / 2, areaH / 2, 0.0f);
 
-		ProfileCUDA(cudaMalloc((void**)&d_FBuf, fBufSize));
-		//ProfileCUDA(cudaMallocHost((void**)&d_FBuf, fBufSize));
+		cudaStream_t d_Stream;
+		ProfileCUDA(cudaStreamCreate(&d_Stream));
+
+		int nDevices;
+		ProfileCUDA(cudaGetDeviceCount(&nDevices));
+		const int n = nDevices;
+		cudaDeviceProp* dProps = new cudaDeviceProp[n];
+		int asyncEngines = 0;
+#if defined(_DEBUG)
+		std::string dPropsStr = "Devices:\n-------";
+#endif
+		for (int i = 0; i < nDevices; ++i) {
+			dProps[i] = QueryDeviceProperties(i);
+#if defined(_DEBUG)
+			dPropsStr.append(
+				"\nDevice ID: " + i +
+				std::string("\nDevice Name: ") + dProps[i].name +
+				"\nMemory Clock Rate (KHz): " + std::to_string(dProps[i].memoryClockRate) +
+				"\nMemory Bus Width (bits): " + std::to_string(dProps[i].memoryBusWidth) +
+				"\nPeak Memory Bandwith (GB/s): " + std::to_string(2.0 * dProps[i].memoryClockRate * (dProps[i].memoryBusWidth / 8) / 1.0e6)
+			);
+#endif
+			if (dProps[i].asyncEngineCount > asyncEngines) {
+				asyncEngines = dProps[i].asyncEngineCount;
+			}
+		}
+#if defined(_DEBUG)
+		StreamOutputToConsole(dPropsStr.c_str());
+#endif
+		if (asyncEngines) {
+			ProfileCUDA(cudaMallocHost((void**)&d_FBuf, fBufSize));
+		}
+		else {
+			ProfileCUDA(cudaMalloc((void**)&d_FBuf, fBufSize));
+		}
 
 #if defined(_DEBUG)
-		QueryDeviceProperties();
 		cudaEvent_t startK, stopK;
 		ProfileCUDA(cudaEventCreate(&startK));
 		ProfileCUDA(cudaEventCreate(&stopK));
 		ProfileCUDA(cudaEventRecord(startK));
 #endif
-		k_Render << <gridSize, CTAsize >> > (d_FBuf, areaW, areaH, rayOrigin);
+		k_Render << <gridSize, CTAsize, 0, d_Stream >> > (d_FBuf, areaW, areaH, rayOrigin);
 #if defined(_DEBUG)
 		ProfileCUDA(cudaEventRecord(stopK));
 		ProfileCUDA(cudaGetLastError());
@@ -59,7 +91,7 @@ namespace HC {
 		ProfileCUDA(cudaEventCreate(&stopDMalloc));
 		ProfileCUDA(cudaEventRecord(startDMalloc));
 #endif
-		ProfileCUDA(cudaMemcpy(h_FBuf, d_FBuf, fBufSize, cudaMemcpyDeviceToHost));
+		ProfileCUDA(cudaMemcpyAsync(h_FBuf, d_FBuf, fBufSize, cudaMemcpyDeviceToHost, d_Stream));
 #if defined(_DEBUG)
 		ProfileCUDA(cudaEventRecord(stopDMalloc));
 		ProfileCUDA(cudaEventSynchronize(stopDMalloc));
@@ -68,8 +100,9 @@ namespace HC {
 		ProfileCUDA(cudaEventDestroy(startDMalloc));
 		ProfileCUDA(cudaEventDestroy(stopDMalloc));
 		float dthBw = ComputeDeviceToHostBandwith(sizeof(float), mallocElapsedMs);
-		GetPerformanceMetrics(kExecMs, efBw, compThr, 0.0f, dthBw);
+		GetPerformanceMetrics(&kExecMs, &efBw, &compThr, NULL, &dthBw);
 #endif
+		ProfileCUDA(cudaStreamDestroy(d_Stream));
 
 		std::ofstream ofs("./cudaRaytraceGfx.ppm", std::ios::out | std::ios::binary);
 		ofs << "P6\n" << areaW << " " << areaH << "\n255\n";
@@ -87,8 +120,13 @@ namespace HC {
 		ofs.close();
 
 		free(h_FBuf);
-		ProfileCUDA(cudaFree(d_FBuf));
-		//ProfileCUDA(cudaFreeHost(d_FBuf));
+
+		if (asyncEngines) {
+			ProfileCUDA(cudaFreeHost(d_FBuf));
+		}
+		else {
+			ProfileCUDA(cudaFree(d_FBuf));
+		}
 	}
 
 	__host__ __device__ void CheckError(cudaError_t result, char const* const func, const char* const file, int const line) {
@@ -118,24 +156,10 @@ namespace HC {
 #endif
 	}
 
-	__host__ std::string QueryDeviceProperties() {
-		int nDevices;
-		ProfileCUDA(cudaGetDeviceCount(&nDevices));
-		const int n = nDevices;
-		cudaDeviceProp* dProps = new cudaDeviceProp[n];
-		std::string dPropsStr = "Devices:\n-------";
-		for (int i = 0; i < nDevices; ++i) {
-			ProfileCUDA(cudaGetDeviceProperties(&dProps[i], i));
-			dPropsStr.append(
-				"\nDevice ID: " + i +
-				std::string("\nDevice Name: ") + dProps[i].name +
-				"\nMemory Clock Rate (KHz): " + std::to_string(dProps[i].memoryClockRate) +
-				"\nMemory Bus Width (bits): " + std::to_string(dProps[i].memoryBusWidth) +
-				"\nPeak Memory Bandwith (GB/s): " + std::to_string(2.0 * dProps[i].memoryClockRate * (dProps[i].memoryBusWidth / 8) / 1.0e6)
-			);
-		}
-		StreamOutputToConsole(dPropsStr.c_str());
-		return dPropsStr;
+	__host__ cudaDeviceProp QueryDeviceProperties(int dIndex) {
+		cudaDeviceProp dProps;
+		ProfileCUDA(cudaGetDeviceProperties(&dProps, dIndex));
+		return dProps;
 	}
 
 	__host__ float ComputeSPEffectiveBandwith(int actThr, float kExecMs)
@@ -158,32 +182,37 @@ namespace HC {
 		return (bytes * 1e6 / elpsdMs);
 	}
 
-	__host__ std::string GetPerformanceMetrics(float kExecMs, float efBw, float compThr, float htdBw, float dthBw)
+	__host__ std::string GetPerformanceMetrics(
+		float* kExecMs, 
+		float* efBw, 
+		float* compThr, 
+		float* htdBw, 
+		float* dthBw)
 	{
 		std::string perfStr;
 		
-		if (kExecMs > 0.0f) {
-			std::string kExecStr = "Kernel Execution Speed (MS): " + std::to_string(kExecMs);
+		if (kExecMs) {
+			std::string kExecStr = "Kernel Execution Speed (MS): " + std::to_string(*kExecMs);
 			perfStr.append(kExecStr);
 		}
 
-		if (efBw > 0.0f) {
-			std::string efBwStr = "\nEffective Bandwith (GB/s): " + std::to_string(efBw);
+		if (efBw) {
+			std::string efBwStr = "\nEffective Bandwith (GB/s): " + std::to_string(*efBw);
 			perfStr.append(efBwStr);
 		}
 
-		if (compThr > 0.0f) {
-			std::string compThrStr = "\nComputation Throughput (FLOPS/s): " + std::to_string(compThr);
+		if (compThr) {
+			std::string compThrStr = "\nComputation Throughput (FLOPS/s): " + std::to_string(*compThr);
 			perfStr.append(compThrStr);
 		}
 
-		if (htdBw > 0.0f) {
-			std::string htdBwStr = "\nHost to Device bandwith (GB/s): " + std::to_string(htdBw);
+		if (htdBw) {
+			std::string htdBwStr = "\nHost to Device bandwith (GB/s): " + std::to_string(*htdBw);
 			perfStr.append(htdBwStr);
 		}
 
-		if (dthBw > 0.0f) {
-			std::string dthBwStr = "\nDevice to Host bandwith (GB/s): " + std::to_string(dthBw);
+		if (dthBw) {
+			std::string dthBwStr = "\nDevice to Host bandwith (GB/s): " + std::to_string(*dthBw);
 			perfStr.append(dthBwStr);
 		}
 		

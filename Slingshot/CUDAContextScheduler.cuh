@@ -8,12 +8,17 @@
 
 namespace HC {
 	__host__ void ScheduleRenderKernel(int areaW, int areaH);
-	__host__ std::string QueryDeviceProperties();
+	__host__ cudaDeviceProp QueryDeviceProperties(int dIndex);
 	__host__ float ComputeSPEffectiveBandwith(int actThr, float kExecMs); 
 	__host__ float ComputeComputationalThroughput(int nFlops, int actThr, float kExecS);
 	__host__ float ComputeHostToDeviceBandwith(unsigned int bytes, float elpsdMs);
 	__host__ float ComputeDeviceToHostBandwith(unsigned int bytes, float elpsdMs);
-	__host__ std::string GetPerformanceMetrics(float kExecMs = 0.0f, float efBw = 0.0f, float compThr = 0.0f, float htdBw = 0.0f, float dthBw = 0.0f);
+	__host__ std::string GetPerformanceMetrics(
+		float* kExecMs = NULL, 
+		float* efBw = NULL, 
+		float* compThr = NULL, 
+		float* htdBw = NULL, 
+		float* dthBw = NULL);
 	__host__ __device__ void CheckError(cudaError_t result, char const* const func, const char* const file, int const line);
 
 	class vec3 {
