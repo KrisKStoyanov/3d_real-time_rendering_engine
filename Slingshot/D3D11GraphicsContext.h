@@ -32,7 +32,6 @@ public:
 	void CreateDevice();
 	void CreateSwapChain();
 	void CreateRenderTargetView();
-	void SetupViewport();
 
 	void CaptureCursor();
 
@@ -40,6 +39,7 @@ public:
 
 	HWND m_hWnd;
 	bool m_CaptureCursor = false;
+	const float m_ClearColor[4] = { 1.0f, 0.5f, 0.32f, 1.0f };
 
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pDeviceContext;

@@ -15,7 +15,6 @@ void D3D11GraphicsContext::OnCreate(HWND hwnd)
 	CreateDevice();
 	CreateSwapChain();
 	CreateRenderTargetView();
-	SetupViewport();
 }
 
 void D3D11GraphicsContext::OnDestroy()
@@ -28,7 +27,9 @@ void D3D11GraphicsContext::OnDestroy()
 
 void D3D11GraphicsContext::OnPaint()
 {
-
+	m_pDeviceContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
+	m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
+	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
 }
 
 void D3D11GraphicsContext::OnResize()
@@ -200,7 +201,7 @@ void D3D11GraphicsContext::CreateDevice()
 void D3D11GraphicsContext::CreateSwapChain()
 {
 	//Define swap chain behaviour
-	DXGI_SWAP_CHAIN_DESC1 sd = {};
+	DXGI_SWAP_CHAIN_DESC1 sd = {0};
 	//ZeroMemory(&sd, sizeof(sd));
 	sd.Width = 1280;
 	sd.Height = 720;
@@ -233,17 +234,16 @@ void D3D11GraphicsContext::CreateRenderTargetView()
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer;
 	DX::ThrowIfFailed(m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
 
-	m_pDevice->CreateRenderTargetView(pBackBuffer.Get(), NULL, &m_pRenderTargetView);
-	m_pDeviceContext->OMSetRenderTargets(1, &m_pRenderTargetView, NULL);
-}
+	DX::ThrowIfFailed(m_pDevice->CreateRenderTargetView(pBackBuffer.Get(), NULL, &m_pRenderTargetView));
 
-void D3D11GraphicsContext::SetupViewport()
-{
+	D3D11_TEXTURE2D_DESC backBufferDesc = { 0 };
+	pBackBuffer->GetDesc(&backBufferDesc);
+
 	D3D11_VIEWPORT vp;
-	vp.Width = 1280;
-	vp.Height = 720;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
+	vp.Width = static_cast<float>(backBufferDesc.Width);
+	vp.Height = static_cast<float>(backBufferDesc.Height);
+	vp.MinDepth = D3D11_MIN_DEPTH;
+	vp.MaxDepth = D3D11_MAX_DEPTH;
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
 	m_pDeviceContext->RSSetViewports(1, &vp);
