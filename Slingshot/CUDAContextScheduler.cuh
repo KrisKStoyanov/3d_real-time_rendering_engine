@@ -1,4 +1,5 @@
 #pragma once
+#define CUDA_API_PER_THREAD_DEFAULT_STREAM
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
@@ -7,19 +8,6 @@
 #define ProfileCUDA(val) CheckError((val),#val, __FILE__, __LINE__)
 
 namespace HC {
-	__host__ void ScheduleRenderKernel(int areaW, int areaH);
-	__host__ cudaDeviceProp QueryDeviceProperties(int dIndex);
-	__host__ float ComputeSPEffectiveBandwith(int actThr, float kExecMs); 
-	__host__ float ComputeComputationalThroughput(int nFlops, int actThr, float kExecS);
-	__host__ float ComputeHostToDeviceBandwith(unsigned int bytes, float elpsdMs);
-	__host__ float ComputeDeviceToHostBandwith(unsigned int bytes, float elpsdMs);
-	__host__ std::string GetPerformanceMetrics(
-		float* kExecMs = NULL, 
-		float* efBw = NULL, 
-		float* compThr = NULL, 
-		float* htdBw = NULL, 
-		float* dthBw = NULL);
-	__host__ __device__ void CheckError(cudaError_t result, char const* const func, const char* const file, int const line);
 
 	class vec3 {
 	public:
@@ -124,9 +112,26 @@ namespace HC {
 		vec3 B;
 	};
 
+	__host__ bool InvokeRenderKernel(vec3*& screenBuffer, int areaW, int areaH);
+	__host__ cudaDeviceProp QueryDeviceProperties(int dIndex);
+	__host__ float ComputeSPEffectiveBandwith(int actThr, float kExecMs);
+	__host__ float ComputeComputationalThroughput(int nFlops, int actThr, float kExecS);
+	__host__ float ComputeHostToDeviceBandwith(unsigned int bytes, float elpsdMs);
+	__host__ float ComputeDeviceToHostBandwith(unsigned int bytes, float elpsdMs);
+	__host__ std::string GetPerformanceMetrics(
+		float* kExecMs = NULL,
+		float* efBw = NULL,
+		float* compThr = NULL,
+		float* htdBw = NULL,
+		float* dthBw = NULL,
+		unsigned int conSleepMs = 1000);
+	__host__ __device__ void CheckError(cudaError_t result, char const* const func, const char* const file, int const line);
+	__host__ void GenPPMFile(const char* fileName, vec3* buffer, const int imgW, const int imgH);
+	
 	__device__ inline vec3 d_color(const ray& r) {
 		vec3 rayDir = norm(r.direction());
 		float t = 0.5f * (rayDir.y() + 1.0f);
 		return (1.0f - t) * vec3(1.0f) + t * vec3(0.5f, 0.7f, 1.0f);
 	}
+
 }

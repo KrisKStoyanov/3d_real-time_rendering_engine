@@ -11,6 +11,7 @@ D3D11GraphicsContext::~D3D11GraphicsContext()
 void D3D11GraphicsContext::OnCreate(HWND hwnd)
 {
 	m_hWnd = hwnd;
+	HC::InvokeRenderKernel(ScreenBuffer, 1280, 720);
 	CreateDevice();
 	CreateSwapChain();
 	CreateRenderTargetView();
@@ -135,12 +136,6 @@ LRESULT D3D11GraphicsContext::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	break;
 	case WM_SYSCHAR:
 		break;
-	//case WM_SETCURSOR:
-	//	if (LOWORD(lParam) == HTCLIENT) {
-	//		SetCursor(m_hCursor);
-	//		return TRUE;
-	//	}
-	//	break;
 	case WM_DESTROY:
 	{
 		PostQuitMessage(0);

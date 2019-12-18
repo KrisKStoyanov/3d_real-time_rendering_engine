@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "Helpers.h"
+#include "CUDAContextScheduler.cuh"
 
 class D3D11GraphicsContext : public GraphicsContext
 {
@@ -35,8 +36,10 @@ public:
 
 	void CaptureCursor();
 
+	HC::vec3* ScreenBuffer;
+
 	HWND m_hWnd;
-	bool m_CaptureCursor = true;
+	bool m_CaptureCursor = false;
 
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pDeviceContext;

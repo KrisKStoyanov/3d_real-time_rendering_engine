@@ -552,7 +552,7 @@ int CALLBACK wWinMain(
 	_In_ PWSTR lpCmdLine, 
 	_In_ int nCmdShow) 
 {
-	Window* win = new Window(GC::CUDA);
+	Window* win = new Window(GC::D3D11);
 	win->Create(L"Slingshot Graphics", WS_OVERLAPPEDWINDOW);
 	win->Show(nCmdShow);
 	win->OnUpdate();

@@ -1,37 +1,40 @@
 #include "CUDAContextScheduler.cuh"
 
 namespace HC {
-	__global__ void k_Render(vec3* frameBuffer, const int areaW, const int areaH,
-		vec3 rayOrigin) {
-		//Thread ID offset by CTA ID with blockdim number of threads inside the grid 
-		int tidX = threadIdx.x + blockIdx.x * blockDim.x;
-		int tidY = threadIdx.y + blockIdx.y * blockDim.y;
-		if ((tidX >= areaW) || (tidY >= areaH)) {
+	__global__ void k_Render(vec3* frameBuffer, int nPixels, int areaW, int areaH) {
+		
+		int tid = threadIdx.x + blockIdx.x * blockDim.x;
+		if (tid > nPixels) {
 			return;
 		}
-		int pId = tidY * areaW + tidX;
-		float u = (float(tidX) / float(areaW));
-		float v = (float(tidY) / float(areaH));
-		ray r(rayOrigin, vec3(u , v , 0.0f));
-		frameBuffer[pId] = d_color(r);
+		int pixelY = areaH - tid / areaW;
+		int pixelX = tid - (tid / areaW) * areaW;
+		float r = (float)pixelX / (float)areaW;;
+		float g = (float)pixelY / (float)areaH;
+		float b = 0.2f;
+		vec3 v(r, g, b);
+		frameBuffer[tid] = v;
 	}
 
-	__host__ void ScheduleRenderKernel(int areaW, int areaH) {
+	//Pending compute concurrency implementation through CUDA streams (local async engines = 6)
 
-		dim3 CTAsize(8, 8);
-		dim3 gridSize(1280 / CTAsize.x + 1, 720 / CTAsize.y + 1);
+	__host__ bool InvokeRenderKernel(vec3*& screenBuffer, int areaW, int areaH) {
 
 		int nPixels = areaW * areaH;
+
+		//dim3 CTAsize(8, 8);
+		//dim3 gridSize(areaW / CTAsize.x + 1, areaH / CTAsize.y + 1);
+
+		int CTASize = 64;
+		int gridSize = nPixels / CTASize + 1;
+
 		size_t fBufSize = nPixels * sizeof(vec3);
 
-		vec3* h_FBuf = (vec3*)(malloc(fBufSize));
+		screenBuffer = (vec3*)(malloc(fBufSize));
 		vec3* d_FBuf;
 		
 		vec3 rayOrigin = vec3(areaW / 2, areaH / 2, 0.0f);
-
-		cudaStream_t d_Stream;
-		ProfileCUDA(cudaStreamCreate(&d_Stream));
-
+		
 		int nDevices;
 		ProfileCUDA(cudaGetDeviceCount(&nDevices));
 		const int n = nDevices;
@@ -58,68 +61,119 @@ namespace HC {
 #if defined(_DEBUG)
 		StreamOutputToConsole(dPropsStr.c_str());
 #endif
+
+		//Experimental: (override asyncEngines to 0 to return to default implementation)
+		asyncEngines = 0;
+		//----------------
 		if (asyncEngines) {
+			const int nEngines = asyncEngines;
+			cudaStream_t* d_Streams = new cudaStream_t[nEngines];
+			
+			size_t d_FbufFeatureSize = fBufSize / nEngines;
+
+			for (int i = 0; i < nEngines; ++i) {
+				ProfileCUDA(cudaStreamCreate(&d_Streams[i]));
+			}
+			
 			ProfileCUDA(cudaMallocHost((void**)&d_FBuf, fBufSize));
-		}
-		else {
-			ProfileCUDA(cudaMalloc((void**)&d_FBuf, fBufSize));
-		}
 
 #if defined(_DEBUG)
-		cudaEvent_t startK, stopK;
-		ProfileCUDA(cudaEventCreate(&startK));
-		ProfileCUDA(cudaEventCreate(&stopK));
-		ProfileCUDA(cudaEventRecord(startK));
+			cudaEvent_t startK, stopK;
+			ProfileCUDA(cudaEventCreate(&startK));
+			ProfileCUDA(cudaEventCreate(&stopK));
+			ProfileCUDA(cudaEventRecord(startK));
 #endif
-		k_Render << <gridSize, CTAsize, 0, d_Stream >> > (d_FBuf, areaW, areaH, rayOrigin);
+
+			for (int i = 0; i < nEngines; ++i) {
+				int wOffset ;
+				int hOffset;
+				k_Render << <gridSize, CTASize, 0, d_Streams[i] >> > 
+					(d_FBuf, nPixels, areaW, areaH);
+			}
+			
 #if defined(_DEBUG)
-		ProfileCUDA(cudaEventRecord(stopK));
-		ProfileCUDA(cudaGetLastError());
-		ProfileCUDA(cudaEventSynchronize(stopK));
-		float kExecMs;
-		ProfileCUDA(cudaEventElapsedTime(&kExecMs, startK, stopK));
-		ProfileCUDA(cudaEventDestroy(startK));
-		ProfileCUDA(cudaEventDestroy(stopK));
-		int actThreads = gridSize.x * CTAsize.x * areaW + gridSize.y * CTAsize.y * areaH;
-		float efBw = ComputeSPEffectiveBandwith(actThreads, kExecMs);
-		float compThr = ComputeComputationalThroughput(18, actThreads, kExecMs/1000);
+			ProfileCUDA(cudaEventRecord(stopK));
+			ProfileCUDA(cudaGetLastError());
+			ProfileCUDA(cudaEventSynchronize(stopK));
+			float kExecMs;
+			ProfileCUDA(cudaEventElapsedTime(&kExecMs, startK, stopK));
+			ProfileCUDA(cudaEventDestroy(startK));
+			ProfileCUDA(cudaEventDestroy(stopK));
+			float efBw = ComputeSPEffectiveBandwith(nPixels, kExecMs);
+			float compThr = ComputeComputationalThroughput(18, nPixels, kExecMs / 1000);
 #endif
 
 #if defined(_DEBUG)
-		cudaEvent_t startDMalloc, stopDMalloc;
-		ProfileCUDA(cudaEventCreate(&startDMalloc));
-		ProfileCUDA(cudaEventCreate(&stopDMalloc));
-		ProfileCUDA(cudaEventRecord(startDMalloc));
+			cudaEvent_t startDMalloc, stopDMalloc;
+			ProfileCUDA(cudaEventCreate(&startDMalloc));
+			ProfileCUDA(cudaEventCreate(&stopDMalloc));
+			ProfileCUDA(cudaEventRecord(startDMalloc));
 #endif
-		ProfileCUDA(cudaMemcpyAsync(h_FBuf, d_FBuf, fBufSize, cudaMemcpyDeviceToHost, d_Stream));
+			for (int i = 0; i < nEngines; ++i) {
+				ProfileCUDA(cudaMemcpyAsync(screenBuffer, d_FBuf, fBufSize, cudaMemcpyDeviceToHost, d_Streams[i]));
+			}
 #if defined(_DEBUG)
-		ProfileCUDA(cudaEventRecord(stopDMalloc));
-		ProfileCUDA(cudaEventSynchronize(stopDMalloc));
-		float mallocElapsedMs;
-		ProfileCUDA(cudaEventElapsedTime(&mallocElapsedMs, startDMalloc, stopDMalloc));
-		ProfileCUDA(cudaEventDestroy(startDMalloc));
-		ProfileCUDA(cudaEventDestroy(stopDMalloc));
-		float dthBw = ComputeDeviceToHostBandwith(sizeof(float), mallocElapsedMs);
-		GetPerformanceMetrics(&kExecMs, &efBw, &compThr, NULL, &dthBw);
+			ProfileCUDA(cudaEventRecord(stopDMalloc));
+			ProfileCUDA(cudaEventSynchronize(stopDMalloc));
+			float mallocElapsedMs;
+			ProfileCUDA(cudaEventElapsedTime(&mallocElapsedMs, startDMalloc, stopDMalloc));
+			ProfileCUDA(cudaEventDestroy(startDMalloc));
+			ProfileCUDA(cudaEventDestroy(stopDMalloc));
+			float dthBw = ComputeDeviceToHostBandwith(sizeof(float), mallocElapsedMs);
+			GetPerformanceMetrics(&kExecMs, &efBw, &compThr, NULL, &dthBw);
 #endif
-		ProfileCUDA(cudaStreamDestroy(d_Stream));
-
-		std::ofstream ofs("./cudaRaytraceGfx.ppm", std::ios::out | std::ios::binary);
-		ofs << "P6\n" << areaW << " " << areaH << "\n255\n";
-		for (int yOffset = areaH - 1; yOffset >= 0; --yOffset) {
-			for (int xOffset = 0; xOffset < areaW; ++xOffset) {
-				size_t pixelId = yOffset * areaW + xOffset;
-				vec3 v = h_FBuf[pixelId];
-				int r = int(255.99f * v.r());
-				int g = int(255.99f * v.g());
-				int b = int(255.99f * v.b());
-				std::cout << r << " " << g << " " << b << "\n";
-				ofs << (unsigned char)r << (unsigned char)g << (unsigned char)b;
+			for (int i = 0; i < nEngines; ++i) {
+				ProfileCUDA(cudaStreamDestroy(d_Streams[i]));
 			}
 		}
-		ofs.close();
+		//----------------
+		//Default:
+		//----------------
+		else {
+			ProfileCUDA(cudaMalloc((void**)&d_FBuf, fBufSize));
 
-		free(h_FBuf);
+#if defined(_DEBUG)
+			cudaEvent_t startK, stopK;
+			ProfileCUDA(cudaEventCreate(&startK));
+			ProfileCUDA(cudaEventCreate(&stopK));
+			ProfileCUDA(cudaEventRecord(startK));
+#endif
+			k_Render << <gridSize, CTASize, 0, 0 >> > (d_FBuf, nPixels, areaW, areaH);
+#if defined(_DEBUG)
+			ProfileCUDA(cudaEventRecord(stopK));
+			ProfileCUDA(cudaGetLastError());
+			ProfileCUDA(cudaEventSynchronize(stopK));
+			float kExecMs;
+			ProfileCUDA(cudaEventElapsedTime(&kExecMs, startK, stopK));
+			ProfileCUDA(cudaEventDestroy(startK));
+			ProfileCUDA(cudaEventDestroy(stopK));
+			float efBw = ComputeSPEffectiveBandwith(nPixels, kExecMs);
+			float compThr = ComputeComputationalThroughput(18, nPixels, kExecMs / 1000);
+#endif
+
+#if defined(_DEBUG)
+			cudaEvent_t startDMalloc, stopDMalloc;
+			ProfileCUDA(cudaEventCreate(&startDMalloc));
+			ProfileCUDA(cudaEventCreate(&stopDMalloc));
+			ProfileCUDA(cudaEventRecord(startDMalloc));
+#endif
+			ProfileCUDA(cudaMemcpyAsync(screenBuffer, d_FBuf, fBufSize, cudaMemcpyDeviceToHost));
+#if defined(_DEBUG)
+			ProfileCUDA(cudaEventRecord(stopDMalloc));
+			ProfileCUDA(cudaEventSynchronize(stopDMalloc));
+			float mallocElapsedMs;
+			ProfileCUDA(cudaEventElapsedTime(&mallocElapsedMs, startDMalloc, stopDMalloc));
+			ProfileCUDA(cudaEventDestroy(startDMalloc));
+			ProfileCUDA(cudaEventDestroy(stopDMalloc));
+			float dthBw = ComputeDeviceToHostBandwith(sizeof(float), mallocElapsedMs);
+			GetPerformanceMetrics(&kExecMs, &efBw, &compThr, NULL, &dthBw);
+#endif
+		}
+		//----------------
+
+		GenPPMFile("GfxExp", screenBuffer, areaW, areaH);
+
+		//free(screenBuffer);
 
 		if (asyncEngines) {
 			ProfileCUDA(cudaFreeHost(d_FBuf));
@@ -127,6 +181,8 @@ namespace HC {
 		else {
 			ProfileCUDA(cudaFree(d_FBuf));
 		}
+
+		return true;
 	}
 
 	__host__ __device__ void CheckError(cudaError_t result, char const* const func, const char* const file, int const line) {
@@ -187,7 +243,8 @@ namespace HC {
 		float* efBw, 
 		float* compThr, 
 		float* htdBw, 
-		float* dthBw)
+		float* dthBw,
+		unsigned int conSleepMs)
 	{
 		std::string perfStr;
 		
@@ -216,7 +273,22 @@ namespace HC {
 			perfStr.append(dthBwStr);
 		}
 		
-		StreamOutputToConsole(perfStr.c_str(), 3000);
+		StreamOutputToConsole(perfStr.c_str(), conSleepMs);
 		return perfStr;
+	}
+
+	__host__ void GenPPMFile(const char* fileName, vec3* buffer, const int imgW, const int imgH) {
+		std::string fn = std::string("./") + fileName + ".ppm";
+		std::ofstream ofsGpu(fn.c_str(), std::ios::out | std::ios::binary);
+		ofsGpu << "P6\n" << imgW << " " << imgH << "\n255\n";
+		int nPixels = imgW * imgH;
+		for (int i = 0; i < nPixels; ++i) {
+			vec3 v = buffer[i];
+			int r = int(255.99f * v.r());
+			int g = int(255.99f * v.g());
+			int b = int(255.99f * v.b());
+			ofsGpu << (unsigned char)r << (unsigned char)g << (unsigned char)b;
+		}
+		ofsGpu.close();
 	}
 }

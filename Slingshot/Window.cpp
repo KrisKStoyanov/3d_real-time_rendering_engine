@@ -3,11 +3,6 @@
 Window::Window(GC gc)
 {
 	switch (gc) {
-	case GC::D2D:
-	{
-		m_GC = new D2DGraphicsContext();
-	}
-	break;
 	case GC::D3D11:
 	{
 		m_GC = new D3D11GraphicsContext();
@@ -18,14 +13,9 @@ Window::Window(GC gc)
 		m_GC = new D3D12GraphicsContext();
 	}
 	break;
-	case GC::CUDA:
-	{
-		m_GC = new CUDAGraphicsContext();
-	}
-	break;
 	default:
 	{
-		m_GC = new D2DGraphicsContext();
+		m_GC = new D3D11GraphicsContext();
 	}
 	break;
 	}

@@ -1,16 +1,11 @@
 #pragma once
 
-#include "D2DGraphicsContext.h"
 #include "D3D11GraphicsContext.h"
 #include "D3D12GraphicsContext.h"
-#include "CUDAGraphicsContext.h"
 
 enum class GC : UINT {
-	D2D = 0,
-	D3D11,
+	D3D11 = 0,
 	D3D12,
-	CUDA,
-	OpenCL,
 	OpenGL,
 	Vulkan
 };
