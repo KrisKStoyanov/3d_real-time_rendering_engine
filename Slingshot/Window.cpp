@@ -1,41 +1,68 @@
 #include "Window.h"
 
-Window::Window(GC gc)
+LRESULT CALLBACK UpdateProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	switch (gc) {
-	case GC::D3D11:
-	{
-		m_GC = new D3D11GraphicsContext();
+	GraphicsContext* pGC =
+		reinterpret_cast<GraphicsContext*>
+		(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+
+	if (pGC) {
+		return pGC->HandleMessage(uMsg, wParam, lParam);
 	}
-	break;
-	case GC::D3D12:
-	{
-		m_GC = new D3D12GraphicsContext();
+	else{
+		DestroyWindow(hwnd);
+		PostQuitMessage(0);
 	}
-	break;
-	default:
-	{
-		m_GC = new D3D11GraphicsContext();
+	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
+}
+
+LRESULT CALLBACK SetupProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if (uMsg == WM_CREATE) {
+		GraphicsContext* pGC;
+		CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+		GC* gcTag = reinterpret_cast<GC*>(pCreate->lpCreateParams);
+		switch (*gcTag) {
+		case GC::D3D11:
+			pGC = new D3D11GraphicsContext();
+			break;
+		case GC::D3D12:
+			pGC = new D3D12GraphicsContext();
+			break;
+		default:
+			pGC = new D3D11GraphicsContext();
+			break;
+		}
+
+		SetWindowLongPtrW(
+			hwnd, GWLP_USERDATA,
+			reinterpret_cast<LONG_PTR>(pGC));
+		SetWindowLongPtrW(
+			hwnd, GWLP_WNDPROC,
+			reinterpret_cast<LONG_PTR>(UpdateProc));
+		pGC->OnCreate(hwnd);
 	}
-	break;
+	else {
+		return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 	}
 }
 
-Window::~Window()
+BOOL Window::Create(
+	GC graphicsContext,
+	HINSTANCE hInstance,
+	PCWSTR lpWindowName, 
+	DWORD dwStyle, 
+	DWORD dwExStyle, 
+	int xCoord, int yCoord, 
+	int nWidth, int nHeight, 
+	HWND hWndParent, HMENU hMenu,
+	int nCmdShow)
 {
-}
 
-BOOL Window::Create(PCWSTR lpWindowName, DWORD dwStyle, DWORD dwExStyle, int xCoord, int yCoord, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu)
-{
-	//Behaviour template for extended window class template (supporting Unicode (W) chars)
 	WNDCLASSEXW wc = {};
-
-	//Obtain application instance signature
-	HINSTANCE hInstance = GetModuleHandleW(NULL);
-
 	wc.cbSize = sizeof(WNDCLASSEX);
 	wc.style = dwExStyle;
-	wc.lpfnWndProc = &WindowProc;
+	wc.lpfnWndProc = SetupProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = hInstance;
@@ -60,10 +87,11 @@ BOOL Window::Create(PCWSTR lpWindowName, DWORD dwStyle, DWORD dwExStyle, int xCo
 		hWndParent,
 		hMenu,
 		hInstance,
-		m_GC);
+		&graphicsContext);
+
+	ShowWindow(m_hWnd, nCmdShow);
 
 	return (m_hWnd ? TRUE : FALSE);
-
 }
 
 void Window::OnUpdate()
@@ -75,14 +103,9 @@ void Window::OnUpdate()
 	}
 }
 
-void Window::Show(int cmdShow)
-{
-	ShowWindow(m_hWnd, cmdShow);
-}
-
 GraphicsContext* Window::GetWindowGC(HWND hwnd)
 {
 	LONG_PTR ptr = GetWindowLongPtrW(hwnd, GWLP_USERDATA);
-	GraphicsContext* wsh = reinterpret_cast<GraphicsContext*>(ptr);
-	return wsh;
+	GraphicsContext* pGC = reinterpret_cast<GraphicsContext*>(ptr);
+	return pGC;
 }

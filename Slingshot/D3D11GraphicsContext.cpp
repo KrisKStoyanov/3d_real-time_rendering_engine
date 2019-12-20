@@ -21,11 +21,17 @@ void D3D11GraphicsContext::OnCreate(HWND hwnd)
 		std::vector<uint8_t> fsBytecode;
 		//std::vector<uint8_t> hsBytecode;
 		//std::vector<uint8_t> dsBytecode;
+		std::vector<uint8_t> gsBytecode;
 		SetupVertexShader("VertexShader.cso", &vsBytecode);
 		SetupInputAssembler(vsBytecode);
 		//SetupHullShader("HullShader.cso", &hsBytecode);
 		//SetupTessallator();
 		//SetupDomainShader("DomainShader.cso", &dsBytecode);
+		SetupGeometryShader("GeometryShader.cso", &gsBytecode);
+		SetupRasterizer(
+			m_pSwapChain.Get(), 
+			m_pImmediateContext.Get(),
+			&m_pRasertizerState);
 		SetupPixelShader("PixelShader.cso", &fsBytecode);
 		SetupOutputMerger(m_pSwapChain.Get(),
 			&m_pDepthStencil,
@@ -37,7 +43,7 @@ void D3D11GraphicsContext::OnCreate(HWND hwnd)
 		RecordCommandList(m_pDeferredContext.Get(), &m_pCommandList);
 	}
 
-	//Setup interop pipeline extension
+	//Setup interop HPS extension
 	//m_pDeviceInteropContext = new HC::D3D11DeviceInteropContext();
 	//HC::InvokeRenderKernel(m_pDeviceInteropContext->m_ScreenBuffer, 1280, 720);
 }
@@ -51,7 +57,7 @@ void D3D11GraphicsContext::OnDestroy()
 	m_pSwapChain->Release();
 	m_pVertexShader->Release();
 	m_pPixelShader->Release();
-	//m_pInputLayout->Release();
+	m_pInputLayout->Release();
 }
 
 void D3D11GraphicsContext::OnPaint()
@@ -101,17 +107,16 @@ void D3D11GraphicsContext::CaptureCursor()
 
 std::vector<IDXGIAdapter*> D3D11GraphicsContext::EnumerateAdapters()
 {
-	IDXGIAdapter* pAdapter;
+	Microsoft::WRL::ComPtr<IDXGIAdapter> pAdapter;
 	std::vector<IDXGIAdapter*> vpAdapters;
 	Microsoft::WRL::ComPtr<IDXGIFactory2> pFactory2;
 
 	DX::ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&pFactory2)));
 	for (UINT i = 0; 
-		pFactory2->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND; ++i) {
-		vpAdapters.push_back(pAdapter);
+		pFactory2->EnumAdapters(i, pAdapter.GetAddressOf()) != DXGI_ERROR_NOT_FOUND; ++i) {
+		vpAdapters.push_back(pAdapter.Get());
 	}
 
-	DX::SafeRelease(&pAdapter);
 	return vpAdapters;
 }
 
@@ -119,7 +124,6 @@ DXGI_MODE_DESC* D3D11GraphicsContext::GetAdapterDisplayMode(IDXGIAdapter* adapte
 {
 	//Adapter output (typically a monitor)
 	IDXGIOutput* pOutput = NULL;
-	HRESULT hr;
 
 	DX::ThrowIfFailed(adapter->EnumOutputs(0, &pOutput));
 
@@ -183,7 +187,6 @@ LRESULT D3D11GraphicsContext::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			DestroyWindow(m_hWnd);
 		}
 		}
-		return 0;
 	}
 	break;
 	case WM_SYSCHAR:
@@ -191,7 +194,6 @@ LRESULT D3D11GraphicsContext::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	case WM_DESTROY:
 	{
 		PostQuitMessage(0);
-		return 0;
 	}
 	break;
 	default:
@@ -200,6 +202,7 @@ LRESULT D3D11GraphicsContext::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	}
 	break;
 	}
+	return 0;
 }
 
 bool D3D11GraphicsContext::CreateDevice(ID3D11Device** device, ID3D11DeviceContext** context)
@@ -293,18 +296,6 @@ bool D3D11GraphicsContext::CreateRenderTargetView(ID3D11RenderTargetView** rtv)
 	DX::ThrowIfFailed(m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
 
 	DX::ThrowIfFailed(m_pDevice->CreateRenderTargetView(pBackBuffer.Get(), NULL, rtv));
-
-	D3D11_TEXTURE2D_DESC backBufferDesc = {};
-	pBackBuffer->GetDesc(&backBufferDesc);
-
-	D3D11_VIEWPORT vp;
-	vp.Width = static_cast<float>(backBufferDesc.Width);
-	vp.Height = static_cast<float>(backBufferDesc.Height);
-	vp.MinDepth = D3D11_MIN_DEPTH;
-	vp.MaxDepth = D3D11_MAX_DEPTH;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	m_pImmediateContext->RSSetViewports(1, &vp);
 	
 	return true;
 }
@@ -334,13 +325,13 @@ bool D3D11GraphicsContext::CreateVertexBuffer()
 	Vertex* vBuf = new Vertex[3];
 
 	vBuf[0].position = DirectX::XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f);
-	//vBuf[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	vBuf[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
 	vBuf[1].position = DirectX::XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f);
-	//vBuf[1].color = DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+	vBuf[1].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 
 	vBuf[2].position = DirectX::XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f);
-	//vBuf[2].color = DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
+	vBuf[2].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
 
 	D3D11_BUFFER_DESC bd = {};
 	bd.Usage = D3D11_USAGE_DEFAULT;
@@ -462,6 +453,7 @@ bool D3D11GraphicsContext::SetupHullShader(
 		m_pImmediateContext->HSSetShader(m_pHullShader.Get(), nullptr, 0);
 		return true;
 	}
+	return false;
 }
 
 bool D3D11GraphicsContext::SetupTessallator()
@@ -483,6 +475,7 @@ bool D3D11GraphicsContext::SetupDomainShader(
 		m_pImmediateContext->DSSetShader(m_pDomainShader.Get(), nullptr, 0);
 		return true;
 	}
+	return false;
 }
 
 bool D3D11GraphicsContext::SetupGeometryShader(
@@ -499,6 +492,7 @@ bool D3D11GraphicsContext::SetupGeometryShader(
 		m_pImmediateContext->GSSetShader(m_pGeometryShader.Get(), nullptr, 0);
 		return true;
 	}
+	return false;
 }
 
 bool D3D11GraphicsContext::SetupStreamOutput()
@@ -506,9 +500,48 @@ bool D3D11GraphicsContext::SetupStreamOutput()
 	return false;
 }
 
-bool D3D11GraphicsContext::SetupRasterizer()
+bool D3D11GraphicsContext::SetupRasterizer(
+	IDXGISwapChain1* swapChain, 
+	ID3D11DeviceContext* context,
+	ID3D11RasterizerState** rasterizerState)
 {
-	return false;
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer;
+	swapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
+	D3D11_TEXTURE2D_DESC backBufferDesc = {};
+	pBackBuffer->GetDesc(&backBufferDesc);
+
+	D3D11_VIEWPORT vp = {};
+	vp.Width = static_cast<float>(backBufferDesc.Width);
+	vp.Height = static_cast<float>(backBufferDesc.Height);
+	vp.MinDepth = D3D11_MIN_DEPTH;
+	vp.MaxDepth = D3D11_MAX_DEPTH;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	context->RSSetViewports(1, &vp);
+
+	D3D11_RECT scRect = {};
+	scRect.left = 0;
+	scRect.right = backBufferDesc.Width;
+	scRect.top = 0;
+	scRect.bottom = backBufferDesc.Height;
+	context->RSSetScissorRects(1, &scRect);
+
+	D3D11_RASTERIZER_DESC rd = {};
+	rd.FillMode = D3D11_FILL_SOLID;
+	rd.CullMode = D3D11_CULL_BACK;
+	rd.FrontCounterClockwise = false;
+	rd.DepthBias = false;
+	rd.DepthBiasClamp = 0;
+	rd.SlopeScaledDepthBias = 0;
+	rd.DepthClipEnable = true;
+	rd.ScissorEnable = true;
+	rd.MultisampleEnable = false;
+	rd.AntialiasedLineEnable = false;
+	DX::ThrowIfFailed(m_pDevice->CreateRasterizerState(&rd, rasterizerState));
+
+	context->RSSetState(m_pRasertizerState.Get());
+
+	return true;
 }
 
 bool D3D11GraphicsContext::SetupPixelShader(
@@ -578,15 +611,23 @@ bool D3D11GraphicsContext::SetupOutputMerger(
 
 bool D3D11GraphicsContext::SetupInputAssembler(std::vector<uint8_t> vsBytecode)
 {
-	D3D11_INPUT_ELEMENT_DESC layout[1];
+	D3D11_INPUT_ELEMENT_DESC layout[2];
 
 	layout[0].SemanticName = "POSITION";
 	layout[0].SemanticIndex = 0;
-	layout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	layout[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	layout[0].InputSlot = 0;
 	layout[0].AlignedByteOffset = 0;
 	layout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	layout[0].InstanceDataStepRate = 0;
+
+	layout[1].SemanticName = "COLOR";
+	layout[1].SemanticIndex = 0;
+	layout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	layout[1].InputSlot = 0;
+	layout[1].AlignedByteOffset = sizeof(float) * 4;
+	layout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	layout[1].InstanceDataStepRate = 0;
 
 	m_pDevice->CreateInputLayout(
 		layout, ARRAYSIZE(layout), 
@@ -594,7 +635,7 @@ bool D3D11GraphicsContext::SetupInputAssembler(std::vector<uint8_t> vsBytecode)
 		&m_pInputLayout);
 	m_pImmediateContext->IASetInputLayout(m_pInputLayout.Get());
 
-	m_pImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_pImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	return true;
 }

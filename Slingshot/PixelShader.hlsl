@@ -1,17 +1,17 @@
 struct PS_INPUT
 {
-	float4 pos : SV_POSITION;
-	float4 col : COLOR;
+	float4 pos : SV_Position;
+	float4 color : COLOR0;
 };
 
 struct PS_OUTPUT
 {
-	float4 col : SV_Target;
+	float4 color : SV_Target0;
 };
 
 PS_OUTPUT main(PS_INPUT input)
 {
 	PS_OUTPUT output;
-	output.col = input.col;
+	output.color = input.color;
 	return output;
 }

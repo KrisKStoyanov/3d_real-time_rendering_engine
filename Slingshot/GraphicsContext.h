@@ -9,6 +9,7 @@
 #include <windowsx.h>
 
 #include <wrl.h>
+#include <wrl/client.h>
 #include <algorithm>
 #include <cassert>
 #include <chrono>
@@ -16,17 +17,14 @@
 class GraphicsContext
 {
 public:
-	GraphicsContext();
-	~GraphicsContext();
+	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) { return LRESULT(); }
 
-	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-	virtual void OnCreate(HWND hwnd);
-	virtual void OnDestroy();
-	virtual void OnPaint();
-	virtual void OnResize();
-	virtual void OnLButtonDown(int pixelX, int pixelY, DWORD flags);
-	virtual void OnLButtonUp();
-	virtual void OnMouseMove(int pixelX, int pixelY, DWORD flags);
+	virtual void OnCreate(HWND hwnd) {};
+	virtual void OnDestroy() {};
+	virtual void OnPaint() {};
+	virtual void OnResize() {};
+	virtual void OnLButtonDown(int pixelX, int pixelY, DWORD flags) {};
+	virtual void OnLButtonUp() {};
+	virtual void OnMouseMove(int pixelX, int pixelY, DWORD flags) {};
 };
 

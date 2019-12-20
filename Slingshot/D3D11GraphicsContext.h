@@ -4,6 +4,7 @@
 #include "GraphicsContext.h"
 
 #include <d3d11.h>
+#include "d3d11_1.h"
 #include <dxgi1_6.h>
 #include <vector>
 
@@ -62,7 +63,10 @@ public:
 		std::string filePath,
 		std::vector<uint8_t>* bytecode);
 	bool SetupStreamOutput();
-	bool SetupRasterizer();
+	bool SetupRasterizer(
+		IDXGISwapChain1* swapChain, 
+		ID3D11DeviceContext* context,
+		ID3D11RasterizerState** rasterizerState);
 	bool SetupPixelShader(
 		std::string filePath, 
 		std::vector<uint8_t>* bytecode);
@@ -99,6 +103,8 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11DomainShader> m_pDomainShader;
 	//Geometry Shader
 	Microsoft::WRL::ComPtr<ID3D11GeometryShader> m_pGeometryShader;
+	//Raserizer
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_pRasertizerState;
 	//Pixel Shader
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pPixelShader;
 	//Output Merger

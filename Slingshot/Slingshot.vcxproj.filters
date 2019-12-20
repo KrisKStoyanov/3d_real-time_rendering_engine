@@ -30,9 +30,6 @@
     <ClCompile Include="D3D12GraphicsContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GUIConsole.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
