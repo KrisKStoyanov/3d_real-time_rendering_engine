@@ -8,7 +8,9 @@
 #include <vector>
 
 #include "Helpers.h"
+#include "GraphicsWrappers.h"
 #include "CUDAContextScheduler.cuh"
+#include "FileHandler.h"
 
 class D3D11GraphicsContext : public GraphicsContext
 {
@@ -33,21 +35,46 @@ public:
 	void CreateSwapChain();
 	void CreateRenderTargetView();
 
-	void CaptureCursor();
+	void CreateVertexBuffer();
+	void CreateIndexBuffer();
+	void CreateConstantBuffer();
+	
+	void CreateTexture();
 
-	HC::vec3* ScreenBuffer;
+	void CreateVertexShader(std::string filePath);
+	void CreateFragmentShader(std::string filePath);
+
+	//Rendering Pipeline Setup:
+	void SetupInputAssembler();
+
+	void CaptureCursor();
 
 	HWND m_hWnd;
 	bool m_CaptureCursor = false;
 	const float m_ClearColor[4] = { 1.0f, 0.5f, 0.32f, 1.0f };
+	std::vector<uint8_t> vShaderBytecode;
 
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pDeviceContext;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_pRenderTargetView;
 
 	Microsoft::WRL::ComPtr<IDXGIAdapter> m_pAdapter;
-	Microsoft::WRL::ComPtr<IDXGIOutput> m_pOutput;
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> m_pSwapChain;
+
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pVBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pCBuffer;
+
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_pVertexShader;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pPixelShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_pInputLayout;
+
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_pTexture2D;
+	Microsoft::WRL::ComPtr<ID3D11Resource> m_pTexture;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_pTextureView;
+
+	HC::D3D11DeviceInteropContext* m_pDeviceInteropContext;
+
 private:
 };
 

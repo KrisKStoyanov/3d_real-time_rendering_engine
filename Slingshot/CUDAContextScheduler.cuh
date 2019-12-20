@@ -3,6 +3,11 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
+#include <cuda_d3d11_interop.h>
+#include <d3dcompiler.h>
+
+#include <dxgi1_6.h>
+
 #include "GUIConsole.h"
 
 #define ProfileCUDA(val) CheckError((val),#val, __FILE__, __LINE__)
@@ -134,4 +139,35 @@ namespace HC {
 		return (1.0f - t) * vec3(1.0f) + t * vec3(0.5f, 0.7f, 1.0f);
 	}
 
+	//D3D11 Interop:
+	class D3D11DeviceInteropContext {
+	public:
+		__host__ inline D3D11DeviceInteropContext() {};
+		__host__ inline ~D3D11DeviceInteropContext() {};
+
+		__host__ inline void GetD3D11DeviceID(IDXGIAdapter* adapter)
+		{
+			ProfileCUDA(cudaD3D11GetDevice(m_DeviceId, adapter));
+		}
+
+		__host__ inline void RegisterD3D11Resource(
+			cudaGraphicsResource*& cudaResH,
+			ID3D11Resource* d3d11ResH,
+			unsigned int flags)
+		{
+			ProfileCUDA(cudaGraphicsD3D11RegisterResource(&cudaResH, d3d11ResH, flags));
+		}
+
+		__host__ inline void UnregisterD3D11Resource(
+			cudaGraphicsResource*& cudaResH,
+			ID3D11Resource* d3d11ResH,
+			unsigned int flags)
+		{
+			ProfileCUDA(cudaGraphicsUnregisterResource(m_Resource));
+		}
+
+		vec3* m_ScreenBuffer = NULL;
+		int* m_DeviceId = 0;
+		cudaGraphicsResource_t m_Resource = NULL;
+	};
 }

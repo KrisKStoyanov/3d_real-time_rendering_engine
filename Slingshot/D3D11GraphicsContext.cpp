@@ -11,10 +11,22 @@ D3D11GraphicsContext::~D3D11GraphicsContext()
 void D3D11GraphicsContext::OnCreate(HWND hwnd)
 {
 	m_hWnd = hwnd;
-	HC::InvokeRenderKernel(ScreenBuffer, 1280, 720);
 	CreateDevice();
 	CreateSwapChain();
 	CreateRenderTargetView();
+	
+	//Setup rendering pipeline:
+	CreateVertexShader("VertexShader.cso");
+	CreateFragmentShader("PixelShader.cso");
+	
+	CreateVertexBuffer();
+
+	SetupInputAssembler();
+
+	//Setup interop pipeline extension
+	//m_pDeviceInteropContext = new HC::D3D11DeviceInteropContext();
+
+	//HC::InvokeRenderKernel(m_pDeviceInteropContext->m_ScreenBuffer, 1280, 720);
 }
 
 void D3D11GraphicsContext::OnDestroy()
@@ -23,12 +35,15 @@ void D3D11GraphicsContext::OnDestroy()
 	m_pDevice->Release();
 	m_pDeviceContext->Release();
 	m_pSwapChain->Release();
+	m_pRenderTargetView->Release();
 }
 
 void D3D11GraphicsContext::OnPaint()
 {
 	m_pDeviceContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
 	m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
+
+	m_pDeviceContext->Draw(3, 0);
 	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
 }
 
@@ -215,7 +230,8 @@ void D3D11GraphicsContext::CreateSwapChain()
 	sd.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 	sd.Flags = 0;
 	
-	m_pAdapter->EnumOutputs(0, &m_pOutput);
+	Microsoft::WRL::ComPtr<IDXGIOutput> pOutput;
+	m_pAdapter->EnumOutputs(0, &pOutput);
 
 	Microsoft::WRL::ComPtr<IDXGIFactory2> pFactory2;
 	DX::ThrowIfFailed(m_pAdapter->GetParent(IID_PPV_ARGS(&pFactory2)));
@@ -224,9 +240,11 @@ void D3D11GraphicsContext::CreateSwapChain()
 		m_hWnd,
 		&sd,
 		NULL,
-		m_pOutput.Get(),
+		pOutput.Get(),
 		&m_pSwapChain
 	));
+
+	pOutput->Release();
 }
 
 void D3D11GraphicsContext::CreateRenderTargetView()
@@ -247,6 +265,147 @@ void D3D11GraphicsContext::CreateRenderTargetView()
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
 	m_pDeviceContext->RSSetViewports(1, &vp);
+}
+
+void D3D11GraphicsContext::CreateVertexBuffer()
+{
+	Vertex* vBuf = new Vertex[3];
+
+	vBuf[0].position = DirectX::XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f);
+	//vBuf[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	vBuf[1].position = DirectX::XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f);
+	//vBuf[1].color = DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+
+	vBuf[2].position = DirectX::XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f);
+	//vBuf[2].color = DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
+
+	D3D11_BUFFER_DESC bd = {};
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(Vertex) * 3;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = 0;
+	bd.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA srd = {};
+	srd.pSysMem = vBuf;
+	srd.SysMemPitch = 0;
+	srd.SysMemSlicePitch = 0;
+
+	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, &srd, &m_pVBuffer));
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	m_pDeviceContext->IASetVertexBuffers(0, 1, m_pVBuffer.GetAddressOf(), &stride, &offset);
+}
+
+void D3D11GraphicsContext::CreateIndexBuffer()
+{
+	unsigned int iBuf[] = { 0, 1, 2 };
+
+	D3D11_BUFFER_DESC bd = {};
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(unsigned int) * 3;
+	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	bd.CPUAccessFlags = 0;
+	bd.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA srd = {};
+	srd.pSysMem = iBuf;
+	srd.SysMemPitch = 0;
+	srd.SysMemSlicePitch = 0;
+
+	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, &srd, &m_pIBuffer));
+	m_pDeviceContext->IASetIndexBuffer(m_pIBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+}
+
+void D3D11GraphicsContext::CreateConstantBuffer()
+{
+	VS_ConstantBuffer vsCB = {};
+	vsCB.matWrapper;
+	vsCB.fCountWrapper = 1.0f;
+	vsCB.vecWrapper = DirectX::XMFLOAT4(1, 2, 3, 4);
+	vsCB.fWrapperA = 3.0f;
+	vsCB.fWrapperB = 2.0f;
+	vsCB.fWrapperC = 4.0f;
+
+	D3D11_BUFFER_DESC bd = {};
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(VS_ConstantBuffer);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bd.MiscFlags = 0;
+	bd.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA srd = {};
+	srd.pSysMem = &vsCB;
+	srd.SysMemPitch = 0;
+	srd.SysMemSlicePitch = 0;
+
+	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, &srd, &m_pCBuffer));
+	m_pDeviceContext->VSSetConstantBuffers(0, 1, &m_pCBuffer);
+}
+
+void D3D11GraphicsContext::CreateTexture()
+{
+	D3D11_TEXTURE2D_DESC t2dd = {};
+	t2dd.Width = 256;
+	t2dd.Height = 256;
+	t2dd.MipLevels = t2dd.ArraySize = 1;
+	t2dd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	t2dd.SampleDesc = { 1,0 };
+	t2dd.Usage = D3D11_USAGE_DYNAMIC;
+	t2dd.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	t2dd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	t2dd.MiscFlags = 0;
+
+	DX::ThrowIfFailed(m_pDevice->CreateTexture2D(&t2dd, NULL, &m_pTexture2D));
+}
+
+void D3D11GraphicsContext::CreateVertexShader(std::string filePath)
+{
+	vShaderBytecode = ReadFile(filePath);
+
+	DX::ThrowIfFailed(m_pDevice->CreateVertexShader(
+		vShaderBytecode.data(),
+		vShaderBytecode.size(),
+		nullptr,
+		&m_pVertexShader));
+
+	m_pDeviceContext->VSSetShader(m_pVertexShader.Get(), nullptr, 0);
+}
+
+void D3D11GraphicsContext::CreateFragmentShader(std::string filePath)
+{
+	std::vector<uint8_t> shaderBytecode = ReadFile(filePath);
+
+	DX::ThrowIfFailed(m_pDevice->CreatePixelShader(
+		shaderBytecode.data(),
+		shaderBytecode.size(),
+		nullptr,
+		&m_pPixelShader));
+
+	m_pDeviceContext->PSSetShader(m_pPixelShader.Get(), nullptr, 0);
+}
+
+void D3D11GraphicsContext::SetupInputAssembler()
+{
+	D3D11_INPUT_ELEMENT_DESC layout[1];
+
+	layout[0].SemanticName = "POSITION";
+	layout[0].SemanticIndex = 0;
+	layout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	layout[0].InputSlot = 0;
+	layout[0].AlignedByteOffset = 0;
+	layout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	layout[0].InstanceDataStepRate = 0;
+
+	m_pDevice->CreateInputLayout(
+		layout, ARRAYSIZE(layout), 
+		vShaderBytecode.data(), vShaderBytecode.size(),
+		&m_pInputLayout);
+	m_pDeviceContext->IASetInputLayout(m_pInputLayout.Get());
+
+	m_pDeviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void D3D11GraphicsContext::CaptureCursor()

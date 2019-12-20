@@ -1,14 +1,9 @@
 #pragma once
 
+#include "SupportedContexts.h"
+
 #include "D3D11GraphicsContext.h"
 #include "D3D12GraphicsContext.h"
-
-enum class GC : UINT {
-	D3D11 = 0,
-	D3D12,
-	OpenGL,
-	Vulkan
-};
 
 class Window
 {
