@@ -30,33 +30,56 @@ public:
 	virtual void OnLButtonDown(int pixelX, int pixelY, DWORD flags);
 	virtual void OnLButtonUp();
 	virtual void OnMouseMove(int pixelX, int pixelY, DWORD flags);
-
-	void CreateDevice();
-	void CreateSwapChain();
-	void CreateRenderTargetView();
-
-	void CreateVertexBuffer();
-	void CreateIndexBuffer();
-	void CreateConstantBuffer();
-	
-	void CreateTexture();
-
-	void CreateVertexShader(std::string filePath);
-	void CreateFragmentShader(std::string filePath);
-
-	//Rendering Pipeline Setup:
-	void SetupInputAssembler();
-
 	void CaptureCursor();
+
+	bool CreateDevice(ID3D11Device** device, ID3D11DeviceContext** context);
+	bool CreateSwapChain(IDXGISwapChain1** swapChain);
+	bool CreateRenderTargetView(ID3D11RenderTargetView** rtv);
+	bool CreateDeferredContext(ID3D11Device* device, ID3D11DeviceContext** context);
+	
+	bool RecordCommandList(ID3D11DeviceContext* defContext, ID3D11CommandList** commandList);
+	bool ExecuteCommandList(ID3D11DeviceContext* imContext, ID3D11CommandList* commandList);
+
+	bool CreateVertexBuffer();
+	bool CreateIndexBuffer();
+	bool CreateConstantBuffer();
+	
+	bool CreateTexture();
+
+	//Rendering Pipeline:
+	bool SetupInputAssembler(std::vector<uint8_t> vsBytecode);
+	bool SetupVertexShader(
+		std::string filePath, 
+		std::vector<uint8_t>* bytecode);
+	bool SetupHullShader(
+		std::string filePath, 
+		std::vector<uint8_t>* bytecode);
+	bool SetupTessallator();
+	bool SetupDomainShader(
+		std::string filePath,
+		std::vector<uint8_t>* bytecode);
+	bool SetupGeometryShader(
+		std::string filePath,
+		std::vector<uint8_t>* bytecode);
+	bool SetupStreamOutput();
+	bool SetupRasterizer();
+	bool SetupPixelShader(
+		std::string filePath, 
+		std::vector<uint8_t>* bytecode);
+	bool SetupOutputMerger(
+		IDXGISwapChain1* swapChain,
+		ID3D11Texture2D** depthStencil, 
+		ID3D11BlendState** blendState);
 
 	HWND m_hWnd;
 	bool m_CaptureCursor = false;
 	const float m_ClearColor[4] = { 1.0f, 0.5f, 0.32f, 1.0f };
-	std::vector<uint8_t> vShaderBytecode;
 
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
-	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pDeviceContext;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pImmediateContext;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_pRenderTargetView;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pDeferredContext;
+	Microsoft::WRL::ComPtr<ID3D11CommandList> m_pCommandList;
 
 	Microsoft::WRL::ComPtr<IDXGIAdapter> m_pAdapter;
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> m_pSwapChain;
@@ -65,16 +88,29 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pCBuffer;
 
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_pVertexShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pPixelShader;
+	//----------------Rendering Pipeline----------------
+	//Input Assembler
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_pInputLayout;
+	//Vertex Shader
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_pVertexShader;
+	//Hull Shader
+	Microsoft::WRL::ComPtr<ID3D11HullShader> m_pHullShader;
+	//Domain Shader
+	Microsoft::WRL::ComPtr<ID3D11DomainShader> m_pDomainShader;
+	//Geometry Shader
+	Microsoft::WRL::ComPtr<ID3D11GeometryShader> m_pGeometryShader;
+	//Pixel Shader
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pPixelShader;
+	//Output Merger
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_pDepthStencil;
+	Microsoft::WRL::ComPtr<ID3D11BlendState> m_pBlendState;
+	//--------------------------------------------------
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_pTexture2D;
 	Microsoft::WRL::ComPtr<ID3D11Resource> m_pTexture;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_pTextureView;
 
 	HC::D3D11DeviceInteropContext* m_pDeviceInteropContext;
-
 private:
 };
 

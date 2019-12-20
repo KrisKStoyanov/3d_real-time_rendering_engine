@@ -8,5 +8,5 @@
 
 #include <d3dcompiler.h>
 
-std::vector<uint8_t> ReadFile(std::string filePath);
+bool GetBytecode(std::string filePath, std::vector<uint8_t>* bytecode);
 uintmax_t ComputeFileSize(std::string filePath);

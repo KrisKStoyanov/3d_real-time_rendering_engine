@@ -11,21 +11,34 @@ D3D11GraphicsContext::~D3D11GraphicsContext()
 void D3D11GraphicsContext::OnCreate(HWND hwnd)
 {
 	m_hWnd = hwnd;
-	CreateDevice();
-	CreateSwapChain();
-	CreateRenderTargetView();
-	
-	//Setup rendering pipeline:
-	CreateVertexShader("VertexShader.cso");
-	CreateFragmentShader("PixelShader.cso");
-	
-	CreateVertexBuffer();
+	if (CreateDevice(&m_pDevice, &m_pImmediateContext)) {
+		CreateSwapChain(&m_pSwapChain);
+		CreateRenderTargetView(&m_pRenderTargetView);
+		CreateDeferredContext(m_pDevice.Get(), &m_pDeferredContext);
 
-	SetupInputAssembler();
+		//Setup rendering pipeline:
+		std::vector<uint8_t> vsBytecode;
+		std::vector<uint8_t> fsBytecode;
+		//std::vector<uint8_t> hsBytecode;
+		//std::vector<uint8_t> dsBytecode;
+		SetupVertexShader("VertexShader.cso", &vsBytecode);
+		SetupInputAssembler(vsBytecode);
+		//SetupHullShader("HullShader.cso", &hsBytecode);
+		//SetupTessallator();
+		//SetupDomainShader("DomainShader.cso", &dsBytecode);
+		SetupPixelShader("PixelShader.cso", &fsBytecode);
+		SetupOutputMerger(m_pSwapChain.Get(),
+			&m_pDepthStencil,
+			&m_pBlendState);
+
+		CreateVertexBuffer();
+		CreateIndexBuffer();
+
+		RecordCommandList(m_pDeferredContext.Get(), &m_pCommandList);
+	}
 
 	//Setup interop pipeline extension
 	//m_pDeviceInteropContext = new HC::D3D11DeviceInteropContext();
-
 	//HC::InvokeRenderKernel(m_pDeviceInteropContext->m_ScreenBuffer, 1280, 720);
 }
 
@@ -33,17 +46,20 @@ void D3D11GraphicsContext::OnDestroy()
 {
 	m_pAdapter->Release();
 	m_pDevice->Release();
-	m_pDeviceContext->Release();
-	m_pSwapChain->Release();
+	m_pImmediateContext->Release();
 	m_pRenderTargetView->Release();
+	m_pSwapChain->Release();
+	m_pVertexShader->Release();
+	m_pPixelShader->Release();
+	//m_pInputLayout->Release();
 }
 
 void D3D11GraphicsContext::OnPaint()
 {
-	m_pDeviceContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
-	m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
+	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
+	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
 
-	m_pDeviceContext->Draw(3, 0);
+	m_pImmediateContext->DrawIndexed(3, 0, 0);
 	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
 }
 
@@ -61,6 +77,26 @@ void D3D11GraphicsContext::OnLButtonUp()
 
 void D3D11GraphicsContext::OnMouseMove(int pixelX, int pixelY, DWORD flags)
 {
+}
+
+void D3D11GraphicsContext::CaptureCursor()
+{
+	if (m_CaptureCursor) {
+		RECT rc;
+		GetClientRect(m_hWnd, &rc);
+
+		POINT pt = { rc.left, rc.top };
+		POINT pt2 = { rc.right, rc.bottom };
+		ClientToScreen(m_hWnd, &pt);
+		ClientToScreen(m_hWnd, &pt2);
+
+		SetRect(&rc, pt.x, pt.y, pt2.x, pt2.y);
+
+		ClipCursor(&rc);
+	}
+	else {
+		ClipCursor(NULL);
+	}
 }
 
 std::vector<IDXGIAdapter*> D3D11GraphicsContext::EnumerateAdapters()
@@ -166,7 +202,7 @@ LRESULT D3D11GraphicsContext::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	}
 }
 
-void D3D11GraphicsContext::CreateDevice()
+bool D3D11GraphicsContext::CreateDevice(ID3D11Device** device, ID3D11DeviceContext** context)
 {
 	std::vector<IDXGIAdapter*> vpAdapters = EnumerateAdapters();
 	int adId = 0;
@@ -207,13 +243,15 @@ void D3D11GraphicsContext::CreateDevice()
 		featureLevels,
 		ARRAYSIZE(featureLevels),
 		D3D11_SDK_VERSION,
-		&m_pDevice,
+		device,
 		&maxSupportedFeatureLevel,
-		&m_pDeviceContext
+		context
 	));
+
+	return true;
 }
 
-void D3D11GraphicsContext::CreateSwapChain()
+bool D3D11GraphicsContext::CreateSwapChain(IDXGISwapChain1** swapChain)
 {
 	//Define swap chain behaviour
 	DXGI_SWAP_CHAIN_DESC1 sd = {0};
@@ -241,20 +279,22 @@ void D3D11GraphicsContext::CreateSwapChain()
 		&sd,
 		NULL,
 		pOutput.Get(),
-		&m_pSwapChain
+		swapChain
 	));
 
 	pOutput->Release();
+
+	return true;
 }
 
-void D3D11GraphicsContext::CreateRenderTargetView()
+bool D3D11GraphicsContext::CreateRenderTargetView(ID3D11RenderTargetView** rtv)
 {
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer;
 	DX::ThrowIfFailed(m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
 
-	DX::ThrowIfFailed(m_pDevice->CreateRenderTargetView(pBackBuffer.Get(), NULL, &m_pRenderTargetView));
+	DX::ThrowIfFailed(m_pDevice->CreateRenderTargetView(pBackBuffer.Get(), NULL, rtv));
 
-	D3D11_TEXTURE2D_DESC backBufferDesc = { 0 };
+	D3D11_TEXTURE2D_DESC backBufferDesc = {};
 	pBackBuffer->GetDesc(&backBufferDesc);
 
 	D3D11_VIEWPORT vp;
@@ -264,10 +304,32 @@ void D3D11GraphicsContext::CreateRenderTargetView()
 	vp.MaxDepth = D3D11_MAX_DEPTH;
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
-	m_pDeviceContext->RSSetViewports(1, &vp);
+	m_pImmediateContext->RSSetViewports(1, &vp);
+	
+	return true;
 }
 
-void D3D11GraphicsContext::CreateVertexBuffer()
+bool D3D11GraphicsContext::CreateDeferredContext(ID3D11Device* device, ID3D11DeviceContext** context)
+{
+	DX::ThrowIfFailed(device->CreateDeferredContext(0, context));
+	return true;
+}
+
+bool D3D11GraphicsContext::RecordCommandList(ID3D11DeviceContext* context, ID3D11CommandList** commandList)
+{
+	context->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
+	context->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
+	DX::ThrowIfFailed(context->FinishCommandList(FALSE, commandList));
+	return true;
+}
+
+bool D3D11GraphicsContext::ExecuteCommandList(ID3D11DeviceContext* context, ID3D11CommandList* commandList)
+{
+	context->ExecuteCommandList(commandList, FALSE);
+	return true;
+}
+
+bool D3D11GraphicsContext::CreateVertexBuffer()
 {
 	Vertex* vBuf = new Vertex[3];
 
@@ -295,10 +357,12 @@ void D3D11GraphicsContext::CreateVertexBuffer()
 	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, &srd, &m_pVBuffer));
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
-	m_pDeviceContext->IASetVertexBuffers(0, 1, m_pVBuffer.GetAddressOf(), &stride, &offset);
+	m_pImmediateContext->IASetVertexBuffers(0, 1, m_pVBuffer.GetAddressOf(), &stride, &offset);
+
+	return true;
 }
 
-void D3D11GraphicsContext::CreateIndexBuffer()
+bool D3D11GraphicsContext::CreateIndexBuffer()
 {
 	unsigned int iBuf[] = { 0, 1, 2 };
 
@@ -315,10 +379,12 @@ void D3D11GraphicsContext::CreateIndexBuffer()
 	srd.SysMemSlicePitch = 0;
 
 	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, &srd, &m_pIBuffer));
-	m_pDeviceContext->IASetIndexBuffer(m_pIBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	m_pImmediateContext->IASetIndexBuffer(m_pIBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+	return true;
 }
 
-void D3D11GraphicsContext::CreateConstantBuffer()
+bool D3D11GraphicsContext::CreateConstantBuffer()
 {
 	VS_ConstantBuffer vsCB = {};
 	vsCB.matWrapper;
@@ -342,10 +408,12 @@ void D3D11GraphicsContext::CreateConstantBuffer()
 	srd.SysMemSlicePitch = 0;
 
 	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, &srd, &m_pCBuffer));
-	m_pDeviceContext->VSSetConstantBuffers(0, 1, &m_pCBuffer);
+	m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pCBuffer);
+
+	return true;
 }
 
-void D3D11GraphicsContext::CreateTexture()
+bool D3D11GraphicsContext::CreateTexture()
 {
 	D3D11_TEXTURE2D_DESC t2dd = {};
 	t2dd.Width = 256;
@@ -359,35 +427,156 @@ void D3D11GraphicsContext::CreateTexture()
 	t2dd.MiscFlags = 0;
 
 	DX::ThrowIfFailed(m_pDevice->CreateTexture2D(&t2dd, NULL, &m_pTexture2D));
+
+	return true;
 }
 
-void D3D11GraphicsContext::CreateVertexShader(std::string filePath)
+bool D3D11GraphicsContext::SetupVertexShader(
+	std::string filePath, 
+	std::vector<uint8_t>* bytecode)
 {
-	vShaderBytecode = ReadFile(filePath);
+	if (GetBytecode(filePath, bytecode)) {
+		DX::ThrowIfFailed(m_pDevice->CreateVertexShader(
+			bytecode->data(),
+			bytecode->size(),
+			nullptr,
+			&m_pVertexShader));
 
-	DX::ThrowIfFailed(m_pDevice->CreateVertexShader(
-		vShaderBytecode.data(),
-		vShaderBytecode.size(),
-		nullptr,
-		&m_pVertexShader));
-
-	m_pDeviceContext->VSSetShader(m_pVertexShader.Get(), nullptr, 0);
+		m_pImmediateContext->VSSetShader(m_pVertexShader.Get(), nullptr, 0);
+		return true;
+	}
+	return false;
 }
 
-void D3D11GraphicsContext::CreateFragmentShader(std::string filePath)
+bool D3D11GraphicsContext::SetupHullShader(
+	std::string filePath,
+	std::vector<uint8_t>* bytecode)
 {
-	std::vector<uint8_t> shaderBytecode = ReadFile(filePath);
+	if (GetBytecode(filePath, bytecode)) {
+		DX::ThrowIfFailed(m_pDevice->CreateHullShader(
+			bytecode->data(),
+			bytecode->size(),
+			nullptr,
+			&m_pHullShader));
 
-	DX::ThrowIfFailed(m_pDevice->CreatePixelShader(
-		shaderBytecode.data(),
-		shaderBytecode.size(),
-		nullptr,
-		&m_pPixelShader));
-
-	m_pDeviceContext->PSSetShader(m_pPixelShader.Get(), nullptr, 0);
+		m_pImmediateContext->HSSetShader(m_pHullShader.Get(), nullptr, 0);
+		return true;
+	}
 }
 
-void D3D11GraphicsContext::SetupInputAssembler()
+bool D3D11GraphicsContext::SetupTessallator()
+{
+	return false;
+}
+
+bool D3D11GraphicsContext::SetupDomainShader(
+	std::string filePath,
+	std::vector<uint8_t>* bytecode)
+{
+	if (GetBytecode(filePath, bytecode)) {
+		DX::ThrowIfFailed(m_pDevice->CreateDomainShader(
+			bytecode->data(),
+			bytecode->size(),
+			nullptr,
+			&m_pDomainShader));
+
+		m_pImmediateContext->DSSetShader(m_pDomainShader.Get(), nullptr, 0);
+		return true;
+	}
+}
+
+bool D3D11GraphicsContext::SetupGeometryShader(
+	std::string filePath,
+	std::vector<uint8_t>* bytecode)
+{
+	if (GetBytecode(filePath, bytecode)) {
+		DX::ThrowIfFailed(m_pDevice->CreateGeometryShader(
+			bytecode->data(),
+			bytecode->size(),
+			nullptr,
+			&m_pGeometryShader));
+
+		m_pImmediateContext->GSSetShader(m_pGeometryShader.Get(), nullptr, 0);
+		return true;
+	}
+}
+
+bool D3D11GraphicsContext::SetupStreamOutput()
+{
+	return false;
+}
+
+bool D3D11GraphicsContext::SetupRasterizer()
+{
+	return false;
+}
+
+bool D3D11GraphicsContext::SetupPixelShader(
+	std::string filePath, 
+	std::vector<uint8_t>* bytecode)
+{
+	if (GetBytecode(filePath, bytecode)) {
+		DX::ThrowIfFailed(m_pDevice->CreatePixelShader(
+			bytecode->data(),
+			bytecode->size(),
+			nullptr,
+			&m_pPixelShader));
+
+		m_pImmediateContext->PSSetShader(m_pPixelShader.Get(), nullptr, 0);
+
+		return true;
+	}
+	return false;
+}
+
+bool D3D11GraphicsContext::SetupOutputMerger(
+	IDXGISwapChain1* swapChain,
+	ID3D11Texture2D** depthStencil, 
+	ID3D11BlendState** blendState)
+{
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer;
+	swapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
+	D3D11_TEXTURE2D_DESC scbbd = {};
+	pBackBuffer->GetDesc(&scbbd);
+	DXGI_FORMAT stencilFormats[2] =
+	{	DXGI_FORMAT_D24_UNORM_S8_UINT,
+		DXGI_FORMAT_D32_FLOAT_S8X24_UINT };
+	UINT formatCheck;
+	int stencilFormatId = 0;
+	HRESULT hr;
+	for (int i = 0; i < ARRAYSIZE(stencilFormats); ++i) {
+		hr = m_pDevice->CheckFormatSupport(stencilFormats[i], &formatCheck);
+		if (hr == S_OK && (formatCheck & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)) {
+			stencilFormatId = i;
+			break;
+		}
+	}
+
+	D3D11_TEXTURE2D_DESC dsd = {};
+	dsd.Width = scbbd.Width;
+	dsd.Height = scbbd.Height;
+	dsd.MipLevels = 1;
+	dsd.ArraySize = 1;
+	dsd.Format = stencilFormats[stencilFormatId];
+	dsd.SampleDesc = { 1, 0 };
+	dsd.Usage = D3D11_USAGE_DEFAULT;
+	dsd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	dsd.CPUAccessFlags = 0;
+	dsd.MiscFlags = 0;
+	DX::ThrowIfFailed(m_pDevice->CreateTexture2D(&dsd, NULL, depthStencil));
+
+	D3D11_BLEND_DESC bd = {};
+	bd.RenderTarget[0].BlendEnable = FALSE;
+	bd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	DX::ThrowIfFailed(m_pDevice->CreateBlendState(&bd, blendState));
+
+	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	UINT sampleMask = 0xffffffff;
+	m_pImmediateContext->OMSetBlendState(*blendState, blendFactor, sampleMask);
+	return true;
+}
+
+bool D3D11GraphicsContext::SetupInputAssembler(std::vector<uint8_t> vsBytecode)
 {
 	D3D11_INPUT_ELEMENT_DESC layout[1];
 
@@ -401,29 +590,11 @@ void D3D11GraphicsContext::SetupInputAssembler()
 
 	m_pDevice->CreateInputLayout(
 		layout, ARRAYSIZE(layout), 
-		vShaderBytecode.data(), vShaderBytecode.size(),
+		vsBytecode.data(), vsBytecode.size(),
 		&m_pInputLayout);
-	m_pDeviceContext->IASetInputLayout(m_pInputLayout.Get());
+	m_pImmediateContext->IASetInputLayout(m_pInputLayout.Get());
 
-	m_pDeviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-}
+	m_pImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-void D3D11GraphicsContext::CaptureCursor()
-{
-	if (m_CaptureCursor) {
-		RECT rc;
-		GetClientRect(m_hWnd, &rc);
-
-		POINT pt = { rc.left, rc.top };
-		POINT pt2 = { rc.right, rc.bottom };
-		ClientToScreen(m_hWnd, &pt);
-		ClientToScreen(m_hWnd, &pt2);
-
-		SetRect(&rc, pt.x, pt.y, pt2.x, pt2.y);
-
-		ClipCursor(&rc);
-	}
-	else {
-		ClipCursor(NULL);
-	}
+	return true;
 }

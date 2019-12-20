@@ -1,19 +1,18 @@
 #include "FileHandler.h"
 
-std::vector<uint8_t> ReadFile(std::string filePath)
+bool GetBytecode(std::string filePath, std::vector<uint8_t>* bytecode)
 {
-	std::vector<uint8_t> bytecode;
-
 	std::ifstream ifs;
 	ifs.open(filePath, std::ifstream::in | std::ifstream::binary);
 	if (ifs.good()) {
 		uintmax_t ifsSize = ComputeFileSize(filePath);
-		bytecode.resize(ifsSize);
+		bytecode->resize(ifsSize);
 		ifs.seekg(0, std::ios::beg);
-		ifs.read(reinterpret_cast<char*>(&bytecode[0]), ifsSize);
+		ifs.read(reinterpret_cast<char*>(bytecode[0].data()), ifsSize);
 		ifs.close();
+		return true;
 	}
-	return bytecode;
+	return false;
 }
 
 uintmax_t ComputeFileSize(std::string filePath)
