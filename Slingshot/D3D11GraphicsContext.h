@@ -33,15 +33,19 @@ public:
 	virtual void OnMouseMove(int pixelX, int pixelY, DWORD flags);
 	void CaptureCursor();
 
-	bool SetupRenderingPipeline(bool enableGSSO = false);
-	bool InitRenderingPipeline(bool enableGSSO = false);
-	bool TerminateRenderingPipeline();
-	void Render(bool enableIndexed = true, bool enableSO = false, bool swapIASOBuffers = false);
-	bool SwapIASOVertexBuffers();
+	bool SetupD3D11Context();
+	bool SetupRenderingPipeline(bool enableIndexing = true, bool enableSO = false);
+	bool InitRenderingPipeline(bool enableIndexing = true, bool enableSO = false);
+	bool TerminateRenderingPipeline(bool enableIndexing = true, bool enableSO = false);
+	void Render(bool enableIndexing = true, bool enableSO = false, bool swapIASOBuffers = false);
+	bool SwapIASOVertexBuffers(bool& readABuffer);
 
 	bool CreateDevice(ID3D11Device** device, ID3D11DeviceContext** context);
 	bool CreateSwapChain(IDXGISwapChain1** swapChain);
-	bool CreateRenderTargetView(ID3D11RenderTargetView** rtv);
+	bool CreateRenderTargetView(
+		ID3D11Device* device,
+		IDXGISwapChain1* swapChain, 
+		ID3D11RenderTargetView** rtv);
 	bool CreateDeferredContext(ID3D11Device* device, ID3D11DeviceContext** context);
 	
 	bool RecordCommandList(ID3D11DeviceContext* defContext, ID3D11CommandList** commandList);
@@ -58,32 +62,46 @@ public:
 	//Rendering Pipeline:
 	bool SetupInputAssembler(std::vector<uint8_t> vsBytecode);
 	bool SetupVertexShader(
-		std::string filePath, 
-		std::vector<uint8_t>* bytecode);
-	bool SetupHullShader(
-		std::string filePath, 
-		std::vector<uint8_t>* bytecode);
-	bool SetupTessallator();
-	bool SetupDomainShader(
-		std::string filePath,
-		std::vector<uint8_t>* bytecode);
-	bool SetupGeometryShader(
-		std::string filePath,
-		std::vector<uint8_t>* bytecode);
-	bool SetupGeometryShaderWithStreamOutput(
-		std::string filePath,
-		std::vector<uint8_t>* bytecode,
 		ID3D11Device* device,
 		ID3D11DeviceContext* context,
-		ID3D11Buffer** buffer,
-		ID3D11GeometryShader** geometryShader);
+		std::string filePath, 
+		std::vector<uint8_t>* bytecode,
+		ID3D11VertexShader** shader);
+	bool SetupHullShader(
+		ID3D11Device* device,
+		ID3D11DeviceContext* context,
+		std::string filePath, 
+		std::vector<uint8_t>* bytecode,
+		ID3D11HullShader** shader);
+	bool SetupTessallator();
+	bool SetupDomainShader(
+		ID3D11Device* device,
+		ID3D11DeviceContext* context,
+		std::string filePath,
+		std::vector<uint8_t>* bytecode,
+		ID3D11DomainShader** shader);
+	bool SetupGeometryShader(
+		ID3D11Device* device,
+		ID3D11DeviceContext* context,
+		std::string filePath,
+		std::vector<uint8_t>* bytecode,
+		ID3D11GeometryShader** shader);
+	bool SetupGeometryShaderWithStreamOutput(
+		ID3D11Device* device,
+		ID3D11DeviceContext* context,
+		std::string filePath,
+		std::vector<uint8_t>* bytecode,
+		ID3D11GeometryShader** shader);
 	bool SetupRasterizer(
 		IDXGISwapChain1* swapChain, 
 		ID3D11DeviceContext* context,
 		ID3D11RasterizerState** rasterizerState);
 	bool SetupPixelShader(
-		std::string filePath, 
-		std::vector<uint8_t>* bytecode);
+		ID3D11Device* device,
+		ID3D11DeviceContext* context,
+		std::string filePath,
+		std::vector<uint8_t>* bytecode,
+		ID3D11PixelShader** shader);
 	bool SetupOutputMerger(
 		IDXGISwapChain1* swapChain,
 		ID3D11Texture2D** depthStencil, 
@@ -92,12 +110,19 @@ public:
 	//Window behaviour:
 	bool m_CaptureCursor = false;
 
-	//Pipeline behaviour:
-	bool m_RenderSO = true;
-	bool m_RenderIndexed = false;
-	bool m_EnableSO = true;
+	//Pipeline Managed behaviour:
+	//--------------------------
+	//Input Assembly Stage:
+	bool m_EnableIndexing = false;
+	//Stream Output Stage:
+	bool m_EnableSO = true;	
 	bool m_SwapIASOBuffers = false;
+
+	//Pipeline Auto behaviour:
+	//--------------------------
+	//IA<->SO Vertex Buffer Handling
 	bool m_ReadSO_A = true;
+
 	const float m_ClearColor[4] = { 1.0f, 0.5f, 0.32f, 1.0f };
 
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;

@@ -11,25 +11,27 @@ D3D11GraphicsContext::~D3D11GraphicsContext()
 
 void D3D11GraphicsContext::OnCreate(HWND hwnd)
 {
-	if (SetupRenderingPipeline(m_EnableSO)) {
-		//Setup interop HPS extension
-		//m_pDeviceInteropContext = new HC::D3D11DeviceInteropContext();
-		//HC::InvokeRenderKernel(m_pDeviceInteropContext->m_ScreenBuffer, 1280, 720);	
-		
-		//RecordCommandList(m_pDeferredContext.Get(), &m_pCommandList);
-		InitRenderingPipeline(m_EnableSO);
+	if (SetupD3D11Context()) {
+		if (SetupRenderingPipeline(m_EnableIndexing, m_EnableSO)) {
+			//Setup interop HPS extension
+			//m_pDeviceInteropContext = new HC::D3D11DeviceInteropContext();
+			//HC::InvokeRenderKernel(m_pDeviceInteropContext->m_ScreenBuffer, 1280, 720);	
+
+			//RecordCommandList(m_pDeferredContext.Get(), &m_pCommandList);
+			InitRenderingPipeline(m_EnableIndexing, m_EnableSO);
+		}
 	}
 }
 
 void D3D11GraphicsContext::OnDestroy()
 {
-	TerminateRenderingPipeline();
+	TerminateRenderingPipeline(m_EnableIndexing, m_EnableSO);
 }
 
 void D3D11GraphicsContext::OnPaint()
 {
-	//Implement Effects to stop preemptive GS transformations
-	Render(m_RenderIndexed, m_EnableSO, m_SwapIASOBuffers);
+	//Implement Effects to stop preemptive GS transformations during SO rendering
+	Render(m_EnableIndexing, m_EnableSO, m_SwapIASOBuffers);
 }
 
 void D3D11GraphicsContext::OnResize()
@@ -68,40 +70,68 @@ void D3D11GraphicsContext::CaptureCursor()
 	}
 }
 
-bool D3D11GraphicsContext::SetupRenderingPipeline(bool enableGSSO)
+bool D3D11GraphicsContext::SetupD3D11Context()
 {
 	CreateDevice(&m_pDevice, &m_pImmediateContext);
 	CreateSwapChain(&m_pSwapChain);
-	CreateRenderTargetView(&m_pRenderTargetView);
-	CreateDeferredContext(m_pDevice.Get(), &m_pDeferredContext);
+	CreateRenderTargetView(m_pDevice.Get(), m_pSwapChain.Get(), &m_pRenderTargetView);
+	//CreateDeferredContext(m_pDevice.Get(), &m_pDeferredContext);
+	return true;
+}
 
+bool D3D11GraphicsContext::SetupRenderingPipeline(bool enableIndexing, bool enableSO)
+{
 	std::vector<uint8_t> vsBytecode;
 	std::vector<uint8_t> fsBytecode;
 	//std::vector<uint8_t> hsBytecode;
 	//std::vector<uint8_t> dsBytecode;
 	std::vector<uint8_t> gsBytecode;
-	SetupVertexShader("VertexShader.cso", &vsBytecode);
+	SetupVertexShader(
+		m_pDevice.Get(),
+		m_pImmediateContext.Get(), 
+		"VertexShader.cso", 
+		&vsBytecode, 
+		m_pVertexShader.GetAddressOf());
 	SetupInputAssembler(vsBytecode);
-
-	CreateIAVertexBuffer();
-	CreateSOVertexBuffers();
 	//SetupHullShader("HullShader.cso", &hsBytecode);
 	//SetupTessallator();
 	//SetupDomainShader("DomainShader.cso", &dsBytecode);
-	enableGSSO ? 
+	CreateIAVertexBuffer();
+
+	if (enableIndexing) {
+		CreateIndexBuffer();
+	}
+	else if(enableSO){
+		CreateSOVertexBuffers();
+	}
+
+	if(enableSO){
 		SetupGeometryShaderWithStreamOutput(
-			"GeometryShader.cso",
-			&gsBytecode,
 			m_pDevice.Get(),
 			m_pImmediateContext.Get(),
-			m_pSOVertexBuffer_A.GetAddressOf(),
-			&m_pGeometryShader) :
-		SetupGeometryShader("GeometryShader.cso", &gsBytecode);
+			"GeometryShader.cso",
+			&gsBytecode,
+			&m_pGeometryShader);
+	}
+	else {
+		SetupGeometryShader(
+			m_pDevice.Get(),
+			m_pImmediateContext.Get(),
+			"GeometryShader.cso", 
+			&gsBytecode,
+			m_pGeometryShader.GetAddressOf());
+	}
+
 	SetupRasterizer(
 		m_pSwapChain.Get(),
 		m_pImmediateContext.Get(),
 		&m_pRasertizerState);
-	SetupPixelShader("PixelShader.cso", &fsBytecode);
+	SetupPixelShader(
+		m_pDevice.Get(),
+		m_pImmediateContext.Get(),
+		"PixelShader.cso", 
+		&fsBytecode,
+		m_pPixelShader.GetAddressOf());
 	SetupOutputMerger(m_pSwapChain.Get(),
 		&m_pDepthStencil,
 		&m_pBlendState);
@@ -109,21 +139,27 @@ bool D3D11GraphicsContext::SetupRenderingPipeline(bool enableGSSO)
 	return true;
 }
 
-bool D3D11GraphicsContext::InitRenderingPipeline(bool enableGSSO)
+bool D3D11GraphicsContext::InitRenderingPipeline(bool enableIndexing, bool enableSO)
 {
 	m_pImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 	m_pImmediateContext->IASetVertexBuffers(0, 1, m_pIAVertexBuffer.GetAddressOf(), &stride, &offset);
+	if (enableIndexing && !enableSO) {
+		m_pImmediateContext->IASetIndexBuffer(m_pIBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	}
 	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
+	if (enableSO) {
+		m_pImmediateContext->SOSetTargets(1, m_pSOVertexBuffer_A.GetAddressOf(), &offset);
+	}
 	m_pImmediateContext->Draw(3, 0);
-	if (enableGSSO) {
-		SwapIASOVertexBuffers();
+	if (enableSO) {
+		SwapIASOVertexBuffers(enableSO);
 	}
 	return true;
 }
 
-bool D3D11GraphicsContext::TerminateRenderingPipeline()
+bool D3D11GraphicsContext::TerminateRenderingPipeline(bool enableIndexing, bool enableSO)
 {
 	m_pAdapter->Release();
 	m_pDevice->Release();
@@ -131,8 +167,13 @@ bool D3D11GraphicsContext::TerminateRenderingPipeline()
 	m_pRenderTargetView->Release();
 	m_pSwapChain->Release();
 	m_pIAVertexBuffer->Release();
-	m_pSOVertexBuffer_A->Release();
-	m_pSOVertexBuffer_B->Release();
+	if (enableIndexing) {
+		m_pIBuffer->Release();
+	}
+	if (enableSO) {
+		m_pSOVertexBuffer_A->Release();
+		m_pSOVertexBuffer_B->Release();
+	}
 	m_pVertexShader->Release();
 	m_pGeometryShader->Release();
 	m_pPixelShader->Release();
@@ -140,17 +181,17 @@ bool D3D11GraphicsContext::TerminateRenderingPipeline()
 	return true;
 }
 
-void D3D11GraphicsContext::Render(bool enableIndexed, bool enableSO, bool swapIASOBuffers)
+void D3D11GraphicsContext::Render(bool enableIndexing, bool enableSO, bool swapIASOBuffers)
 {
 	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
 	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
-	if (enableIndexed) {
+	if (enableIndexing) {
 		m_pImmediateContext->DrawIndexed(3, 0, 0);
 	}
 	else {
 		if (enableSO) {
 			if (swapIASOBuffers) {
-				SwapIASOVertexBuffers();
+				m_ReadSO_A = SwapIASOVertexBuffers(m_ReadSO_A);
 			}
 			m_pImmediateContext->DrawAuto();
 		}
@@ -161,23 +202,23 @@ void D3D11GraphicsContext::Render(bool enableIndexed, bool enableSO, bool swapIA
 	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
 }
 
-bool D3D11GraphicsContext::SwapIASOVertexBuffers()
+bool D3D11GraphicsContext::SwapIASOVertexBuffers(bool& readABuffer)
 {
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 	ID3D11Buffer* nb = NULL;
 	m_pImmediateContext->SOSetTargets(1, &nb, 0);
-	if (m_ReadSO_A) {
+	if (readABuffer) {
 		m_pImmediateContext->IASetVertexBuffers(0, 1, m_pSOVertexBuffer_A.GetAddressOf(), &stride, &offset);
 		m_pImmediateContext->SOSetTargets(1, m_pSOVertexBuffer_B.GetAddressOf(), &offset);
-		m_ReadSO_A = !m_ReadSO_A;
+		readABuffer = !readABuffer;
 	}
 	else {
 		m_pImmediateContext->IASetVertexBuffers(0, 1, m_pSOVertexBuffer_B.GetAddressOf(), &stride, &offset);
 		m_pImmediateContext->SOSetTargets(1, m_pSOVertexBuffer_A.GetAddressOf(), &offset);
-		m_ReadSO_A = !m_ReadSO_A;
+		readABuffer = !readABuffer;
 	}
-	return true;
+	return readABuffer;
 }
 
 std::vector<IDXGIAdapter*> D3D11GraphicsContext::EnumerateAdapters()
@@ -349,9 +390,9 @@ bool D3D11GraphicsContext::CreateSwapChain(IDXGISwapChain1** swapChain)
 	Microsoft::WRL::ComPtr<IDXGIOutput> pOutput;
 	m_pAdapter->EnumOutputs(0, &pOutput);
 
-	Microsoft::WRL::ComPtr<IDXGIFactory2> pFactory2;
-	DX::ThrowIfFailed(m_pAdapter->GetParent(IID_PPV_ARGS(&pFactory2)));
-	DX::ThrowIfFailed(pFactory2->CreateSwapChainForHwnd(
+	Microsoft::WRL::ComPtr<IDXGIFactory2> pFactory;
+	DX::ThrowIfFailed(m_pAdapter->GetParent(IID_PPV_ARGS(&pFactory)));
+	DX::ThrowIfFailed(pFactory->CreateSwapChainForHwnd(
 		m_pDevice.Get(),
 		m_hWnd,
 		&sd,
@@ -365,12 +406,15 @@ bool D3D11GraphicsContext::CreateSwapChain(IDXGISwapChain1** swapChain)
 	return true;
 }
 
-bool D3D11GraphicsContext::CreateRenderTargetView(ID3D11RenderTargetView** rtv)
+bool D3D11GraphicsContext::CreateRenderTargetView(
+	ID3D11Device* device,
+	IDXGISwapChain1* swapChain,
+	ID3D11RenderTargetView** rtv)
 {
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer;
-	DX::ThrowIfFailed(m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
-	
-	DX::ThrowIfFailed(m_pDevice->CreateRenderTargetView(pBackBuffer.Get(), NULL, rtv));
+	DX::ThrowIfFailed(swapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
+
+	DX::ThrowIfFailed(device->CreateRenderTargetView(pBackBuffer.Get(), NULL, rtv));
 
 	return true;
 }
@@ -454,9 +498,7 @@ bool D3D11GraphicsContext::CreateIndexBuffer()
 	srd.pSysMem = iBuf;
 	srd.SysMemPitch = 0;
 	srd.SysMemSlicePitch = 0;
-
 	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, &srd, &m_pIBuffer));
-	m_pImmediateContext->IASetIndexBuffer(m_pIBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
 	return true;
 }
@@ -509,34 +551,40 @@ bool D3D11GraphicsContext::CreateTexture()
 }
 
 bool D3D11GraphicsContext::SetupVertexShader(
+	ID3D11Device* device,
+	ID3D11DeviceContext* context,
 	std::string filePath, 
-	std::vector<uint8_t>* bytecode)
+	std::vector<uint8_t>* bytecode,
+	ID3D11VertexShader** shader)
 {
 	if (GetBytecode(filePath, bytecode)) {
-		DX::ThrowIfFailed(m_pDevice->CreateVertexShader(
+		DX::ThrowIfFailed(device->CreateVertexShader(
 			bytecode->data(),
 			bytecode->size(),
 			nullptr,
-			&m_pVertexShader));
+			shader));
 
-		m_pImmediateContext->VSSetShader(m_pVertexShader.Get(), nullptr, 0);
+		context->VSSetShader(*shader, nullptr, 0);
 		return true;
 	}
 	return false;
 }
 
 bool D3D11GraphicsContext::SetupHullShader(
+	ID3D11Device* device,
+	ID3D11DeviceContext* context,
 	std::string filePath,
-	std::vector<uint8_t>* bytecode)
+	std::vector<uint8_t>* bytecode,
+	ID3D11HullShader** shader)
 {
 	if (GetBytecode(filePath, bytecode)) {
-		DX::ThrowIfFailed(m_pDevice->CreateHullShader(
+		DX::ThrowIfFailed(device->CreateHullShader(
 			bytecode->data(),
 			bytecode->size(),
 			nullptr,
-			&m_pHullShader));
+			shader));
 
-		m_pImmediateContext->HSSetShader(m_pHullShader.Get(), nullptr, 0);
+		context->HSSetShader(*shader, nullptr, 0);
 		return true;
 	}
 	return false;
@@ -548,46 +596,51 @@ bool D3D11GraphicsContext::SetupTessallator()
 }
 
 bool D3D11GraphicsContext::SetupDomainShader(
+	ID3D11Device* device,
+	ID3D11DeviceContext* context,
 	std::string filePath,
-	std::vector<uint8_t>* bytecode)
+	std::vector<uint8_t>* bytecode,
+	ID3D11DomainShader** shader)
 {
 	if (GetBytecode(filePath, bytecode)) {
-		DX::ThrowIfFailed(m_pDevice->CreateDomainShader(
+		DX::ThrowIfFailed(device->CreateDomainShader(
 			bytecode->data(),
 			bytecode->size(),
 			nullptr,
-			&m_pDomainShader));
+			shader));
 
-		m_pImmediateContext->DSSetShader(m_pDomainShader.Get(), nullptr, 0);
+		context->DSSetShader(*shader, nullptr, 0);
 		return true;
 	}
 	return false;
 }
 
 bool D3D11GraphicsContext::SetupGeometryShader(
+	ID3D11Device* device,
+	ID3D11DeviceContext* context,
 	std::string filePath,
-	std::vector<uint8_t>* bytecode)
+	std::vector<uint8_t>* bytecode,
+	ID3D11GeometryShader** shader)
 {
 	if (GetBytecode(filePath, bytecode)) {
-		DX::ThrowIfFailed(m_pDevice->CreateGeometryShader(
+		DX::ThrowIfFailed(device->CreateGeometryShader(
 			bytecode->data(),
 			bytecode->size(),
 			nullptr,
-			&m_pGeometryShader));
+			shader));
 
-		m_pImmediateContext->GSSetShader(m_pGeometryShader.Get(), nullptr, 0);
+		context->GSSetShader(*shader, nullptr, 0);
 		return true;
 	}
 	return false;
 }
 
 bool D3D11GraphicsContext::SetupGeometryShaderWithStreamOutput(
-	std::string filePath,
-	std::vector<uint8_t>* bytecode,
 	ID3D11Device* device,
 	ID3D11DeviceContext* context,
-	ID3D11Buffer** buffer,
-	ID3D11GeometryShader** geometryShader)
+	std::string filePath,
+	std::vector<uint8_t>* bytecode,
+	ID3D11GeometryShader** shader)
 {
 	if (GetBytecode(filePath, bytecode)) {
 		D3D11_SO_DECLARATION_ENTRY soEntries[2];
@@ -615,10 +668,8 @@ bool D3D11GraphicsContext::SetupGeometryShaderWithStreamOutput(
 			0,
 			0,
 			NULL,
-			geometryShader));
-		context->GSSetShader(*geometryShader, nullptr, 0);
-		UINT offset = 0;
-		context->SOSetTargets(1, buffer, &offset);
+			shader));
+		context->GSSetShader(*shader, nullptr, 0);
 	}
 
 	return true;
@@ -669,17 +720,20 @@ bool D3D11GraphicsContext::SetupRasterizer(
 }
 
 bool D3D11GraphicsContext::SetupPixelShader(
+	ID3D11Device* device,
+	ID3D11DeviceContext* context,
 	std::string filePath, 
-	std::vector<uint8_t>* bytecode)
+	std::vector<uint8_t>* bytecode,
+	ID3D11PixelShader** shader)
 {
 	if (GetBytecode(filePath, bytecode)) {
-		DX::ThrowIfFailed(m_pDevice->CreatePixelShader(
+		DX::ThrowIfFailed(device->CreatePixelShader(
 			bytecode->data(),
 			bytecode->size(),
 			nullptr,
-			&m_pPixelShader));
+			shader));
 
-		m_pImmediateContext->PSSetShader(m_pPixelShader.Get(), nullptr, 0);
+		context->PSSetShader(*shader, nullptr, 0);
 
 		return true;
 	}
