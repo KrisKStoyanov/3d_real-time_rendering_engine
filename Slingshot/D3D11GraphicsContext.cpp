@@ -11,13 +11,13 @@ D3D11GraphicsContext::~D3D11GraphicsContext()
 
 void D3D11GraphicsContext::OnCreate(HWND hwnd)
 {
-	if (SetupRenderingPipeline()) {
+	if (SetupRenderingPipeline(m_EnableSO)) {
 		//Setup interop HPS extension
 		//m_pDeviceInteropContext = new HC::D3D11DeviceInteropContext();
 		//HC::InvokeRenderKernel(m_pDeviceInteropContext->m_ScreenBuffer, 1280, 720);	
 		
 		//RecordCommandList(m_pDeferredContext.Get(), &m_pCommandList);
-		InitRenderingPipeline();
+		InitRenderingPipeline(m_EnableSO);
 	}
 }
 
@@ -28,9 +28,8 @@ void D3D11GraphicsContext::OnDestroy()
 
 void D3D11GraphicsContext::OnPaint()
 {
-	//Render();
-	//RenderIndexed();
-	RenderSO();
+	//Implement Effects to stop preemptive GS transformations
+	Render(m_RenderIndexed, m_EnableSO, m_SwapIASOBuffers);
 }
 
 void D3D11GraphicsContext::OnResize()
@@ -69,7 +68,7 @@ void D3D11GraphicsContext::CaptureCursor()
 	}
 }
 
-bool D3D11GraphicsContext::SetupRenderingPipeline()
+bool D3D11GraphicsContext::SetupRenderingPipeline(bool enableGSSO)
 {
 	CreateDevice(&m_pDevice, &m_pImmediateContext);
 	CreateSwapChain(&m_pSwapChain);
@@ -89,13 +88,15 @@ bool D3D11GraphicsContext::SetupRenderingPipeline()
 	//SetupHullShader("HullShader.cso", &hsBytecode);
 	//SetupTessallator();
 	//SetupDomainShader("DomainShader.cso", &dsBytecode);
-	SetupGeometryShaderWithStreamOutput(
-		"GeometryShader.cso",
-		&gsBytecode,
-		m_pDevice.Get(),
-		m_pImmediateContext.Get(),
-		m_pSOVertexBuffer_A.GetAddressOf(),
-		&m_pGeometryShader);
+	enableGSSO ? 
+		SetupGeometryShaderWithStreamOutput(
+			"GeometryShader.cso",
+			&gsBytecode,
+			m_pDevice.Get(),
+			m_pImmediateContext.Get(),
+			m_pSOVertexBuffer_A.GetAddressOf(),
+			&m_pGeometryShader) :
+		SetupGeometryShader("GeometryShader.cso", &gsBytecode);
 	SetupRasterizer(
 		m_pSwapChain.Get(),
 		m_pImmediateContext.Get(),
@@ -108,7 +109,7 @@ bool D3D11GraphicsContext::SetupRenderingPipeline()
 	return true;
 }
 
-bool D3D11GraphicsContext::InitRenderingPipeline()
+bool D3D11GraphicsContext::InitRenderingPipeline(bool enableGSSO)
 {
 	m_pImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	UINT stride = sizeof(Vertex);
@@ -116,6 +117,9 @@ bool D3D11GraphicsContext::InitRenderingPipeline()
 	m_pImmediateContext->IASetVertexBuffers(0, 1, m_pIAVertexBuffer.GetAddressOf(), &stride, &offset);
 	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
 	m_pImmediateContext->Draw(3, 0);
+	if (enableGSSO) {
+		SwapIASOVertexBuffers();
+	}
 	return true;
 }
 
@@ -136,28 +140,24 @@ bool D3D11GraphicsContext::TerminateRenderingPipeline()
 	return true;
 }
 
-void D3D11GraphicsContext::Render()
+void D3D11GraphicsContext::Render(bool enableIndexed, bool enableSO, bool swapIASOBuffers)
 {
 	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
 	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
-	m_pImmediateContext->Draw(3, 0);
-	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
-}
-
-void D3D11GraphicsContext::RenderIndexed()
-{
-	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
-	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
-	m_pImmediateContext->DrawIndexed(3, 0, 0);
-	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
-}
-
-void D3D11GraphicsContext::RenderSO()
-{
-	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
-	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
-	SwapIASOVertexBuffers();
-	m_pImmediateContext->DrawAuto();
+	if (enableIndexed) {
+		m_pImmediateContext->DrawIndexed(3, 0, 0);
+	}
+	else {
+		if (enableSO) {
+			if (swapIASOBuffers) {
+				SwapIASOVertexBuffers();
+			}
+			m_pImmediateContext->DrawAuto();
+		}
+		else {
+			m_pImmediateContext->Draw(3, 0);
+		}
+	}
 	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
 }
 

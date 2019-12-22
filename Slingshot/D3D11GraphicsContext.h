@@ -33,12 +33,10 @@ public:
 	virtual void OnMouseMove(int pixelX, int pixelY, DWORD flags);
 	void CaptureCursor();
 
-	bool SetupRenderingPipeline();
-	bool InitRenderingPipeline();
+	bool SetupRenderingPipeline(bool enableGSSO = false);
+	bool InitRenderingPipeline(bool enableGSSO = false);
 	bool TerminateRenderingPipeline();
-	void Render();
-	void RenderIndexed();
-	void RenderSO();
+	void Render(bool enableIndexed = true, bool enableSO = false, bool swapIASOBuffers = false);
 	bool SwapIASOVertexBuffers();
 
 	bool CreateDevice(ID3D11Device** device, ID3D11DeviceContext** context);
@@ -91,7 +89,14 @@ public:
 		ID3D11Texture2D** depthStencil, 
 		ID3D11BlendState** blendState);
 
+	//Window behaviour:
 	bool m_CaptureCursor = false;
+
+	//Pipeline behaviour:
+	bool m_RenderSO = true;
+	bool m_RenderIndexed = false;
+	bool m_EnableSO = true;
+	bool m_SwapIASOBuffers = false;
 	bool m_ReadSO_A = true;
 	const float m_ClearColor[4] = { 1.0f, 0.5f, 0.32f, 1.0f };
 
