@@ -15,7 +15,7 @@
 class D3D12GraphicsContext : public GraphicsContext
 {
 public:
-	D3D12GraphicsContext();
+	D3D12GraphicsContext(HWND hwnd);
 	~D3D12GraphicsContext();
 
 	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);

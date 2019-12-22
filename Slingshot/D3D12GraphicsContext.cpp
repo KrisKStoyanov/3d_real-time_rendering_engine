@@ -1,7 +1,7 @@
 #include "D3D12GraphicsContext.h"
 
-D3D12GraphicsContext::D3D12GraphicsContext() {
-
+D3D12GraphicsContext::D3D12GraphicsContext(HWND hwnd) {
+	m_hWnd = hwnd;
 }
 
 D3D12GraphicsContext::~D3D12GraphicsContext()

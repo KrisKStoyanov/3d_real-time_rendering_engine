@@ -24,13 +24,13 @@ LRESULT CALLBACK SetupProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		GC* gcTag = reinterpret_cast<GC*>(pCreate->lpCreateParams);
 		switch (*gcTag) {
 		case GC::D3D11:
-			pGC = new D3D11GraphicsContext();
+			pGC = new D3D11GraphicsContext(hwnd);
 			break;
 		case GC::D3D12:
-			pGC = new D3D12GraphicsContext();
+			pGC = new D3D12GraphicsContext(hwnd);
 			break;
 		default:
-			pGC = new D3D11GraphicsContext();
+			pGC = new D3D11GraphicsContext(hwnd);
 			break;
 		}
 
@@ -42,9 +42,7 @@ LRESULT CALLBACK SetupProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			reinterpret_cast<LONG_PTR>(UpdateProc));
 		pGC->OnCreate(hwnd);
 	}
-	else {
-		return DefWindowProcW(hwnd, uMsg, wParam, lParam);
-	}
+	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
 BOOL Window::Create(

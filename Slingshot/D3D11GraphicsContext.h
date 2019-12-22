@@ -16,7 +16,7 @@
 class D3D11GraphicsContext : public GraphicsContext
 {
 public:
-	D3D11GraphicsContext();
+	D3D11GraphicsContext(HWND hwnd);
 	~D3D11GraphicsContext();
 
 	std::vector<IDXGIAdapter*> EnumerateAdapters();
@@ -33,6 +33,14 @@ public:
 	virtual void OnMouseMove(int pixelX, int pixelY, DWORD flags);
 	void CaptureCursor();
 
+	bool SetupRenderingPipeline();
+	bool InitRenderingPipeline();
+	bool TerminateRenderingPipeline();
+	void Render();
+	void RenderIndexed();
+	void RenderSO();
+	bool SwapIASOVertexBuffers();
+
 	bool CreateDevice(ID3D11Device** device, ID3D11DeviceContext** context);
 	bool CreateSwapChain(IDXGISwapChain1** swapChain);
 	bool CreateRenderTargetView(ID3D11RenderTargetView** rtv);
@@ -41,7 +49,9 @@ public:
 	bool RecordCommandList(ID3D11DeviceContext* defContext, ID3D11CommandList** commandList);
 	bool ExecuteCommandList(ID3D11DeviceContext* imContext, ID3D11CommandList* commandList);
 
-	bool CreateVertexBuffer();
+	bool CreateIAVertexBuffer();
+	bool CreateSOVertexBuffers();
+
 	bool CreateIndexBuffer();
 	bool CreateConstantBuffer();
 	
@@ -62,7 +72,13 @@ public:
 	bool SetupGeometryShader(
 		std::string filePath,
 		std::vector<uint8_t>* bytecode);
-	bool SetupStreamOutput();
+	bool SetupGeometryShaderWithStreamOutput(
+		std::string filePath,
+		std::vector<uint8_t>* bytecode,
+		ID3D11Device* device,
+		ID3D11DeviceContext* context,
+		ID3D11Buffer** buffer,
+		ID3D11GeometryShader** geometryShader);
 	bool SetupRasterizer(
 		IDXGISwapChain1* swapChain, 
 		ID3D11DeviceContext* context,
@@ -75,8 +91,8 @@ public:
 		ID3D11Texture2D** depthStencil, 
 		ID3D11BlendState** blendState);
 
-	HWND m_hWnd;
 	bool m_CaptureCursor = false;
+	bool m_ReadSO_A = true;
 	const float m_ClearColor[4] = { 1.0f, 0.5f, 0.32f, 1.0f };
 
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
@@ -85,10 +101,13 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pDeferredContext;
 	Microsoft::WRL::ComPtr<ID3D11CommandList> m_pCommandList;
 
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIAVertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pSOVertexBuffer_A;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pSOVertexBuffer_B;
+
 	Microsoft::WRL::ComPtr<IDXGIAdapter> m_pAdapter;
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> m_pSwapChain;
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pVBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pCBuffer;
 
@@ -110,13 +129,15 @@ public:
 	//Output Merger
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_pDepthStencil;
 	Microsoft::WRL::ComPtr<ID3D11BlendState> m_pBlendState;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_pDepthStencilState;
 	//--------------------------------------------------
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_pTexture2D;
 	Microsoft::WRL::ComPtr<ID3D11Resource> m_pTexture;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_pTextureView;
 
-	HC::D3D11DeviceInteropContext* m_pDeviceInteropContext;
+	std::unique_ptr<HC::D3D11DeviceInteropContext> m_pDeviceInteropContext;
 private:
+	HWND m_hWnd;
 };
 

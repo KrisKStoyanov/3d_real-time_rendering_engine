@@ -1,7 +1,8 @@
 #include "D3D11GraphicsContext.h"
 
-D3D11GraphicsContext::D3D11GraphicsContext()
+D3D11GraphicsContext::D3D11GraphicsContext(HWND hwnd)
 {
+	m_hWnd = hwnd;
 }
 
 D3D11GraphicsContext::~D3D11GraphicsContext()
@@ -10,63 +11,26 @@ D3D11GraphicsContext::~D3D11GraphicsContext()
 
 void D3D11GraphicsContext::OnCreate(HWND hwnd)
 {
-	m_hWnd = hwnd;
-	if (CreateDevice(&m_pDevice, &m_pImmediateContext)) {
-		CreateSwapChain(&m_pSwapChain);
-		CreateRenderTargetView(&m_pRenderTargetView);
-		CreateDeferredContext(m_pDevice.Get(), &m_pDeferredContext);
-
-		//Setup rendering pipeline:
-		std::vector<uint8_t> vsBytecode;
-		std::vector<uint8_t> fsBytecode;
-		//std::vector<uint8_t> hsBytecode;
-		//std::vector<uint8_t> dsBytecode;
-		std::vector<uint8_t> gsBytecode;
-		SetupVertexShader("VertexShader.cso", &vsBytecode);
-		SetupInputAssembler(vsBytecode);
-		//SetupHullShader("HullShader.cso", &hsBytecode);
-		//SetupTessallator();
-		//SetupDomainShader("DomainShader.cso", &dsBytecode);
-		SetupGeometryShader("GeometryShader.cso", &gsBytecode);
-		SetupRasterizer(
-			m_pSwapChain.Get(), 
-			m_pImmediateContext.Get(),
-			&m_pRasertizerState);
-		SetupPixelShader("PixelShader.cso", &fsBytecode);
-		SetupOutputMerger(m_pSwapChain.Get(),
-			&m_pDepthStencil,
-			&m_pBlendState);
-
-		CreateVertexBuffer();
-		CreateIndexBuffer();
-
-		RecordCommandList(m_pDeferredContext.Get(), &m_pCommandList);
+	if (SetupRenderingPipeline()) {
+		//Setup interop HPS extension
+		//m_pDeviceInteropContext = new HC::D3D11DeviceInteropContext();
+		//HC::InvokeRenderKernel(m_pDeviceInteropContext->m_ScreenBuffer, 1280, 720);	
+		
+		//RecordCommandList(m_pDeferredContext.Get(), &m_pCommandList);
+		InitRenderingPipeline();
 	}
-
-	//Setup interop HPS extension
-	//m_pDeviceInteropContext = new HC::D3D11DeviceInteropContext();
-	//HC::InvokeRenderKernel(m_pDeviceInteropContext->m_ScreenBuffer, 1280, 720);
 }
 
 void D3D11GraphicsContext::OnDestroy()
 {
-	m_pAdapter->Release();
-	m_pDevice->Release();
-	m_pImmediateContext->Release();
-	m_pRenderTargetView->Release();
-	m_pSwapChain->Release();
-	m_pVertexShader->Release();
-	m_pPixelShader->Release();
-	m_pInputLayout->Release();
+	TerminateRenderingPipeline();
 }
 
 void D3D11GraphicsContext::OnPaint()
 {
-	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
-	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
-
-	m_pImmediateContext->DrawIndexed(3, 0, 0);
-	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
+	//Render();
+	//RenderIndexed();
+	RenderSO();
 }
 
 void D3D11GraphicsContext::OnResize()
@@ -103,6 +67,117 @@ void D3D11GraphicsContext::CaptureCursor()
 	else {
 		ClipCursor(NULL);
 	}
+}
+
+bool D3D11GraphicsContext::SetupRenderingPipeline()
+{
+	CreateDevice(&m_pDevice, &m_pImmediateContext);
+	CreateSwapChain(&m_pSwapChain);
+	CreateRenderTargetView(&m_pRenderTargetView);
+	CreateDeferredContext(m_pDevice.Get(), &m_pDeferredContext);
+
+	std::vector<uint8_t> vsBytecode;
+	std::vector<uint8_t> fsBytecode;
+	//std::vector<uint8_t> hsBytecode;
+	//std::vector<uint8_t> dsBytecode;
+	std::vector<uint8_t> gsBytecode;
+	SetupVertexShader("VertexShader.cso", &vsBytecode);
+	SetupInputAssembler(vsBytecode);
+
+	CreateIAVertexBuffer();
+	CreateSOVertexBuffers();
+	//SetupHullShader("HullShader.cso", &hsBytecode);
+	//SetupTessallator();
+	//SetupDomainShader("DomainShader.cso", &dsBytecode);
+	SetupGeometryShaderWithStreamOutput(
+		"GeometryShader.cso",
+		&gsBytecode,
+		m_pDevice.Get(),
+		m_pImmediateContext.Get(),
+		m_pSOVertexBuffer_A.GetAddressOf(),
+		&m_pGeometryShader);
+	SetupRasterizer(
+		m_pSwapChain.Get(),
+		m_pImmediateContext.Get(),
+		&m_pRasertizerState);
+	SetupPixelShader("PixelShader.cso", &fsBytecode);
+	SetupOutputMerger(m_pSwapChain.Get(),
+		&m_pDepthStencil,
+		&m_pBlendState);
+
+	return true;
+}
+
+bool D3D11GraphicsContext::InitRenderingPipeline()
+{
+	m_pImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	m_pImmediateContext->IASetVertexBuffers(0, 1, m_pIAVertexBuffer.GetAddressOf(), &stride, &offset);
+	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
+	m_pImmediateContext->Draw(3, 0);
+	return true;
+}
+
+bool D3D11GraphicsContext::TerminateRenderingPipeline()
+{
+	m_pAdapter->Release();
+	m_pDevice->Release();
+	m_pImmediateContext->Release();
+	m_pRenderTargetView->Release();
+	m_pSwapChain->Release();
+	m_pIAVertexBuffer->Release();
+	m_pSOVertexBuffer_A->Release();
+	m_pSOVertexBuffer_B->Release();
+	m_pVertexShader->Release();
+	m_pGeometryShader->Release();
+	m_pPixelShader->Release();
+	m_pInputLayout->Release();
+	return true;
+}
+
+void D3D11GraphicsContext::Render()
+{
+	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
+	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
+	m_pImmediateContext->Draw(3, 0);
+	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
+}
+
+void D3D11GraphicsContext::RenderIndexed()
+{
+	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
+	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
+	m_pImmediateContext->DrawIndexed(3, 0, 0);
+	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
+}
+
+void D3D11GraphicsContext::RenderSO()
+{
+	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
+	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
+	SwapIASOVertexBuffers();
+	m_pImmediateContext->DrawAuto();
+	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
+}
+
+bool D3D11GraphicsContext::SwapIASOVertexBuffers()
+{
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	ID3D11Buffer* nb = NULL;
+	m_pImmediateContext->SOSetTargets(1, &nb, 0);
+	if (m_ReadSO_A) {
+		m_pImmediateContext->IASetVertexBuffers(0, 1, m_pSOVertexBuffer_A.GetAddressOf(), &stride, &offset);
+		m_pImmediateContext->SOSetTargets(1, m_pSOVertexBuffer_B.GetAddressOf(), &offset);
+		m_ReadSO_A = !m_ReadSO_A;
+	}
+	else {
+		m_pImmediateContext->IASetVertexBuffers(0, 1, m_pSOVertexBuffer_B.GetAddressOf(), &stride, &offset);
+		m_pImmediateContext->SOSetTargets(1, m_pSOVertexBuffer_A.GetAddressOf(), &offset);
+		m_ReadSO_A = !m_ReadSO_A;
+	}
+	return true;
 }
 
 std::vector<IDXGIAdapter*> D3D11GraphicsContext::EnumerateAdapters()
@@ -294,9 +369,9 @@ bool D3D11GraphicsContext::CreateRenderTargetView(ID3D11RenderTargetView** rtv)
 {
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer;
 	DX::ThrowIfFailed(m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
-
-	DX::ThrowIfFailed(m_pDevice->CreateRenderTargetView(pBackBuffer.Get(), NULL, rtv));
 	
+	DX::ThrowIfFailed(m_pDevice->CreateRenderTargetView(pBackBuffer.Get(), NULL, rtv));
+
 	return true;
 }
 
@@ -320,35 +395,46 @@ bool D3D11GraphicsContext::ExecuteCommandList(ID3D11DeviceContext* context, ID3D
 	return true;
 }
 
-bool D3D11GraphicsContext::CreateVertexBuffer()
+bool D3D11GraphicsContext::CreateIAVertexBuffer()
 {
-	Vertex* vBuf = new Vertex[3];
+	Vertex* vb = new Vertex[3];
 
-	vBuf[0].position = DirectX::XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f);
-	vBuf[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	vb[0].position = DirectX::XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f);
+	vb[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
-	vBuf[1].position = DirectX::XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f);
-	vBuf[1].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	vb[1].position = DirectX::XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f);
+	vb[1].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 
-	vBuf[2].position = DirectX::XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f);
-	vBuf[2].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	vb[2].position = DirectX::XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f);
+	vb[2].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
 
 	D3D11_BUFFER_DESC bd = {};
 	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(Vertex) * 3;
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.ByteWidth = sizeof(Vertex) * 9; //Vertex Size: 32 bytes - Default Count: 3, GS Output: 9
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_STREAM_OUTPUT;
 	bd.CPUAccessFlags = 0;
 	bd.MiscFlags = 0;
-
+	bd.StructureByteStride = 0;
 	D3D11_SUBRESOURCE_DATA srd = {};
-	srd.pSysMem = vBuf;
+	srd.pSysMem = vb;
 	srd.SysMemPitch = 0;
 	srd.SysMemSlicePitch = 0;
+	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, &srd, &m_pIAVertexBuffer));
 
-	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, &srd, &m_pVBuffer));
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	m_pImmediateContext->IASetVertexBuffers(0, 1, m_pVBuffer.GetAddressOf(), &stride, &offset);
+	return true;
+}
+
+bool D3D11GraphicsContext::CreateSOVertexBuffers()
+{
+	D3D11_BUFFER_DESC bd = {};
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(Vertex) * 9; //Vertex Size: 32 bytes - Default Count: 3, GS Output: 9
+	bd.BindFlags =  D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_STREAM_OUTPUT;
+	bd.CPUAccessFlags = 0;
+	bd.MiscFlags = 0;
+	bd.StructureByteStride = 0;
+	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, nullptr, &m_pSOVertexBuffer_A));
+	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, nullptr, &m_pSOVertexBuffer_B));
 
 	return true;
 }
@@ -495,9 +581,47 @@ bool D3D11GraphicsContext::SetupGeometryShader(
 	return false;
 }
 
-bool D3D11GraphicsContext::SetupStreamOutput()
+bool D3D11GraphicsContext::SetupGeometryShaderWithStreamOutput(
+	std::string filePath,
+	std::vector<uint8_t>* bytecode,
+	ID3D11Device* device,
+	ID3D11DeviceContext* context,
+	ID3D11Buffer** buffer,
+	ID3D11GeometryShader** geometryShader)
 {
-	return false;
+	if (GetBytecode(filePath, bytecode)) {
+		D3D11_SO_DECLARATION_ENTRY soEntries[2];
+
+		soEntries[0].Stream = 0;
+		soEntries[0].SemanticName = "SV_POSITION";
+		soEntries[0].SemanticIndex = 0;
+		soEntries[0].StartComponent = 0;
+		soEntries[0].ComponentCount = 4;
+		soEntries[0].OutputSlot = 0;
+
+		soEntries[1].Stream = 0;
+		soEntries[1].SemanticName = "COLOR";
+		soEntries[1].SemanticIndex = 0;
+		soEntries[1].StartComponent = 0;
+		soEntries[1].ComponentCount = 4;
+		soEntries[1].OutputSlot = 0;
+
+		DX::ThrowIfFailed(device->CreateGeometryShaderWithStreamOutput(
+			bytecode->data(),
+			bytecode->size(),
+			soEntries,
+			ARRAYSIZE(soEntries),
+			NULL,
+			0,
+			0,
+			NULL,
+			geometryShader));
+		context->GSSetShader(*geometryShader, nullptr, 0);
+		UINT offset = 0;
+		context->SOSetTargets(1, buffer, &offset);
+	}
+
+	return true;
 }
 
 bool D3D11GraphicsContext::SetupRasterizer(
@@ -585,18 +709,40 @@ bool D3D11GraphicsContext::SetupOutputMerger(
 		}
 	}
 
-	D3D11_TEXTURE2D_DESC dsd = {};
-	dsd.Width = scbbd.Width;
-	dsd.Height = scbbd.Height;
-	dsd.MipLevels = 1;
-	dsd.ArraySize = 1;
-	dsd.Format = stencilFormats[stencilFormatId];
-	dsd.SampleDesc = { 1, 0 };
-	dsd.Usage = D3D11_USAGE_DEFAULT;
-	dsd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	dsd.CPUAccessFlags = 0;
-	dsd.MiscFlags = 0;
-	DX::ThrowIfFailed(m_pDevice->CreateTexture2D(&dsd, NULL, depthStencil));
+	D3D11_TEXTURE2D_DESC dd = {};
+	dd.Width = scbbd.Width;
+	dd.Height = scbbd.Height;
+	dd.MipLevels = 1;
+	dd.ArraySize = 1;
+	dd.Format = stencilFormats[stencilFormatId];
+	dd.SampleDesc = { 1, 0 };
+	dd.Usage = D3D11_USAGE_DEFAULT;
+	dd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	dd.CPUAccessFlags = 0;
+	dd.MiscFlags = 0;
+	DX::ThrowIfFailed(m_pDevice->CreateTexture2D(&dd, NULL, depthStencil));
+
+	D3D11_DEPTH_STENCIL_DESC dsd = {};
+	dsd.DepthEnable = true;
+	dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dsd.DepthFunc = D3D11_COMPARISON_LESS;
+	
+	dsd.StencilEnable = true;
+	dsd.StencilReadMask = 0xFF;
+	dsd.StencilWriteMask = 0xFF;
+	
+	dsd.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	dsd.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	dsd.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	dsd.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	dsd.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	dsd.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	dsd.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	dsd.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	DX::ThrowIfFailed(m_pDevice->CreateDepthStencilState(&dsd, &m_pDepthStencilState));
+	m_pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState.Get(), 1);
 
 	D3D11_BLEND_DESC bd = {};
 	bd.RenderTarget[0].BlendEnable = FALSE;
@@ -634,8 +780,6 @@ bool D3D11GraphicsContext::SetupInputAssembler(std::vector<uint8_t> vsBytecode)
 		vsBytecode.data(), vsBytecode.size(),
 		&m_pInputLayout);
 	m_pImmediateContext->IASetInputLayout(m_pInputLayout.Get());
-
-	m_pImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	return true;
 }
