@@ -6,7 +6,7 @@ struct GS_COALESCENT
     float4 color : COLOR0;
 };
 
-[maxvertexcount(27)]
+[maxvertexcount(9)]
 void main(
 	triangle GS_COALESCENT input[3],
 	inout TriangleStream<GS_COALESCENT> gsStream

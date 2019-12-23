@@ -11,13 +11,23 @@ D3D11GraphicsContext::~D3D11GraphicsContext()
 
 void D3D11GraphicsContext::OnCreate(HWND hwnd)
 {
-	if (SetupD3D11Context()) {
+	if (SetupD3D11()) {
 		if (SetupRenderingPipeline(m_EnableIndexing, m_EnableSO)) {
+			SetupContext(
+				m_pImmediateContext.Get(),
+				m_pSwapChain.Get(),
+				m_pVertexShader.GetAddressOf(),
+				m_pInputLayout.GetAddressOf(),
+				m_pGeometryShader.GetAddressOf(),
+				m_pRasertizerState.GetAddressOf(),
+				m_pPixelShader.GetAddressOf(),
+				m_pDepthStencilState.GetAddressOf(),
+				m_pBlendState.GetAddressOf());
+
 			//Setup interop HPS extension
 			//m_pDeviceInteropContext = new HC::D3D11DeviceInteropContext();
 			//HC::InvokeRenderKernel(m_pDeviceInteropContext->m_ScreenBuffer, 1280, 720);	
 
-			//RecordCommandList(m_pDeferredContext.Get(), &m_pCommandList);
 			InitRenderingPipeline(m_EnableIndexing, m_EnableSO);
 		}
 	}
@@ -30,8 +40,7 @@ void D3D11GraphicsContext::OnDestroy()
 
 void D3D11GraphicsContext::OnPaint()
 {
-	//Implement Effects to stop preemptive GS transformations during SO rendering
-	Render(m_EnableIndexing, m_EnableSO, m_SwapIASOBuffers);
+	Render();
 }
 
 void D3D11GraphicsContext::OnResize()
@@ -70,12 +79,91 @@ void D3D11GraphicsContext::CaptureCursor()
 	}
 }
 
-bool D3D11GraphicsContext::SetupD3D11Context()
+bool D3D11GraphicsContext::SetupD3D11()
 {
-	CreateDevice(&m_pDevice, &m_pImmediateContext);
-	CreateSwapChain(&m_pSwapChain);
+	CreateDevice(&m_pAdapter, &m_pDevice, &m_pImmediateContext);
+	CreateSwapChain(m_pAdapter.Get(), &m_pSwapChain);
 	CreateRenderTargetView(m_pDevice.Get(), m_pSwapChain.Get(), &m_pRenderTargetView);
-	//CreateDeferredContext(m_pDevice.Get(), &m_pDeferredContext);
+	CreateDeferredContext(m_pDevice.Get(), &m_pDeferredContext);
+	return true;
+}
+
+bool D3D11GraphicsContext::SetupContext(
+	ID3D11DeviceContext* context,
+	IDXGISwapChain1* swapChain,
+	ID3D11VertexShader** vs,
+	ID3D11InputLayout** il,
+	ID3D11GeometryShader** gs,
+	ID3D11RasterizerState** rs,
+	ID3D11PixelShader** ps,
+	ID3D11DepthStencilState** dss,
+	ID3D11BlendState** bs)
+{
+	context->VSSetShader(*vs, nullptr, 0);
+	context->IASetInputLayout(*il);
+	//context->HSSetShader(*shader, nullptr, 0); //Pending implementation
+	//context->DSSetShader(*shader, nullptr, 0); //Pending implementation
+	context->GSSetShader(*gs, nullptr, 0);
+	context->RSSetState(*rs);
+	context->PSSetShader(*ps, nullptr, 0);
+	context->OMSetDepthStencilState(*dss, 1);
+	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	UINT sampleMask = 0xffffffff;
+	context->OMSetBlendState(*bs, blendFactor, sampleMask);
+
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer;
+	swapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
+	D3D11_TEXTURE2D_DESC backBufferDesc = {};
+	pBackBuffer->GetDesc(&backBufferDesc);
+
+	SetContextRSViewports(context, backBufferDesc);
+	SetContextRSScissorRect(context, backBufferDesc);
+
+	return true;
+}
+
+bool D3D11GraphicsContext::InitContext(bool enableIndexing, bool enableSO)
+{
+	SetupContext(
+		m_pDeferredContext.Get(),
+		m_pSwapChain.Get(),
+		m_pVertexShader.GetAddressOf(),
+		m_pInputLayout.GetAddressOf(),
+		m_pGeometryShader.GetAddressOf(),
+		m_pRasertizerState.GetAddressOf(),
+		m_pPixelShader.GetAddressOf(),
+		m_pDepthStencilState.GetAddressOf(),
+		m_pBlendState.GetAddressOf());
+
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+
+	m_pDeferredContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
+	m_pDeferredContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	m_pDeferredContext->IASetVertexBuffers(0, 1, m_pIAVertexBuffer.GetAddressOf(), &stride, &offset);
+	if (enableSO && !enableIndexing) {
+		m_pDeferredContext->SOSetTargets(1, m_pSOVertexBuffer_A.GetAddressOf(), &offset);
+	}
+	else if (enableIndexing && !enableSO) {
+		m_pDeferredContext->IASetIndexBuffer(m_pIBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	}
+
+	//Command Setup
+	m_pDeferredContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
+	if (enableIndexing && !enableSO) {
+		m_pDeferredContext->DrawIndexed(3, 0, 0);
+	}
+	else if (enableSO) {
+		m_pDeferredContext->Draw(3, 0);
+		//m_ReadSO_A = SwapIASOVertexBuffers(m_pDeferredContext.Get(), m_ReadSO_A);
+		//m_pDeferredContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
+		//m_pDeferredContext->DrawAuto();
+		//DX::ThrowIfFailed(m_pDeferredContext->FinishCommandList(FALSE, &m_pCommandList));
+	}
+	else {
+		m_pDeferredContext->Draw(3, 0);
+	}
+	DX::ThrowIfFailed(m_pDeferredContext->FinishCommandList(FALSE, &m_pCommandList));
 	return true;
 }
 
@@ -88,11 +176,13 @@ bool D3D11GraphicsContext::SetupRenderingPipeline(bool enableIndexing, bool enab
 	std::vector<uint8_t> gsBytecode;
 	SetupVertexShader(
 		m_pDevice.Get(),
-		m_pImmediateContext.Get(), 
 		"VertexShader.cso", 
 		&vsBytecode, 
 		m_pVertexShader.GetAddressOf());
-	SetupInputAssembler(vsBytecode);
+	SetupInputAssembler(
+		m_pDevice.Get(), 
+		vsBytecode,
+		m_pInputLayout.GetAddressOf());
 	//SetupHullShader("HullShader.cso", &hsBytecode);
 	//SetupTessallator();
 	//SetupDomainShader("DomainShader.cso", &dsBytecode);
@@ -108,7 +198,6 @@ bool D3D11GraphicsContext::SetupRenderingPipeline(bool enableIndexing, bool enab
 	if(enableSO){
 		SetupGeometryShaderWithStreamOutput(
 			m_pDevice.Get(),
-			m_pImmediateContext.Get(),
 			"GeometryShader.cso",
 			&gsBytecode,
 			&m_pGeometryShader);
@@ -116,7 +205,6 @@ bool D3D11GraphicsContext::SetupRenderingPipeline(bool enableIndexing, bool enab
 	else {
 		SetupGeometryShader(
 			m_pDevice.Get(),
-			m_pImmediateContext.Get(),
 			"GeometryShader.cso", 
 			&gsBytecode,
 			m_pGeometryShader.GetAddressOf());
@@ -124,15 +212,15 @@ bool D3D11GraphicsContext::SetupRenderingPipeline(bool enableIndexing, bool enab
 
 	SetupRasterizer(
 		m_pSwapChain.Get(),
-		m_pImmediateContext.Get(),
 		&m_pRasertizerState);
 	SetupPixelShader(
 		m_pDevice.Get(),
-		m_pImmediateContext.Get(),
 		"PixelShader.cso", 
 		&fsBytecode,
 		m_pPixelShader.GetAddressOf());
-	SetupOutputMerger(m_pSwapChain.Get(),
+	SetupOutputMerger(
+		m_pDevice.Get(), 
+		m_pSwapChain.Get(),
 		&m_pDepthStencil,
 		&m_pBlendState);
 
@@ -141,21 +229,9 @@ bool D3D11GraphicsContext::SetupRenderingPipeline(bool enableIndexing, bool enab
 
 bool D3D11GraphicsContext::InitRenderingPipeline(bool enableIndexing, bool enableSO)
 {
-	m_pImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	m_pImmediateContext->IASetVertexBuffers(0, 1, m_pIAVertexBuffer.GetAddressOf(), &stride, &offset);
-	if (enableIndexing && !enableSO) {
-		m_pImmediateContext->IASetIndexBuffer(m_pIBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-	}
-	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
-	if (enableSO) {
-		m_pImmediateContext->SOSetTargets(1, m_pSOVertexBuffer_A.GetAddressOf(), &offset);
-	}
-	m_pImmediateContext->Draw(3, 0);
-	if (enableSO) {
-		SwapIASOVertexBuffers(enableSO);
-	}
+	//Init further dependencies prior to rendering here 
+	//(e.g. CUDA/OpenCL/Optix Interop & D3D11<->D3D12 mergers)
+	InitContext(enableIndexing, enableSO); //pass in context and manual settings
 	return true;
 }
 
@@ -181,33 +257,18 @@ bool D3D11GraphicsContext::TerminateRenderingPipeline(bool enableIndexing, bool 
 	return true;
 }
 
-void D3D11GraphicsContext::Render(bool enableIndexing, bool enableSO, bool swapIASOBuffers)
+void D3D11GraphicsContext::Render()
 {
-	m_pImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
-	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
-	if (enableIndexing) {
-		m_pImmediateContext->DrawIndexed(3, 0, 0);
-	}
-	else {
-		if (enableSO) {
-			if (swapIASOBuffers) {
-				m_ReadSO_A = SwapIASOVertexBuffers(m_ReadSO_A);
-			}
-			m_pImmediateContext->DrawAuto();
-		}
-		else {
-			m_pImmediateContext->Draw(3, 0);
-		}
-	}
+	m_pImmediateContext->ExecuteCommandList(m_pCommandList.Get(), TRUE);
 	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
 }
 
-bool D3D11GraphicsContext::SwapIASOVertexBuffers(bool& readABuffer)
+bool D3D11GraphicsContext::SwapIASOVertexBuffers(ID3D11DeviceContext* context, bool readABuffer)
 {
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 	ID3D11Buffer* nb = NULL;
-	m_pImmediateContext->SOSetTargets(1, &nb, 0);
+	context->SOSetTargets(1, &nb, 0);
 	if (readABuffer) {
 		m_pImmediateContext->IASetVertexBuffers(0, 1, m_pSOVertexBuffer_A.GetAddressOf(), &stride, &offset);
 		m_pImmediateContext->SOSetTargets(1, m_pSOVertexBuffer_B.GetAddressOf(), &offset);
@@ -321,7 +382,7 @@ LRESULT D3D11GraphicsContext::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 	return 0;
 }
 
-bool D3D11GraphicsContext::CreateDevice(ID3D11Device** device, ID3D11DeviceContext** context)
+IDXGIAdapter* D3D11GraphicsContext::GetDiscreteAdapter()
 {
 	std::vector<IDXGIAdapter*> vpAdapters = EnumerateAdapters();
 	int adId = 0;
@@ -336,7 +397,16 @@ bool D3D11GraphicsContext::CreateDevice(ID3D11Device** device, ID3D11DeviceConte
 			memCheck = ad.DedicatedSystemMemory;
 		}
 	}
-	m_pAdapter = vpAdapters[adId];
+	IDXGIAdapter* adapter = vpAdapters[adId];
+	return adapter;
+}
+
+bool D3D11GraphicsContext::CreateDevice(
+	IDXGIAdapter** adapter,
+	ID3D11Device** device,
+	ID3D11DeviceContext** context)
+{
+	*adapter = GetDiscreteAdapter();
 	
 	UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #if defined(_DEBUG)
@@ -355,7 +425,7 @@ bool D3D11GraphicsContext::CreateDevice(ID3D11Device** device, ID3D11DeviceConte
 	};
 
 	DX::ThrowIfFailed(D3D11CreateDevice(
-		m_pAdapter.Get(),
+		*adapter,
 		D3D_DRIVER_TYPE_UNKNOWN,
 		nullptr,
 		creationFlags,
@@ -370,7 +440,7 @@ bool D3D11GraphicsContext::CreateDevice(ID3D11Device** device, ID3D11DeviceConte
 	return true;
 }
 
-bool D3D11GraphicsContext::CreateSwapChain(IDXGISwapChain1** swapChain)
+bool D3D11GraphicsContext::CreateSwapChain(IDXGIAdapter* adapter, IDXGISwapChain1** swapChain)
 {
 	//Define swap chain behaviour
 	DXGI_SWAP_CHAIN_DESC1 sd = {0};
@@ -388,10 +458,10 @@ bool D3D11GraphicsContext::CreateSwapChain(IDXGISwapChain1** swapChain)
 	sd.Flags = 0;
 	
 	Microsoft::WRL::ComPtr<IDXGIOutput> pOutput;
-	m_pAdapter->EnumOutputs(0, &pOutput);
+	adapter->EnumOutputs(0, &pOutput);
 
 	Microsoft::WRL::ComPtr<IDXGIFactory2> pFactory;
-	DX::ThrowIfFailed(m_pAdapter->GetParent(IID_PPV_ARGS(&pFactory)));
+	DX::ThrowIfFailed(adapter->GetParent(IID_PPV_ARGS(&pFactory)));
 	DX::ThrowIfFailed(pFactory->CreateSwapChainForHwnd(
 		m_pDevice.Get(),
 		m_hWnd,
@@ -425,18 +495,26 @@ bool D3D11GraphicsContext::CreateDeferredContext(ID3D11Device* device, ID3D11Dev
 	return true;
 }
 
-bool D3D11GraphicsContext::RecordCommandList(ID3D11DeviceContext* context, ID3D11CommandList** commandList)
+void D3D11GraphicsContext::SetContextRSViewports(ID3D11DeviceContext* context, D3D11_TEXTURE2D_DESC backBufferDesc)
 {
-	context->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
-	context->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
-	DX::ThrowIfFailed(context->FinishCommandList(FALSE, commandList));
-	return true;
+	D3D11_VIEWPORT vp = {};
+	vp.Width = static_cast<float>(backBufferDesc.Width);
+	vp.Height = static_cast<float>(backBufferDesc.Height);
+	vp.MinDepth = D3D11_MIN_DEPTH;
+	vp.MaxDepth = D3D11_MAX_DEPTH;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	context->RSSetViewports(1, &vp);
 }
 
-bool D3D11GraphicsContext::ExecuteCommandList(ID3D11DeviceContext* context, ID3D11CommandList* commandList)
+void D3D11GraphicsContext::SetContextRSScissorRect(ID3D11DeviceContext* context, D3D11_TEXTURE2D_DESC backBufferDesc)
 {
-	context->ExecuteCommandList(commandList, FALSE);
-	return true;
+	D3D11_RECT scRect = {};
+	scRect.left = 0;
+	scRect.right = backBufferDesc.Width;
+	scRect.top = 0;
+	scRect.bottom = backBufferDesc.Height;
+	context->RSSetScissorRects(1, &scRect);
 }
 
 bool D3D11GraphicsContext::CreateIAVertexBuffer()
@@ -552,7 +630,6 @@ bool D3D11GraphicsContext::CreateTexture()
 
 bool D3D11GraphicsContext::SetupVertexShader(
 	ID3D11Device* device,
-	ID3D11DeviceContext* context,
 	std::string filePath, 
 	std::vector<uint8_t>* bytecode,
 	ID3D11VertexShader** shader)
@@ -564,7 +641,6 @@ bool D3D11GraphicsContext::SetupVertexShader(
 			nullptr,
 			shader));
 
-		context->VSSetShader(*shader, nullptr, 0);
 		return true;
 	}
 	return false;
@@ -572,7 +648,6 @@ bool D3D11GraphicsContext::SetupVertexShader(
 
 bool D3D11GraphicsContext::SetupHullShader(
 	ID3D11Device* device,
-	ID3D11DeviceContext* context,
 	std::string filePath,
 	std::vector<uint8_t>* bytecode,
 	ID3D11HullShader** shader)
@@ -584,7 +659,6 @@ bool D3D11GraphicsContext::SetupHullShader(
 			nullptr,
 			shader));
 
-		context->HSSetShader(*shader, nullptr, 0);
 		return true;
 	}
 	return false;
@@ -597,7 +671,6 @@ bool D3D11GraphicsContext::SetupTessallator()
 
 bool D3D11GraphicsContext::SetupDomainShader(
 	ID3D11Device* device,
-	ID3D11DeviceContext* context,
 	std::string filePath,
 	std::vector<uint8_t>* bytecode,
 	ID3D11DomainShader** shader)
@@ -609,7 +682,6 @@ bool D3D11GraphicsContext::SetupDomainShader(
 			nullptr,
 			shader));
 
-		context->DSSetShader(*shader, nullptr, 0);
 		return true;
 	}
 	return false;
@@ -617,7 +689,6 @@ bool D3D11GraphicsContext::SetupDomainShader(
 
 bool D3D11GraphicsContext::SetupGeometryShader(
 	ID3D11Device* device,
-	ID3D11DeviceContext* context,
 	std::string filePath,
 	std::vector<uint8_t>* bytecode,
 	ID3D11GeometryShader** shader)
@@ -629,7 +700,6 @@ bool D3D11GraphicsContext::SetupGeometryShader(
 			nullptr,
 			shader));
 
-		context->GSSetShader(*shader, nullptr, 0);
 		return true;
 	}
 	return false;
@@ -637,7 +707,6 @@ bool D3D11GraphicsContext::SetupGeometryShader(
 
 bool D3D11GraphicsContext::SetupGeometryShaderWithStreamOutput(
 	ID3D11Device* device,
-	ID3D11DeviceContext* context,
 	std::string filePath,
 	std::vector<uint8_t>* bytecode,
 	ID3D11GeometryShader** shader)
@@ -669,7 +738,6 @@ bool D3D11GraphicsContext::SetupGeometryShaderWithStreamOutput(
 			0,
 			NULL,
 			shader));
-		context->GSSetShader(*shader, nullptr, 0);
 	}
 
 	return true;
@@ -677,30 +745,8 @@ bool D3D11GraphicsContext::SetupGeometryShaderWithStreamOutput(
 
 bool D3D11GraphicsContext::SetupRasterizer(
 	IDXGISwapChain1* swapChain, 
-	ID3D11DeviceContext* context,
 	ID3D11RasterizerState** rasterizerState)
 {
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer;
-	swapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
-	D3D11_TEXTURE2D_DESC backBufferDesc = {};
-	pBackBuffer->GetDesc(&backBufferDesc);
-
-	D3D11_VIEWPORT vp = {};
-	vp.Width = static_cast<float>(backBufferDesc.Width);
-	vp.Height = static_cast<float>(backBufferDesc.Height);
-	vp.MinDepth = D3D11_MIN_DEPTH;
-	vp.MaxDepth = D3D11_MAX_DEPTH;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	context->RSSetViewports(1, &vp);
-
-	D3D11_RECT scRect = {};
-	scRect.left = 0;
-	scRect.right = backBufferDesc.Width;
-	scRect.top = 0;
-	scRect.bottom = backBufferDesc.Height;
-	context->RSSetScissorRects(1, &scRect);
-
 	D3D11_RASTERIZER_DESC rd = {};
 	rd.FillMode = D3D11_FILL_SOLID;
 	rd.CullMode = D3D11_CULL_BACK;
@@ -714,14 +760,11 @@ bool D3D11GraphicsContext::SetupRasterizer(
 	rd.AntialiasedLineEnable = false;
 	DX::ThrowIfFailed(m_pDevice->CreateRasterizerState(&rd, rasterizerState));
 
-	context->RSSetState(m_pRasertizerState.Get());
-
 	return true;
 }
 
 bool D3D11GraphicsContext::SetupPixelShader(
 	ID3D11Device* device,
-	ID3D11DeviceContext* context,
 	std::string filePath, 
 	std::vector<uint8_t>* bytecode,
 	ID3D11PixelShader** shader)
@@ -733,14 +776,13 @@ bool D3D11GraphicsContext::SetupPixelShader(
 			nullptr,
 			shader));
 
-		context->PSSetShader(*shader, nullptr, 0);
-
 		return true;
 	}
 	return false;
 }
 
 bool D3D11GraphicsContext::SetupOutputMerger(
+	ID3D11Device* device,
 	IDXGISwapChain1* swapChain,
 	ID3D11Texture2D** depthStencil, 
 	ID3D11BlendState** blendState)
@@ -756,7 +798,7 @@ bool D3D11GraphicsContext::SetupOutputMerger(
 	int stencilFormatId = 0;
 	HRESULT hr;
 	for (int i = 0; i < ARRAYSIZE(stencilFormats); ++i) {
-		hr = m_pDevice->CheckFormatSupport(stencilFormats[i], &formatCheck);
+		hr = device->CheckFormatSupport(stencilFormats[i], &formatCheck);
 		if (hr == S_OK && (formatCheck & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)) {
 			stencilFormatId = i;
 			break;
@@ -774,7 +816,7 @@ bool D3D11GraphicsContext::SetupOutputMerger(
 	dd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	dd.CPUAccessFlags = 0;
 	dd.MiscFlags = 0;
-	DX::ThrowIfFailed(m_pDevice->CreateTexture2D(&dd, NULL, depthStencil));
+	DX::ThrowIfFailed(device->CreateTexture2D(&dd, NULL, depthStencil));
 
 	D3D11_DEPTH_STENCIL_DESC dsd = {};
 	dsd.DepthEnable = true;
@@ -794,22 +836,20 @@ bool D3D11GraphicsContext::SetupOutputMerger(
 	dsd.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
 	dsd.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	dsd.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
 	DX::ThrowIfFailed(m_pDevice->CreateDepthStencilState(&dsd, &m_pDepthStencilState));
-	m_pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState.Get(), 1);
 
 	D3D11_BLEND_DESC bd = {};
 	bd.RenderTarget[0].BlendEnable = FALSE;
 	bd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	DX::ThrowIfFailed(m_pDevice->CreateBlendState(&bd, blendState));
 
-	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	UINT sampleMask = 0xffffffff;
-	m_pImmediateContext->OMSetBlendState(*blendState, blendFactor, sampleMask);
 	return true;
 }
 
-bool D3D11GraphicsContext::SetupInputAssembler(std::vector<uint8_t> vsBytecode)
+bool D3D11GraphicsContext::SetupInputAssembler(
+	ID3D11Device* device,
+	std::vector<uint8_t> vsBytecode,
+	ID3D11InputLayout** inputLayout)
 {
 	D3D11_INPUT_ELEMENT_DESC layout[2];
 
@@ -829,11 +869,10 @@ bool D3D11GraphicsContext::SetupInputAssembler(std::vector<uint8_t> vsBytecode)
 	layout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	layout[1].InstanceDataStepRate = 0;
 
-	m_pDevice->CreateInputLayout(
+	device->CreateInputLayout(
 		layout, ARRAYSIZE(layout), 
 		vsBytecode.data(), vsBytecode.size(),
-		&m_pInputLayout);
-	m_pImmediateContext->IASetInputLayout(m_pInputLayout.Get());
+		inputLayout);
 
 	return true;
 }

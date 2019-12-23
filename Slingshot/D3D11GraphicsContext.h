@@ -6,6 +6,7 @@
 #include <d3d11.h>
 #include "d3d11_1.h"
 #include <dxgi1_6.h>
+
 #include <vector>
 
 #include "Helpers.h"
@@ -33,23 +34,35 @@ public:
 	virtual void OnMouseMove(int pixelX, int pixelY, DWORD flags);
 	void CaptureCursor();
 
-	bool SetupD3D11Context();
+	bool SetupD3D11();
+	bool SetupContext(
+		ID3D11DeviceContext* context,
+		IDXGISwapChain1* swapChain,
+		ID3D11VertexShader** vs,
+		ID3D11InputLayout** il,
+		ID3D11GeometryShader** gs,
+		ID3D11RasterizerState** rs,
+		ID3D11PixelShader** ps,
+		ID3D11DepthStencilState** dss,
+		ID3D11BlendState** bs);
+	bool InitContext(bool enableIndexing = true, bool enableSO = false);
 	bool SetupRenderingPipeline(bool enableIndexing = true, bool enableSO = false);
 	bool InitRenderingPipeline(bool enableIndexing = true, bool enableSO = false);
 	bool TerminateRenderingPipeline(bool enableIndexing = true, bool enableSO = false);
-	void Render(bool enableIndexing = true, bool enableSO = false, bool swapIASOBuffers = false);
-	bool SwapIASOVertexBuffers(bool& readABuffer);
+	void Render();
+	bool SwapIASOVertexBuffers(ID3D11DeviceContext* context, bool readABuffer = true);
 
-	bool CreateDevice(ID3D11Device** device, ID3D11DeviceContext** context);
-	bool CreateSwapChain(IDXGISwapChain1** swapChain);
+	IDXGIAdapter* GetDiscreteAdapter();
+	bool CreateDevice(IDXGIAdapter** adapter, ID3D11Device** device, ID3D11DeviceContext** context);
+	bool CreateSwapChain(IDXGIAdapter* adapter, IDXGISwapChain1** swapChain);
 	bool CreateRenderTargetView(
 		ID3D11Device* device,
 		IDXGISwapChain1* swapChain, 
 		ID3D11RenderTargetView** rtv);
 	bool CreateDeferredContext(ID3D11Device* device, ID3D11DeviceContext** context);
-	
-	bool RecordCommandList(ID3D11DeviceContext* defContext, ID3D11CommandList** commandList);
-	bool ExecuteCommandList(ID3D11DeviceContext* imContext, ID3D11CommandList* commandList);
+
+	void SetContextRSViewports(ID3D11DeviceContext* context, D3D11_TEXTURE2D_DESC desc);
+	void SetContextRSScissorRect(ID3D11DeviceContext* context, D3D11_TEXTURE2D_DESC desc);
 
 	bool CreateIAVertexBuffer();
 	bool CreateSOVertexBuffers();
@@ -60,51 +73,47 @@ public:
 	bool CreateTexture();
 
 	//Rendering Pipeline:
-	bool SetupInputAssembler(std::vector<uint8_t> vsBytecode);
+	bool SetupInputAssembler(ID3D11Device* device,
+		std::vector<uint8_t> vsBytecode,
+		ID3D11InputLayout** inputLayout);
 	bool SetupVertexShader(
 		ID3D11Device* device,
-		ID3D11DeviceContext* context,
 		std::string filePath, 
 		std::vector<uint8_t>* bytecode,
 		ID3D11VertexShader** shader);
 	bool SetupHullShader(
 		ID3D11Device* device,
-		ID3D11DeviceContext* context,
 		std::string filePath, 
 		std::vector<uint8_t>* bytecode,
 		ID3D11HullShader** shader);
 	bool SetupTessallator();
 	bool SetupDomainShader(
 		ID3D11Device* device,
-		ID3D11DeviceContext* context,
 		std::string filePath,
 		std::vector<uint8_t>* bytecode,
 		ID3D11DomainShader** shader);
 	bool SetupGeometryShader(
 		ID3D11Device* device,
-		ID3D11DeviceContext* context,
 		std::string filePath,
 		std::vector<uint8_t>* bytecode,
 		ID3D11GeometryShader** shader);
 	bool SetupGeometryShaderWithStreamOutput(
 		ID3D11Device* device,
-		ID3D11DeviceContext* context,
 		std::string filePath,
 		std::vector<uint8_t>* bytecode,
 		ID3D11GeometryShader** shader);
 	bool SetupRasterizer(
 		IDXGISwapChain1* swapChain, 
-		ID3D11DeviceContext* context,
 		ID3D11RasterizerState** rasterizerState);
 	bool SetupPixelShader(
 		ID3D11Device* device,
-		ID3D11DeviceContext* context,
 		std::string filePath,
 		std::vector<uint8_t>* bytecode,
 		ID3D11PixelShader** shader);
 	bool SetupOutputMerger(
+		ID3D11Device* device,
 		IDXGISwapChain1* swapChain,
-		ID3D11Texture2D** depthStencil, 
+		ID3D11Texture2D** depthStencil,
 		ID3D11BlendState** blendState);
 
 	//Window behaviour:
@@ -123,7 +132,7 @@ public:
 	//IA<->SO Vertex Buffer Handling
 	bool m_ReadSO_A = true;
 
-	const float m_ClearColor[4] = { 1.0f, 0.5f, 0.32f, 1.0f };
+	const float m_ClearColor[4] = { 0.3f, 0.5f, 0.92f, 1.0f };
 
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pImmediateContext;
