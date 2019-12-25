@@ -1,7 +1,5 @@
 #pragma once
 
-#include "SupportedContexts.h"
-
 #include "D3D11GraphicsContext.h"
 #include "D3D12GraphicsContext.h"
 

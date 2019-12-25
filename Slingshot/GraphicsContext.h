@@ -14,6 +14,8 @@
 #include <cassert>
 #include <chrono>
 
+#include "SupportedContexts.h"
+
 class GraphicsContext
 {
 public:

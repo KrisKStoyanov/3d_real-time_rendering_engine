@@ -13,6 +13,7 @@ void D3D11GraphicsContext::OnCreate(HWND hwnd)
 {
 	if (SetupD3D11()) {
 		if (SetupRenderingPipeline(m_EnableIndexing, m_EnableSO)) {
+
 			SetupContext(
 				m_pImmediateContext.Get(),
 				m_pSwapChain.Get(),
@@ -24,11 +25,22 @@ void D3D11GraphicsContext::OnCreate(HWND hwnd)
 				m_pDepthStencilState.GetAddressOf(),
 				m_pBlendState.GetAddressOf());
 
-			//Setup interop HPS extension
-			//m_pDeviceInteropContext = new HC::D3D11DeviceInteropContext();
-			//HC::InvokeRenderKernel(m_pDeviceInteropContext->m_ScreenBuffer, 1280, 720);	
-
-			InitRenderingPipeline(m_EnableIndexing, m_EnableSO);
+			SetupContext(
+				m_pDeferredContext.Get(),
+				m_pSwapChain.Get(),
+				m_pVertexShader.GetAddressOf(),
+				m_pInputLayout.GetAddressOf(),
+				m_pGeometryShader.GetAddressOf(),
+				m_pRasertizerState.GetAddressOf(),
+				m_pPixelShader.GetAddressOf(),
+				m_pDepthStencilState.GetAddressOf(),
+				m_pBlendState.GetAddressOf());
+			
+			InitRenderingPipeline(
+				m_pImmediateContext.Get(),
+				m_pDeferredContext.Get(),
+				m_pRenderTargetView.GetAddressOf(),
+				m_EnableIndexing, m_EnableSO);
 		}
 	}
 }
@@ -40,7 +52,7 @@ void D3D11GraphicsContext::OnDestroy()
 
 void D3D11GraphicsContext::OnPaint()
 {
-	Render();
+	Render(m_pImmediateContext.Get(), m_pCommandList.Get());
 }
 
 void D3D11GraphicsContext::OnResize()
@@ -122,51 +134,6 @@ bool D3D11GraphicsContext::SetupContext(
 	return true;
 }
 
-bool D3D11GraphicsContext::InitContext(bool enableIndexing, bool enableSO)
-{
-	SetupContext(
-		m_pDeferredContext.Get(),
-		m_pSwapChain.Get(),
-		m_pVertexShader.GetAddressOf(),
-		m_pInputLayout.GetAddressOf(),
-		m_pGeometryShader.GetAddressOf(),
-		m_pRasertizerState.GetAddressOf(),
-		m_pPixelShader.GetAddressOf(),
-		m_pDepthStencilState.GetAddressOf(),
-		m_pBlendState.GetAddressOf());
-
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-
-	m_pDeferredContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), nullptr);
-	m_pDeferredContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	m_pDeferredContext->IASetVertexBuffers(0, 1, m_pIAVertexBuffer.GetAddressOf(), &stride, &offset);
-	if (enableSO && !enableIndexing) {
-		m_pDeferredContext->SOSetTargets(1, m_pSOVertexBuffer_A.GetAddressOf(), &offset);
-	}
-	else if (enableIndexing && !enableSO) {
-		m_pDeferredContext->IASetIndexBuffer(m_pIBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-	}
-
-	//Command Setup
-	m_pDeferredContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
-	if (enableIndexing && !enableSO) {
-		m_pDeferredContext->DrawIndexed(3, 0, 0);
-	}
-	else if (enableSO) {
-		m_pDeferredContext->Draw(3, 0);
-		//m_ReadSO_A = SwapIASOVertexBuffers(m_pDeferredContext.Get(), m_ReadSO_A);
-		//m_pDeferredContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
-		//m_pDeferredContext->DrawAuto();
-		//DX::ThrowIfFailed(m_pDeferredContext->FinishCommandList(FALSE, &m_pCommandList));
-	}
-	else {
-		m_pDeferredContext->Draw(3, 0);
-	}
-	DX::ThrowIfFailed(m_pDeferredContext->FinishCommandList(FALSE, &m_pCommandList));
-	return true;
-}
-
 bool D3D11GraphicsContext::SetupRenderingPipeline(bool enableIndexing, bool enableSO)
 {
 	std::vector<uint8_t> vsBytecode;
@@ -183,18 +150,9 @@ bool D3D11GraphicsContext::SetupRenderingPipeline(bool enableIndexing, bool enab
 		m_pDevice.Get(), 
 		vsBytecode,
 		m_pInputLayout.GetAddressOf());
-	//SetupHullShader("HullShader.cso", &hsBytecode);
-	//SetupTessallator();
-	//SetupDomainShader("DomainShader.cso", &dsBytecode);
-	CreateIAVertexBuffer();
-
-	if (enableIndexing) {
-		CreateIndexBuffer();
-	}
-	else if(enableSO){
-		CreateSOVertexBuffers();
-	}
-
+	//SetupHullShader("HullShader.cso", &hsBytecode); //Pending implementation
+	//SetupTessallator(); //Pending implementation
+	//SetupDomainShader("DomainShader.cso", &dsBytecode); //Pending implementation
 	if(enableSO){
 		SetupGeometryShaderWithStreamOutput(
 			m_pDevice.Get(),
@@ -227,11 +185,138 @@ bool D3D11GraphicsContext::SetupRenderingPipeline(bool enableIndexing, bool enab
 	return true;
 }
 
-bool D3D11GraphicsContext::InitRenderingPipeline(bool enableIndexing, bool enableSO)
+bool D3D11GraphicsContext::InitRenderingPipeline(
+	ID3D11DeviceContext* immediateContext,
+	ID3D11DeviceContext* deferredContext,
+	ID3D11RenderTargetView** rtv,
+	bool enableIndexing, bool enableSO)
 {
 	//Init further dependencies prior to rendering here 
-	//(e.g. CUDA/OpenCL/Optix Interop & D3D11<->D3D12 mergers)
-	InitContext(enableIndexing, enableSO); //pass in context and manual settings
+	//(e.g. Setup CUDA/OpenCL/Optix/D3D12 interop contexts, setup and create buffers)
+
+	//Test Vertex Buffer
+	Vertex* vbData = new Vertex[3];
+
+	vbData[0].position = DirectX::XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f);
+	vbData[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	vbData[1].position = DirectX::XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f);
+	vbData[1].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+
+	vbData[2].position = DirectX::XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f);
+	vbData[2].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	size_t vbSize = sizeof(Vertex) * 9;
+	CreateVertexBuffer(
+		m_pDevice.Get(), 
+		m_pIAVertexBuffer.GetAddressOf(), 
+		D3D11_USAGE::D3D11_USAGE_DEFAULT, 
+		D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,
+		0,
+		vbSize,
+		vbData);
+	
+	//Test Index Buffer
+	if (enableIndexing) {
+		unsigned int ibData[3] = { 0,1,2 };
+		size_t ibSize = sizeof(unsigned int) * 3;
+		CreateIndexBuffer(
+			m_pDevice.Get(), 
+			m_pIndexBuffer.GetAddressOf(), 
+			ibData, ibSize);
+	}
+
+	//Test SO Vertex Buffers
+	else if (enableSO) {
+		Vertex* vbWrapper = (Vertex*)malloc(vbSize);
+		CreateVertexBuffer(
+			m_pDevice.Get(), 
+			m_pSOVertexBuffer_A.GetAddressOf(),
+			D3D11_USAGE::D3D11_USAGE_DEFAULT,
+			D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,
+			0,
+			vbSize);
+		CreateVertexBuffer(
+			m_pDevice.Get(), 
+			m_pSOVertexBuffer_B.GetAddressOf(), 
+			D3D11_USAGE::D3D11_USAGE_DEFAULT,
+			D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,
+			0,
+			vbSize);
+	}
+
+	//Test Compute Unified Buffer
+	m_pComputeContext = std::unique_ptr<HC::ComputeContext>(
+		new HC::ComputeContext(GetDiscreteAdapter(), m_pDevice.Get()));
+
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer;
+	m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
+	D3D11_TEXTURE2D_DESC backBufferDesc = {};
+	pBackBuffer->GetDesc(&backBufferDesc);
+	UINT numPixels = backBufferDesc.Width * backBufferDesc.Height;
+	size_t iopBufferSize = sizeof(HC::ComputeVertex) * static_cast<size_t>(numPixels);
+	HC::ComputeVertex* iopBufferData = (HC::ComputeVertex*)malloc(iopBufferSize);
+	CreateVertexBuffer(
+		m_pDevice.Get(), 
+		m_pIOPBuffer.GetAddressOf(), 
+		D3D11_USAGE_DEFAULT, 
+		D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_SHADER_RESOURCE, //D3D11_BIND_SHADER_RESOURCE required for retained GPU memory iop write access
+		0, 
+		iopBufferSize,
+		iopBufferData);
+
+	m_pComputeContext->ProcessUnifiedSurfaceBuffer(
+		m_pIOPBuffer.Get(),
+		4, 
+		backBufferDesc.Width,
+		backBufferDesc.Height);
+
+	//Configure the drawing of the processed iop buffer 
+	//Convert world to model to view to clip space for accurate iop data processing
+	//Implement transforms
+	//Test with smaller buffer to render custom triangles (reconfigure kernel)
+
+	InitContext(
+		deferredContext,
+		rtv, 
+		D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_LINESTRIP,
+		m_pIOPBuffer.GetAddressOf(),
+		numPixels,
+		enableIndexing,
+		enableSO);
+	return true;
+}
+
+bool D3D11GraphicsContext::InitContext(
+	ID3D11DeviceContext* context,
+	ID3D11RenderTargetView** rtv,
+	D3D_PRIMITIVE_TOPOLOGY inputAssemblyTopology,
+	ID3D11Buffer** inputAssemblyBuffer,
+	unsigned int numVertices,
+	bool enableIndexing, 
+	bool enableSO)
+{
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+
+	context->OMSetRenderTargets(1, rtv, nullptr);
+	context->IASetPrimitiveTopology(inputAssemblyTopology);
+	context->IASetVertexBuffers(0, 1, inputAssemblyBuffer, &stride, &offset);
+	if (enableSO && !enableIndexing) {
+		context->SOSetTargets(1, m_pSOVertexBuffer_A.GetAddressOf(), &offset);
+	}
+	else if (enableIndexing && !enableSO) {
+		context->IASetIndexBuffer(m_pIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	}
+
+	//Command Setup
+	context->ClearRenderTargetView(*rtv, m_ClearColor);
+	if (enableIndexing && !enableSO) {
+		context->DrawIndexed(3, 0, 0);
+	}
+	else {
+		context->Draw(numVertices, 0);
+	}
+	DX::ThrowIfFailed(context->FinishCommandList(FALSE, &m_pCommandList));
 	return true;
 }
 
@@ -244,7 +329,7 @@ bool D3D11GraphicsContext::TerminateRenderingPipeline(bool enableIndexing, bool 
 	m_pSwapChain->Release();
 	m_pIAVertexBuffer->Release();
 	if (enableIndexing) {
-		m_pIBuffer->Release();
+		m_pIndexBuffer->Release();
 	}
 	if (enableSO) {
 		m_pSOVertexBuffer_A->Release();
@@ -257,10 +342,19 @@ bool D3D11GraphicsContext::TerminateRenderingPipeline(bool enableIndexing, bool 
 	return true;
 }
 
-void D3D11GraphicsContext::Render()
+void D3D11GraphicsContext::Render(ID3D11DeviceContext* context, ID3D11CommandList* commandList)
 {
-	m_pImmediateContext->ExecuteCommandList(m_pCommandList.Get(), TRUE);
+	context->ExecuteCommandList(commandList, TRUE);
 	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
+}
+
+void D3D11GraphicsContext::StreamSOToContext(ID3D11DeviceContext* context, ID3D11CommandList* commandList)
+{
+		//m_pDeferredContext->Draw(3, 0);
+		////m_ReadSO_A = SwapIASOVertexBuffers(m_pDeferredContext.Get(), m_ReadSO_A);
+		////m_pDeferredContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_ClearColor);
+		////m_pDeferredContext->DrawAuto();
+		//DX::ThrowIfFailed(m_pDeferredContext->FinishCommandList(FALSE, &m_pCommandListSO));
 }
 
 bool D3D11GraphicsContext::SwapIASOVertexBuffers(ID3D11DeviceContext* context, bool readABuffer)
@@ -517,66 +611,54 @@ void D3D11GraphicsContext::SetContextRSScissorRect(ID3D11DeviceContext* context,
 	context->RSSetScissorRects(1, &scRect);
 }
 
-bool D3D11GraphicsContext::CreateIAVertexBuffer()
+bool D3D11GraphicsContext::CreateVertexBuffer(
+	ID3D11Device* device,
+	ID3D11Buffer** buffer,
+	D3D11_USAGE bufferType,
+	UINT bindFlags,
+	UINT cpuAccessFlag,
+	size_t vbSize,
+	void* data)
 {
-	Vertex* vb = new Vertex[3];
-
-	vb[0].position = DirectX::XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f);
-	vb[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-
-	vb[1].position = DirectX::XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f);
-	vb[1].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-
-	vb[2].position = DirectX::XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f);
-	vb[2].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-
 	D3D11_BUFFER_DESC bd = {};
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(Vertex) * 9; //Vertex Size: 32 bytes - Default Count: 3, GS Output: 9
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_STREAM_OUTPUT;
-	bd.CPUAccessFlags = 0;
+	bd.Usage = bufferType;
+	bd.ByteWidth = vbSize; //Vertex Size: 32 bytes - Default Count: 3, GS Output: 9
+	bd.BindFlags = bindFlags;
+	bd.CPUAccessFlags = cpuAccessFlag;
 	bd.MiscFlags = 0;
 	bd.StructureByteStride = 0;
-	D3D11_SUBRESOURCE_DATA srd = {};
-	srd.pSysMem = vb;
-	srd.SysMemPitch = 0;
-	srd.SysMemSlicePitch = 0;
-	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, &srd, &m_pIAVertexBuffer));
+	if (data != NULL) {
+		D3D11_SUBRESOURCE_DATA srd = {};
+		srd.pSysMem = data;
+		srd.SysMemPitch = 0;
+		srd.SysMemSlicePitch = 0;
+		DX::ThrowIfFailed(device->CreateBuffer(&bd, &srd, buffer));
+	}
+	else {
+		DX::ThrowIfFailed(device->CreateBuffer(&bd, nullptr, buffer));
+	}
 
 	return true;
 }
 
-bool D3D11GraphicsContext::CreateSOVertexBuffers()
+bool D3D11GraphicsContext::CreateIndexBuffer(
+	ID3D11Device* device, 
+	ID3D11Buffer** buffer, 
+	unsigned int* ib,
+	size_t ibSize)
 {
 	D3D11_BUFFER_DESC bd = {};
 	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(Vertex) * 9; //Vertex Size: 32 bytes - Default Count: 3, GS Output: 9
-	bd.BindFlags =  D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_STREAM_OUTPUT;
-	bd.CPUAccessFlags = 0;
-	bd.MiscFlags = 0;
-	bd.StructureByteStride = 0;
-	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, nullptr, &m_pSOVertexBuffer_A));
-	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, nullptr, &m_pSOVertexBuffer_B));
-
-	return true;
-}
-
-bool D3D11GraphicsContext::CreateIndexBuffer()
-{
-	unsigned int iBuf[] = { 0, 1, 2 };
-
-	D3D11_BUFFER_DESC bd = {};
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(unsigned int) * 3;
+	bd.ByteWidth = ibSize;
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 	bd.MiscFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA srd = {};
-	srd.pSysMem = iBuf;
+	srd.pSysMem = ib;
 	srd.SysMemPitch = 0;
 	srd.SysMemSlicePitch = 0;
-	DX::ThrowIfFailed(m_pDevice->CreateBuffer(&bd, &srd, &m_pIBuffer));
+	DX::ThrowIfFailed(device->CreateBuffer(&bd, &srd, buffer));
 
 	return true;
 }

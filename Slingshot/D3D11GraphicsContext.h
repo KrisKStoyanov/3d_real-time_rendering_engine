@@ -10,9 +10,9 @@
 #include <vector>
 
 #include "Helpers.h"
+#include "FileHandler.h"
 #include "GraphicsWrappers.h"
 #include "CUDAContextScheduler.cuh"
-#include "FileHandler.h"
 
 class D3D11GraphicsContext : public GraphicsContext
 {
@@ -45,11 +45,24 @@ public:
 		ID3D11PixelShader** ps,
 		ID3D11DepthStencilState** dss,
 		ID3D11BlendState** bs);
-	bool InitContext(bool enableIndexing = true, bool enableSO = false);
+	bool InitContext(
+		ID3D11DeviceContext* context,
+		ID3D11RenderTargetView** rtv,
+		D3D_PRIMITIVE_TOPOLOGY inputAssemblyTopology,
+		ID3D11Buffer** inputAssemblyBuffer,
+		unsigned int numVertices,
+		bool enableIndexing = true, 
+		bool enableSO = false);
 	bool SetupRenderingPipeline(bool enableIndexing = true, bool enableSO = false);
-	bool InitRenderingPipeline(bool enableIndexing = true, bool enableSO = false);
+	bool InitRenderingPipeline(
+		ID3D11DeviceContext* immediateContext, 
+		ID3D11DeviceContext* deferredContext, 
+		ID3D11RenderTargetView** rtv,
+		bool enableIndexing = true, 
+		bool enableSO = false);
 	bool TerminateRenderingPipeline(bool enableIndexing = true, bool enableSO = false);
-	void Render();
+	void Render(ID3D11DeviceContext* context, ID3D11CommandList* commandList);
+	void StreamSOToContext(ID3D11DeviceContext* context, ID3D11CommandList* commandList);
 	bool SwapIASOVertexBuffers(ID3D11DeviceContext* context, bool readABuffer = true);
 
 	IDXGIAdapter* GetDiscreteAdapter();
@@ -64,10 +77,21 @@ public:
 	void SetContextRSViewports(ID3D11DeviceContext* context, D3D11_TEXTURE2D_DESC desc);
 	void SetContextRSScissorRect(ID3D11DeviceContext* context, D3D11_TEXTURE2D_DESC desc);
 
-	bool CreateIAVertexBuffer();
-	bool CreateSOVertexBuffers();
+	bool CreateVertexBuffer(
+		ID3D11Device* device,
+		ID3D11Buffer** buffer,
+		D3D11_USAGE bufferType,
+		UINT bindFlags,
+		UINT cpuAccessFlags,
+		size_t bufferSize,
+		void* data = NULL);
 
-	bool CreateIndexBuffer();
+	bool CreateIndexBuffer(
+		ID3D11Device* device,
+		ID3D11Buffer** buffer,
+		unsigned int* ib,
+		size_t ibSize);
+
 	bool CreateConstantBuffer();
 	
 	bool CreateTexture();
@@ -124,7 +148,7 @@ public:
 	//Input Assembly Stage:
 	bool m_EnableIndexing = false;
 	//Stream Output Stage:
-	bool m_EnableSO = true;	
+	bool m_EnableSO = false;	
 	bool m_SwapIASOBuffers = false;
 
 	//Pipeline Auto behaviour:
@@ -147,7 +171,7 @@ public:
 	Microsoft::WRL::ComPtr<IDXGIAdapter> m_pAdapter;
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> m_pSwapChain;
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIndexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pCBuffer;
 
 	//----------------Rendering Pipeline----------------
@@ -175,7 +199,8 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11Resource> m_pTexture;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_pTextureView;
 
-	std::unique_ptr<HC::D3D11DeviceInteropContext> m_pDeviceInteropContext;
+	std::unique_ptr<HC::ComputeContext> m_pComputeContext;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIOPBuffer;
 private:
 	HWND m_hWnd;
 };

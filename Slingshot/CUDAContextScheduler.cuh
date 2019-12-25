@@ -7,6 +7,7 @@
 #include <d3dcompiler.h>
 
 #include <dxgi1_6.h>
+#include <DirectXMath.h>
 
 #include "GUIConsole.h"
 
@@ -117,7 +118,12 @@ namespace HC {
 		vec3 B;
 	};
 
-	__host__ bool InvokeRenderKernel(vec3*& screenBuffer, int areaW, int areaH);
+	__host__ __device__ struct ComputeVertex {
+		float4 position;
+		float4 color;
+	};
+
+	__host__ void InvokeCSPKernel(ComputeVertex** surfaceBuffer, size_t* bufferSize, int surfaceW, int surfaceH);
 	__host__ cudaDeviceProp QueryDeviceProperties(int dIndex);
 	__host__ float ComputeSPEffectiveBandwith(int actThr, float kExecMs);
 	__host__ float ComputeComputationalThroughput(int nFlops, int actThr, float kExecS);
@@ -131,7 +137,7 @@ namespace HC {
 		float* dthBw = NULL,
 		unsigned int conSleepMs = 1000);
 	__host__ __device__ void CheckError(cudaError_t result, char const* const func, const char* const file, int const line);
-	__host__ void GenPPMFile(const char* fileName, vec3* buffer, const int imgW, const int imgH);
+	__host__ void GenPPMFile(const char* fileName, HC::ComputeVertex* buffer, const int imgW, const int imgH);
 	
 	__device__ inline vec3 d_color(const ray& r) {
 		vec3 rayDir = norm(r.direction());
@@ -140,34 +146,69 @@ namespace HC {
 	}
 
 	//D3D11 Interop:
-	class D3D11DeviceInteropContext {
+	class ComputeContext {
 	public:
-		__host__ inline D3D11DeviceInteropContext() {};
-		__host__ inline ~D3D11DeviceInteropContext() {};
-
-		__host__ inline void GetD3D11DeviceID(IDXGIAdapter* adapter)
+		__host__ inline ComputeContext(IDXGIAdapter* adapter, ID3D11Device* device, unsigned int numGpus = 1)
 		{
-			ProfileCUDA(cudaD3D11GetDevice(m_DeviceId, adapter));
+			SetupGraphicsInteropContext(adapter, device, numGpus);
+		}
+		__host__ inline ~ComputeContext() {};
+
+		__host__ inline bool SetupGraphicsInteropContext(IDXGIAdapter* adapter, ID3D11Device* device, unsigned int numGpus = 1)
+		{
+			numGpus > 1 ?
+				m_DeviceIDs = GetD3D11DevicesIDs(device, numGpus) :
+				m_DeviceIDs = GetD3D11DeviceID(adapter);
+
+			return true;
 		}
 
-		__host__ inline void RegisterD3D11Resource(
-			cudaGraphicsResource*& cudaResH,
-			ID3D11Resource* d3d11ResH,
-			unsigned int flags)
+		__host__ void ProcessUnifiedSurfaceBuffer(
+			ID3D11Resource* d3d11Res,
+			unsigned int flags, 
+			unsigned int surfaceW, 
+			unsigned int surfaceH)
 		{
-			ProfileCUDA(cudaGraphicsD3D11RegisterResource(&cudaResH, d3d11ResH, flags));
+			cudaGraphicsResource* pInteropRes = NULL;
+			ProfileCUDA(cudaGraphicsD3D11RegisterResource(&pInteropRes, d3d11Res, 4));
+			ProfileCUDA(cudaGraphicsMapResources(1, &pInteropRes, 0));
+
+			size_t* surfaceBufferSize = new size_t(0);
+			ComputeVertex* surfaceBuffer = NULL;
+			ProfileCUDA(cudaGraphicsResourceGetMappedPointer((void**)&surfaceBuffer, surfaceBufferSize, pInteropRes));
+			InvokeCSPKernel((ComputeVertex**)&surfaceBuffer, surfaceBufferSize, surfaceW, surfaceH);
+
+			//CPU data conversion test
+			//*iopBData = (ComputeVertex*)malloc(*surfaceBufferSize);
+			//ProfileCUDA(cudaMemcpy(*iopBData, surfaceBuffer, *surfaceBufferSize, cudaMemcpyDeviceToHost));
+			ProfileCUDA(cudaGraphicsUnmapResources(1, &pInteropRes, 0));
+			ProfileCUDA(cudaGraphicsUnregisterResource(pInteropRes));
 		}
 
-		__host__ inline void UnregisterD3D11Resource(
-			cudaGraphicsResource*& cudaResH,
-			ID3D11Resource* d3d11ResH,
-			unsigned int flags)
+		__host__ inline int* GetD3D11DeviceID(IDXGIAdapter* adapter) 
 		{
-			ProfileCUDA(cudaGraphicsUnregisterResource(m_Resource));
+			int* id = (int*)malloc(sizeof(int));
+			ProfileCUDA(cudaD3D11GetDevice(id, adapter));
+			return id;
 		}
 
-		vec3* m_ScreenBuffer = NULL;
-		int* m_DeviceId = 0;
-		cudaGraphicsResource_t m_Resource = NULL;
+		//Setup for systems configured with SLI (predetermined GPU count)
+		__host__ inline int* GetD3D11DevicesIDs(ID3D11Device* device, unsigned int numGpus = 1)
+		{
+			unsigned int numCudaDevices = 0;
+			int* cudaDeviceIDs = new int[numGpus];
+
+			ProfileCUDA(
+				cudaD3D11GetDevices(
+					&numCudaDevices,
+					cudaDeviceIDs,
+					sizeof(int) * numGpus, 
+					device, 
+					cudaD3D11DeviceList::cudaD3D11DeviceListAll));
+			return cudaDeviceIDs;
+		}
+
+	private:
+		int* m_DeviceIDs = NULL;
 	};
 }
