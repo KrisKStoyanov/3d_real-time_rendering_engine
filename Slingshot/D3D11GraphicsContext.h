@@ -32,7 +32,9 @@ public:
 	virtual void OnLButtonDown(int pixelX, int pixelY, DWORD flags);
 	virtual void OnLButtonUp();
 	virtual void OnMouseMove(int pixelX, int pixelY, DWORD flags);
+
 	void CaptureCursor();
+	void ToggleFullscreen();
 
 	bool SetupD3D11();
 	bool SetupContext(
@@ -83,14 +85,14 @@ public:
 		D3D11_USAGE bufferType,
 		UINT bindFlags,
 		UINT cpuAccessFlags,
-		size_t bufferSize,
+		UINT bufferSize,
 		void* data = NULL);
 
 	bool CreateIndexBuffer(
 		ID3D11Device* device,
 		ID3D11Buffer** buffer,
 		unsigned int* ib,
-		size_t ibSize);
+		UINT ibSize);
 
 	bool CreateConstantBuffer();
 	
@@ -142,6 +144,7 @@ public:
 
 	//Window behaviour:
 	bool m_CaptureCursor = false;
+	bool m_ToggleFullscreen = false;
 
 	//Pipeline Managed behaviour:
 	//--------------------------
@@ -203,5 +206,6 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIOPBuffer;
 private:
 	HWND m_hWnd;
+	RECT m_WindowRect;
 };
 

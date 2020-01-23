@@ -1,7 +1,6 @@
 #pragma once
 
 #include "D3D11GraphicsContext.h"
-#include "D3D12GraphicsContext.h"
 
 class Window
 {

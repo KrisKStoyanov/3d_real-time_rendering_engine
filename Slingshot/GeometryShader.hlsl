@@ -18,21 +18,5 @@ void main(
         element1.pos = input[i].pos;
         element1.color = input[i].color;
         gsStream.Append(element1);
-        
-        //GS_COALESCENT element1;
-        //element1.pos = input[i].pos + float4(-0.2, 0.0, 0.0, 0.0);
-        //element1.color = input[i].color;
-        //gsStream.Append(element1);
-        
-        //GS_COALESCENT element2;
-        //element2.pos = input[i].pos + float4(0.0, 0.2, 0.0, 0.0);
-        //element2.color = input[i].color;
-        //gsStream.Append(element2);
-        
-        //GS_COALESCENT element3;
-        //element3.pos = input[i].pos + float4(0.2, 0.0, 0.0, 0.0);
-        //element3.color = input[i].color;
-        //gsStream.Append(element3);
-        //gsStream.RestartStrip();
-    }
+    }   
 }

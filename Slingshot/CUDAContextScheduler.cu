@@ -1,23 +1,41 @@
 #include "CUDAContextScheduler.cuh"
 
 namespace HC {
-	__global__ void k_ComputeSurfacePixels(ComputeVertex* frameBuffer, int nPixels, int surfaceW, int surfaceH) {
+	__global__ void k_ComputeSurfacePixels(ComputeVertex* buffer, int nPixels, int surfaceW, int surfaceH) {
 		
 		int tid = threadIdx.x + blockIdx.x * blockDim.x;
 		if (tid > nPixels) {
 			return;
 		}
-		int pixelY = surfaceH - tid / surfaceW;
-		int pixelX = tid - (tid / surfaceW) * surfaceW;
+
+		int pixelY = tid / surfaceW;
+		int pixelX = tid - pixelY * surfaceW;
 		float r = (float)pixelX / (float)surfaceW;;
 		float g = (float)pixelY / (float)surfaceH;
 		float b = 0.2f;
 		float4 vColor { r,g,b,1.0 };
-		frameBuffer[tid].position = float4 { pixelX, pixelY, 1.0, 1.0 };
-		frameBuffer[tid].color = vColor;
+		buffer[tid].position = float4 { pixelX, pixelY, 0.5, 1.0 };
+		buffer[tid].color = vColor;
+	}
+
+	//Compute GFX Test
+	__global__ void k_ComputeBasicTriangle(ComputeVertex* buffer) {
+
+		buffer[0].position = float4{ 0.0f, 0.0f, 1.0f, 1.0f };
+		buffer[0].color = float4{ 1.0f, 0.0f, 0.0f, 1.0f };
+		
+		buffer[1].position = float4{ 1000.0f, 0.0f, 1.0f, 1.0f };
+		buffer[1].color = float4{ 0.0f, 1.0f, 0.0f, 1.0f };
+
+		buffer[2].position = float4{ 0.0f, 0.0005f, 1.0f, 1.0f };
+		buffer[2].color = float4{ 0.0f, 0.0f, 1.0f, 1.0f };
 	}
 
 	//Pending compute concurrency implementation through CUDA streams (local async engines = 6)
+
+	__host__ void InvokeCBTKernel(ComputeVertex** buffer) {
+		k_ComputeBasicTriangle << <1, 1 >> > (*buffer);
+	}
 
 	__host__ void InvokeCSPKernel(ComputeVertex** surfaceBuffer, size_t* bufferSize, int surfaceW, int surfaceH) {
 
@@ -33,7 +51,7 @@ namespace HC {
 
 		//ProfileCUDA(cudaMemcpy(h_surfaceBuffer, *surfaceBuffer, *bufferSize, cudaMemcpyDeviceToHost));
 		//GenPPMFile("GfxExp", h_surfaceBuffer, surfaceW, surfaceH);
-		//free(screenBuffer);
+		//free(h_surfaceBuffer);
 	}
 
 	__host__ __device__ void CheckError(cudaError_t result, char const* const func, const char* const file, int const line) {

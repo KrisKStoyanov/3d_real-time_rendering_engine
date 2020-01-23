@@ -12,7 +12,8 @@ int CALLBACK wWinMain(
 	if (win.Create(GC::D3D11, 
 		hInstance,
 		L"Slingshot Graphics", 
-		WS_OVERLAPPEDWINDOW, nCmdShow)) {
+		WS_OVERLAPPEDWINDOW, 
+		nCmdShow)) {
 		win.OnUpdate();
 	}
 	return 0;

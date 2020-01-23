@@ -3,6 +3,7 @@
 D3D11GraphicsContext::D3D11GraphicsContext(HWND hwnd)
 {
 	m_hWnd = hwnd;
+	GetWindowRect(m_hWnd, &m_WindowRect);
 }
 
 D3D11GraphicsContext::~D3D11GraphicsContext()
@@ -88,6 +89,36 @@ void D3D11GraphicsContext::CaptureCursor()
 	}
 	else {
 		ClipCursor(NULL);
+	}
+}
+
+void D3D11GraphicsContext::ToggleFullscreen()
+{
+	if (m_ToggleFullscreen) {
+		UINT windowStyle = WS_OVERLAPPEDWINDOW & ~(WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME);
+		SetWindowLongW(m_hWnd, GWL_STYLE, windowStyle);
+		HMONITOR hMonitor = MonitorFromWindow(m_hWnd, MONITOR_DEFAULTTONEAREST);
+		MONITORINFOEX monitorInfo = {};
+		monitorInfo.cbSize = sizeof(MONITORINFOEX);
+		GetMonitorInfoW(hMonitor, &monitorInfo);
+		SetWindowPos(m_hWnd, HWND_TOP,
+			monitorInfo.rcMonitor.left,
+			monitorInfo.rcMonitor.top,
+			monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left,
+			monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top,
+			SWP_FRAMECHANGED | SWP_NOACTIVATE);
+		ShowWindow(m_hWnd, SW_MAXIMIZE);
+	}
+	else {
+		SetWindowLongW(m_hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+		SetWindowPos(m_hWnd, HWND_NOTOPMOST,
+			m_WindowRect.left,
+			m_WindowRect.top,
+			m_WindowRect.right - m_WindowRect.left,
+			m_WindowRect.bottom - m_WindowRect.top,
+			SWP_FRAMECHANGED | SWP_NOACTIVATE);
+
+		ShowWindow(m_hWnd, SW_NORMAL);
 	}
 }
 
@@ -205,7 +236,7 @@ bool D3D11GraphicsContext::InitRenderingPipeline(
 
 	vbData[2].position = DirectX::XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f);
 	vbData[2].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-	size_t vbSize = sizeof(Vertex) * 9;
+	UINT vbSize = sizeof(Vertex) * 9;
 	CreateVertexBuffer(
 		m_pDevice.Get(), 
 		m_pIAVertexBuffer.GetAddressOf(), 
@@ -218,7 +249,7 @@ bool D3D11GraphicsContext::InitRenderingPipeline(
 	//Test Index Buffer
 	if (enableIndexing) {
 		unsigned int ibData[3] = { 0,1,2 };
-		size_t ibSize = sizeof(unsigned int) * 3;
+		UINT ibSize = sizeof(unsigned int) * 3;
 		CreateIndexBuffer(
 			m_pDevice.Get(), 
 			m_pIndexBuffer.GetAddressOf(), 
@@ -244,43 +275,47 @@ bool D3D11GraphicsContext::InitRenderingPipeline(
 			vbSize);
 	}
 
-	//Test Compute Unified Buffer
-	m_pComputeContext = std::unique_ptr<HC::ComputeContext>(
-		new HC::ComputeContext(GetDiscreteAdapter(), m_pDevice.Get()));
+	//COMPUTE CONTEXT:
+	//---------------
+	//m_pComputeContext = std::unique_ptr<HC::ComputeContext>(
+	//	new HC::ComputeContext(GetDiscreteAdapter(), m_pDevice.Get()));
+	
+	//Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer;
+	//m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
+	//D3D11_TEXTURE2D_DESC backBufferDesc = {};
+	//pBackBuffer->GetDesc(&backBufferDesc);
+	//UINT numPixels = backBufferDesc.Width * backBufferDesc.Height;
+	//size_t interopBufferSize = sizeof(HC::ComputeVertex) * static_cast<size_t>(numPixels);
+	//HC::ComputeVertex* interopBufferData = (HC::ComputeVertex*)malloc(interopBufferSize);
+	//CreateVertexBuffer(
+	//	m_pDevice.Get(), 
+	//	m_pIOPBuffer.GetAddressOf(), 
+	//	D3D11_USAGE_DEFAULT, 
+	//	D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_STREAM_OUTPUT, //D3D11_BIND_SHADER_RESOURCE 
+	//	0, 
+	//	interopBufferSize,
+	//	interopBufferData);
 
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer;
-	m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
-	D3D11_TEXTURE2D_DESC backBufferDesc = {};
-	pBackBuffer->GetDesc(&backBufferDesc);
-	UINT numPixels = backBufferDesc.Width * backBufferDesc.Height;
-	size_t iopBufferSize = sizeof(HC::ComputeVertex) * static_cast<size_t>(numPixels);
-	HC::ComputeVertex* iopBufferData = (HC::ComputeVertex*)malloc(iopBufferSize);
-	CreateVertexBuffer(
-		m_pDevice.Get(), 
-		m_pIOPBuffer.GetAddressOf(), 
-		D3D11_USAGE_DEFAULT, 
-		D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_SHADER_RESOURCE, //D3D11_BIND_SHADER_RESOURCE required for retained GPU memory iop write access
-		0, 
-		iopBufferSize,
-		iopBufferData);
+	//m_pComputeContext->ProcessUnifiedTriangleBuffer(
+	//	m_pIOPBuffer.Get(),
+	//	4);
 
-	m_pComputeContext->ProcessUnifiedSurfaceBuffer(
-		m_pIOPBuffer.Get(),
-		4, 
-		backBufferDesc.Width,
-		backBufferDesc.Height);
+	//m_pComputeContext->ProcessUnifiedSurfaceBuffer(
+	//	m_pIOPBuffer.Get(),
+	//	numPixels, 
+	//	backBufferDesc.Width,
+	//	backBufferDesc.Height);
+	//---------------
 
-	//Configure the drawing of the processed iop buffer 
 	//Convert world to model to view to clip space for accurate iop data processing
 	//Implement transforms
-	//Test with smaller buffer to render custom triangles (reconfigure kernel)
 
 	InitContext(
 		deferredContext,
 		rtv, 
-		D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_LINESTRIP,
-		m_pIOPBuffer.GetAddressOf(),
-		numPixels,
+		D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
+		m_pIAVertexBuffer.GetAddressOf(),
+		3,
 		enableIndexing,
 		enableSO);
 	return true;
@@ -452,6 +487,14 @@ LRESULT D3D11GraphicsContext::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lPa
 			}
 		}
 		break;
+		case 'F':
+		{
+			if (alt) {
+				m_ToggleFullscreen = !m_ToggleFullscreen;
+				ToggleFullscreen();
+			}
+		}
+		break;
 		case VK_ESCAPE:
 		{
 			OnDestroy();
@@ -594,8 +637,8 @@ void D3D11GraphicsContext::SetContextRSViewports(ID3D11DeviceContext* context, D
 	D3D11_VIEWPORT vp = {};
 	vp.Width = static_cast<float>(backBufferDesc.Width);
 	vp.Height = static_cast<float>(backBufferDesc.Height);
-	vp.MinDepth = D3D11_MIN_DEPTH;
-	vp.MaxDepth = D3D11_MAX_DEPTH;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
 	context->RSSetViewports(1, &vp);
@@ -617,12 +660,12 @@ bool D3D11GraphicsContext::CreateVertexBuffer(
 	D3D11_USAGE bufferType,
 	UINT bindFlags,
 	UINT cpuAccessFlag,
-	size_t vbSize,
+	UINT vbSize,
 	void* data)
 {
 	D3D11_BUFFER_DESC bd = {};
 	bd.Usage = bufferType;
-	bd.ByteWidth = vbSize; //Vertex Size: 32 bytes - Default Count: 3, GS Output: 9
+	bd.ByteWidth = vbSize; 
 	bd.BindFlags = bindFlags;
 	bd.CPUAccessFlags = cpuAccessFlag;
 	bd.MiscFlags = 0;
@@ -645,12 +688,12 @@ bool D3D11GraphicsContext::CreateIndexBuffer(
 	ID3D11Device* device, 
 	ID3D11Buffer** buffer, 
 	unsigned int* ib,
-	size_t ibSize)
+	UINT ibSize)
 {
 	D3D11_BUFFER_DESC bd = {};
-	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.Usage = D3D11_USAGE::D3D11_USAGE_DEFAULT;
 	bd.ByteWidth = ibSize;
-	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	bd.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 	bd.MiscFlags = 0;
 
@@ -674,10 +717,10 @@ bool D3D11GraphicsContext::CreateConstantBuffer()
 	vsCB.fWrapperC = 4.0f;
 
 	D3D11_BUFFER_DESC bd = {};
-	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.Usage = D3D11_USAGE::D3D11_USAGE_DYNAMIC;
 	bd.ByteWidth = sizeof(VS_ConstantBuffer);
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bd.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE;
 	bd.MiscFlags = 0;
 	bd.StructureByteStride = 0;
 
@@ -698,11 +741,11 @@ bool D3D11GraphicsContext::CreateTexture()
 	t2dd.Width = 256;
 	t2dd.Height = 256;
 	t2dd.MipLevels = t2dd.ArraySize = 1;
-	t2dd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	t2dd.Format = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM;
 	t2dd.SampleDesc = { 1,0 };
-	t2dd.Usage = D3D11_USAGE_DYNAMIC;
-	t2dd.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	t2dd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	t2dd.Usage = D3D11_USAGE::D3D11_USAGE_DYNAMIC;
+	t2dd.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_SHADER_RESOURCE;
+	t2dd.CPUAccessFlags = D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE;
 	t2dd.MiscFlags = 0;
 
 	DX::ThrowIfFailed(m_pDevice->CreateTexture2D(&t2dd, NULL, &m_pTexture2D));
@@ -830,8 +873,8 @@ bool D3D11GraphicsContext::SetupRasterizer(
 	ID3D11RasterizerState** rasterizerState)
 {
 	D3D11_RASTERIZER_DESC rd = {};
-	rd.FillMode = D3D11_FILL_SOLID;
-	rd.CullMode = D3D11_CULL_BACK;
+	rd.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
+	rd.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
 	rd.FrontCounterClockwise = false;
 	rd.DepthBias = false;
 	rd.DepthBiasClamp = 0;
@@ -874,8 +917,10 @@ bool D3D11GraphicsContext::SetupOutputMerger(
 	D3D11_TEXTURE2D_DESC scbbd = {};
 	pBackBuffer->GetDesc(&scbbd);
 	DXGI_FORMAT stencilFormats[2] =
-	{	DXGI_FORMAT_D24_UNORM_S8_UINT,
-		DXGI_FORMAT_D32_FLOAT_S8X24_UINT };
+	{ 
+		DXGI_FORMAT::DXGI_FORMAT_D24_UNORM_S8_UINT,
+		DXGI_FORMAT::DXGI_FORMAT_D32_FLOAT_S8X24_UINT 
+	};
 	UINT formatCheck;
 	int stencilFormatId = 0;
 	HRESULT hr;
@@ -894,35 +939,35 @@ bool D3D11GraphicsContext::SetupOutputMerger(
 	dd.ArraySize = 1;
 	dd.Format = stencilFormats[stencilFormatId];
 	dd.SampleDesc = { 1, 0 };
-	dd.Usage = D3D11_USAGE_DEFAULT;
-	dd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	dd.Usage = D3D11_USAGE::D3D11_USAGE_DEFAULT;
+	dd.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL;
 	dd.CPUAccessFlags = 0;
 	dd.MiscFlags = 0;
 	DX::ThrowIfFailed(device->CreateTexture2D(&dd, NULL, depthStencil));
 
 	D3D11_DEPTH_STENCIL_DESC dsd = {};
 	dsd.DepthEnable = true;
-	dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	dsd.DepthFunc = D3D11_COMPARISON_LESS;
+	dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
+	dsd.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS;
 	
 	dsd.StencilEnable = true;
 	dsd.StencilReadMask = 0xFF;
 	dsd.StencilWriteMask = 0xFF;
 	
-	dsd.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	dsd.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-	dsd.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	dsd.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	dsd.FrontFace.StencilFailOp = D3D11_STENCIL_OP::D3D11_STENCIL_OP_KEEP;
+	dsd.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP::D3D11_STENCIL_OP_INCR;
+	dsd.FrontFace.StencilPassOp = D3D11_STENCIL_OP::D3D11_STENCIL_OP_KEEP;
+	dsd.FrontFace.StencilFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_ALWAYS;
 
-	dsd.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	dsd.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-	dsd.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	dsd.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	dsd.BackFace.StencilFailOp = D3D11_STENCIL_OP::D3D11_STENCIL_OP_KEEP;
+	dsd.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP::D3D11_STENCIL_OP_INCR;
+	dsd.BackFace.StencilPassOp = D3D11_STENCIL_OP::D3D11_STENCIL_OP_KEEP;
+	dsd.BackFace.StencilFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_ALWAYS;
 	DX::ThrowIfFailed(m_pDevice->CreateDepthStencilState(&dsd, &m_pDepthStencilState));
 
 	D3D11_BLEND_DESC bd = {};
 	bd.RenderTarget[0].BlendEnable = FALSE;
-	bd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	bd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE::D3D11_COLOR_WRITE_ENABLE_ALL;
 	DX::ThrowIfFailed(m_pDevice->CreateBlendState(&bd, blendState));
 
 	return true;
@@ -937,18 +982,18 @@ bool D3D11GraphicsContext::SetupInputAssembler(
 
 	layout[0].SemanticName = "POSITION";
 	layout[0].SemanticIndex = 0;
-	layout[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	layout[0].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
 	layout[0].InputSlot = 0;
 	layout[0].AlignedByteOffset = 0;
-	layout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	layout[0].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
 	layout[0].InstanceDataStepRate = 0;
 
 	layout[1].SemanticName = "COLOR";
 	layout[1].SemanticIndex = 0;
-	layout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	layout[1].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
 	layout[1].InputSlot = 0;
 	layout[1].AlignedByteOffset = sizeof(float) * 4;
-	layout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	layout[1].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
 	layout[1].InstanceDataStepRate = 0;
 
 	device->CreateInputLayout(

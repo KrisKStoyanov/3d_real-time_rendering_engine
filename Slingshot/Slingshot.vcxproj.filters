@@ -27,9 +27,6 @@
     <ClCompile Include="D3D11GraphicsContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="D3D12GraphicsContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GUIConsole.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -53,16 +50,10 @@
     <ClInclude Include="Helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="D3D12GraphicsContext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CUDAContextScheduler.cuh">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GUIConsole.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="d3dx12.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SupportedContexts.h">

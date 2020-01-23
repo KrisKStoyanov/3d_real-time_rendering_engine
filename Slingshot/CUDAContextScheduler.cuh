@@ -145,6 +145,8 @@ namespace HC {
 		return (1.0f - t) * vec3(1.0f) + t * vec3(0.5f, 0.7f, 1.0f);
 	}
 
+	__host__ void InvokeCBTKernel(ComputeVertex** buffer);
+
 	//D3D11 Interop:
 	class ComputeContext {
 	public:
@@ -163,6 +165,23 @@ namespace HC {
 			return true;
 		}
 
+		__host__ void ProcessUnifiedTriangleBuffer(
+			ID3D11Resource* d3d11Res,
+			unsigned int flags)
+		{
+			cudaGraphicsResource* pInteropRes = NULL;
+			ProfileCUDA(cudaGraphicsD3D11RegisterResource(&pInteropRes, d3d11Res, 4));
+			ProfileCUDA(cudaGraphicsMapResources(1, &pInteropRes, 0));
+
+			size_t* interopBufferSize = new size_t(0);
+			ComputeVertex* interopBuffer = NULL;
+			ProfileCUDA(cudaGraphicsResourceGetMappedPointer((void**)&interopBuffer, interopBufferSize, pInteropRes));
+			InvokeCBTKernel((ComputeVertex**)&interopBuffer);
+
+			ProfileCUDA(cudaGraphicsUnmapResources(1, &pInteropRes, 0));
+			ProfileCUDA(cudaGraphicsUnregisterResource(pInteropRes));
+		}
+
 		__host__ void ProcessUnifiedSurfaceBuffer(
 			ID3D11Resource* d3d11Res,
 			unsigned int flags, 
@@ -173,10 +192,10 @@ namespace HC {
 			ProfileCUDA(cudaGraphicsD3D11RegisterResource(&pInteropRes, d3d11Res, 4));
 			ProfileCUDA(cudaGraphicsMapResources(1, &pInteropRes, 0));
 
-			size_t* surfaceBufferSize = new size_t(0);
-			ComputeVertex* surfaceBuffer = NULL;
-			ProfileCUDA(cudaGraphicsResourceGetMappedPointer((void**)&surfaceBuffer, surfaceBufferSize, pInteropRes));
-			InvokeCSPKernel((ComputeVertex**)&surfaceBuffer, surfaceBufferSize, surfaceW, surfaceH);
+			size_t* interopBufferSize = new size_t(0);
+			ComputeVertex* interopBuffer = NULL;
+			ProfileCUDA(cudaGraphicsResourceGetMappedPointer((void**)&interopBuffer, interopBufferSize, pInteropRes));
+			InvokeCSPKernel((ComputeVertex**)&interopBuffer, interopBufferSize, surfaceW, surfaceH);
 
 			//CPU data conversion test
 			//*iopBData = (ComputeVertex*)malloc(*surfaceBufferSize);

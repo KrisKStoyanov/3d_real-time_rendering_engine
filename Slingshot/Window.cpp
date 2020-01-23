@@ -26,9 +26,6 @@ LRESULT CALLBACK SetupProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case GC::D3D11:
 			pGC = new D3D11GraphicsContext(hwnd);
 			break;
-		case GC::D3D12:
-			pGC = new D3D12GraphicsContext(hwnd);
-			break;
 		default:
 			pGC = new D3D11GraphicsContext(hwnd);
 			break;
@@ -71,7 +68,9 @@ BOOL Window::Create(
 	wc.lpszClassName = m_wcName;
 	wc.hIconSm = NULL;
 
-	RegisterClassExW(&wc);
+	if (!RegisterClassExW(&wc)) {
+		return -1;
+	};
 
 	m_hWnd = CreateWindowExW(
 		dwExStyle,
@@ -86,7 +85,7 @@ BOOL Window::Create(
 		hMenu,
 		hInstance,
 		&graphicsContext);
-
+	
 	ShowWindow(m_hWnd, nCmdShow);
 
 	return (m_hWnd ? TRUE : FALSE);

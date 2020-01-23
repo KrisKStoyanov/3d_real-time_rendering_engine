@@ -176,7 +176,6 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="D3D11GraphicsContext.cpp" />
-    <ClCompile Include="D3D12GraphicsContext.cpp" />
     <ClCompile Include="FileHandler.cpp" />
     <ClCompile Include="GUIConsole.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -186,8 +185,6 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="CUDAContextScheduler.cuh" />
     <ClInclude Include="D3D11GraphicsContext.h" />
-    <ClInclude Include="D3D12GraphicsContext.h" />
-    <ClInclude Include="d3dx12.h" />
     <ClInclude Include="FileHandler.h" />
     <ClInclude Include="GraphicsContext.h" />
     <ClInclude Include="GraphicsWrappers.h" />
