@@ -69,7 +69,7 @@ BOOL Window::Create(
 	wc.hIconSm = NULL;
 
 	if (!RegisterClassExW(&wc)) {
-		return -1;
+		return false;
 	};
 
 	m_hWnd = CreateWindowExW(
@@ -88,7 +88,7 @@ BOOL Window::Create(
 	
 	ShowWindow(m_hWnd, nCmdShow);
 
-	return (m_hWnd ? TRUE : FALSE);
+	return true;
 }
 
 void Window::OnUpdate()
@@ -100,9 +100,9 @@ void Window::OnUpdate()
 	}
 }
 
-GraphicsContext* Window::GetWindowGC(HWND hwnd)
+GraphicsContext* Window::GetGraphicsContext()
 {
-	LONG_PTR ptr = GetWindowLongPtrW(hwnd, GWLP_USERDATA);
+	LONG_PTR ptr = GetWindowLongPtrW(m_hWnd, GWLP_USERDATA);
 	GraphicsContext* pGC = reinterpret_cast<GraphicsContext*>(ptr);
 	return pGC;
 }

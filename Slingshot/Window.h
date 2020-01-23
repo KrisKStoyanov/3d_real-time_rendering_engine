@@ -22,8 +22,9 @@ public:
 		int nCmdShow = 5);
 
 	void OnUpdate();
-	GraphicsContext* GetWindowGC(HWND hwnd);
+	GraphicsContext* GetGraphicsContext();
 private:
+	GC gc;
 	HWND m_hWnd;
 	const PCWSTR m_wcName = L"SlingshotWindow";
 };

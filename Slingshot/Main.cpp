@@ -1,4 +1,4 @@
-#include "Window.h"
+#include "Renderer.h"
 
 //SAL annotations for entry point parameter config 
 //(https://docs.microsoft.com/en-us/visualstudio/code-quality/understanding-sal?view=vs-2015)
@@ -14,7 +14,10 @@ int CALLBACK wWinMain(
 		L"Slingshot Graphics", 
 		WS_OVERLAPPEDWINDOW, 
 		nCmdShow)) {
-		win.OnUpdate();
+		Renderer renderer;
+		if (renderer.OnStart(&win)) {
+			renderer.OnUpdate();
+		}
 	}
 	return 0;
 }
