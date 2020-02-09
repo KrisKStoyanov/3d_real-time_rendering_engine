@@ -2,12 +2,12 @@
 
 LRESULT CALLBACK UpdateProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	GraphicsContext* pGC =
-		reinterpret_cast<GraphicsContext*>
+	Core* pCore =
+		reinterpret_cast<Core*>
 		(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
 
-	if (pGC) {
-		return pGC->HandleMessage(uMsg, wParam, lParam);
+	if (pCore) {
+		return pCore->HandleMessage(hwnd, uMsg, wParam, lParam);
 	}
 	else{
 		DestroyWindow(hwnd);
@@ -16,36 +16,37 @@ LRESULT CALLBACK UpdateProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
-LRESULT CALLBACK SetupProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK SetupProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	if (uMsg == WM_CREATE) {
-		GraphicsContext* pGC;
 		CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
-		GraphicsContextType* gcTag = reinterpret_cast<GraphicsContextType*>(pCreate->lpCreateParams);
-		switch (*gcTag) {
-		case GraphicsContextType::D3D11:
-			pGC = new D3D11GraphicsContext(hwnd);
-			break;
-		default:
-			pGC = new D3D11GraphicsContext(hwnd);
-			break;
-		}
+		CORE_DESC* pCoreDesc =
+			reinterpret_cast<CORE_DESC*>(pCreate->lpCreateParams);
 
-		SetWindowLongPtrW(
-			hwnd, GWLP_USERDATA,
-			reinterpret_cast<LONG_PTR>(pGC));
-		SetWindowLongPtrW(
-			hwnd, GWLP_WNDPROC,
-			reinterpret_cast<LONG_PTR>(UpdateProc));
-		pGC->OnCreate(hwnd);
+		Core* pCore = Core::Create(pCoreDesc, hWnd);
+		if (pCore) {
+			if (pCore->Initialize()) {
+				SetWindowLongPtrW(
+					hWnd, GWLP_USERDATA,
+					reinterpret_cast<LONG_PTR>(pCore));
+				SetWindowLongPtrW(
+					hWnd, GWLP_WNDPROC,
+					reinterpret_cast<LONG_PTR>(UpdateProc));
+			}
+		}			
 	}
-	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
+	return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }
 
-BOOL Window::Create(
-	WINDOW_DESC * window_desc)
+Window* Window::Create(WINDOW_DESC* window_desc, CORE_DESC* core_desc)
 {
+	return new Window(window_desc, core_desc);
+}
 
+Window::Window(
+	WINDOW_DESC * window_desc,
+	CORE_DESC * core_desc) : m_hWnd(nullptr), m_pDesc(nullptr)
+{
 	WNDCLASSEXW wc = {};
 	wc.cbSize = sizeof(WNDCLASSEX);
 	wc.style = window_desc->dwExStyle;
@@ -61,7 +62,7 @@ BOOL Window::Create(
 	wc.hIconSm = NULL;
 
 	if (!RegisterClassExW(&wc)) {
-		return false;
+		return;
 	};
 
 	m_hWnd = CreateWindowExW(
@@ -76,16 +77,14 @@ BOOL Window::Create(
 		window_desc->hWndParent,
 		window_desc->hMenu,
 		window_desc->hInstance,
-		&window_desc->graphicsContextType);
+		&core_desc);
 	
 	if (!m_hWnd) {
-		return false;
+		return;
 	}
 
 	ShowWindow(m_hWnd, window_desc->nCmdShow);
 	m_pDesc = window_desc;
-
-	return true;
 }
 
 int Window::OnUpdate(bool & isRunning)
@@ -101,11 +100,11 @@ int Window::OnUpdate(bool & isRunning)
 	return (int)msg.wParam;
 }
 
-GraphicsContext* Window::GetGraphicsContext()
+Core* Window::GetMessageHandler()
 {
 	LONG_PTR ptr = GetWindowLongPtrW(m_hWnd, GWLP_USERDATA);
-	GraphicsContext* pGC = reinterpret_cast<GraphicsContext*>(ptr);
-	return pGC;
+	Core* pCore = reinterpret_cast<Core*>(ptr);
+	return pCore;
 }
 
 BOOL Window::Shutdown()

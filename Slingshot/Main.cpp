@@ -1,5 +1,5 @@
 #include "Macros.h"
-#include "Core.h"
+#include "Engine.h"
 
 //SAL annotations for entry point parameter config 
 //(https://docs.microsoft.com/en-us/visualstudio/code-quality/understanding-sal?view=vs-2015)
@@ -11,16 +11,20 @@ int CALLBACK wWinMain(
 {
 	int status = EXIT_FAILURE;
 
-	Core* core = new Core();
-	if (core->Initialize(
-			&WINDOW_DESC(GraphicsContextType::D3D11,
+	Engine* engine = new Engine();
+	if (engine->Initialize(
+			&WINDOW_DESC(
 			hInstance,
 			L"Slingshot Graphics",
-			WS_OVERLAPPEDWINDOW,
-			nCmdShow))) {
-		status = core->Run();
+			nCmdShow,
+			1280, 720),
+			&CORE_DESC(
+				GraphicsContextType::D3D11
+			)
+		)) {
+		status = engine->Run();
 	}
-	SAFE_SHUTDOWN(core);
+	SAFE_SHUTDOWN(engine);
 
 	return status;
 }

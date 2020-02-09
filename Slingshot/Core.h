@@ -1,23 +1,24 @@
 #pragma once
-#include "Window.h"
-#include "Camera.h"
+#include "D3D11Context.h"
+
+struct CORE_DESC {
+	GraphicsContextType graphicsContextType;
+	CORE_DESC(
+		GraphicsContextType _graphicsContextType) :
+		graphicsContextType(_graphicsContextType) {}
+};
 
 class Core
 {
 public:
-	Core() : 
-		m_pWindow(nullptr), 
-		m_pGC(nullptr), 
-		m_pCamera(nullptr),
-		m_isRunning(false)
-	{};
-	bool Initialize(WINDOW_DESC * window_desc);
-	int Run();
+	static Core* Create(CORE_DESC* core_desc, HWND hWnd);
+	LRESULT CALLBACK HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	bool Initialize();
 	void Shutdown();
 private:
-	Window* m_pWindow;
-	GraphicsContext* m_pGC;
-	Camera* m_pCamera;
-	bool m_isRunning;
+	Core(CORE_DESC* core_desc, HWND hWnd);
+	CORE_DESC* m_pDesc;
+	D3D11Context* m_pGraphicsContext;
+	//Renderer & other subsystems go here
 };
 

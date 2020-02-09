@@ -176,8 +176,10 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Core.cpp" />
+    <ClCompile Include="D3D11Context.cpp" />
     <ClCompile Include="D3D11GraphicsContext.cpp" />
     <ClCompile Include="DXManager.cpp" />
+    <ClCompile Include="Engine.cpp" />
     <ClCompile Include="FileHandler.cpp" />
     <ClCompile Include="GUIConsole.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -188,15 +190,16 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="CUDAContextScheduler.cuh" />
+    <ClInclude Include="D3D11Context.h" />
     <ClInclude Include="D3D11GraphicsContext.h" />
     <ClInclude Include="DXManager.h" />
+    <ClInclude Include="Engine.h" />
     <ClInclude Include="FileHandler.h" />
     <ClInclude Include="GraphicsContext.h" />
     <ClInclude Include="GraphicsWrappers.h" />
     <ClInclude Include="GUIConsole.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="Macros.h" />
-    <ClInclude Include="SupportedContexts.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>

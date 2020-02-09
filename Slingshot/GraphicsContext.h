@@ -13,20 +13,21 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <vector>
 
-#include "SupportedContexts.h"
+enum class GraphicsContextType : unsigned int {
+	D3D11 = 0,
+	D3D12,
+	OpenGL,
+	Vulkan
+};
 
 class GraphicsContext
 {
 public:
-	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) { return LRESULT(); }
-
-	virtual void OnCreate(HWND hwnd) {};
-	virtual void OnDestroy() {};
-	virtual void OnPaint() {};
-	virtual void OnResize() {};
-	virtual void OnLButtonDown(int pixelX, int pixelY, DWORD flags) {};
-	virtual void OnLButtonUp() {};
-	virtual void OnMouseMove(int pixelX, int pixelY, DWORD flags) {};
+	//Render
+	//Update
+	//Shutdown
+	//Load?
 };
 

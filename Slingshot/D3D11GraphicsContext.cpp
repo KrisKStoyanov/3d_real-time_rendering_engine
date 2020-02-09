@@ -529,9 +529,9 @@ IDXGIAdapter* D3D11GraphicsContext::GetDiscreteAdapter()
 	//Retrieve adapter ID with highest dedicated memory
 	for (UINT i = 0; i < vpAdapters.size(); ++i) {
 		vpAdapters[i]->GetDesc(&ad);
-		if (ad.DedicatedSystemMemory > memCheck) {
+		if (ad.DedicatedVideoMemory > memCheck) {
 			adId = i;
-			memCheck = ad.DedicatedSystemMemory;
+			memCheck = ad.DedicatedVideoMemory;
 		}
 	}
 	IDXGIAdapter* adapter = vpAdapters[adId];
@@ -579,7 +579,6 @@ bool D3D11GraphicsContext::CreateDevice(
 
 bool D3D11GraphicsContext::CreateSwapChain(IDXGIAdapter* adapter, IDXGISwapChain1** swapChain)
 {
-	//Define swap chain behaviour
 	DXGI_SWAP_CHAIN_DESC1 sd = {0};
 	//ZeroMemory(&sd, sizeof(sd));
 	sd.Width = 1280;

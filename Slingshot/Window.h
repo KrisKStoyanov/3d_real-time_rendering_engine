@@ -1,42 +1,39 @@
 #pragma once
-#include "D3D11GraphicsContext.h"
+#include "Core.h"
 
 struct WINDOW_DESC {
-	GraphicsContextType graphicsContextType;
 	HINSTANCE hInstance;
 	PCWSTR lpWindowName;
+	int nCmdShow;
+	int nWidth, nHeight;
 	DWORD dwStyle;
 	DWORD dwExStyle;
 	PCWSTR lpClassName;
 	int xCoord, yCoord;
-	int nWidth, nHeight;
 	HWND hWndParent;
 	HMENU hMenu;
-	int nCmdShow;
 
 	WINDOW_DESC(
-		GraphicsContextType _graphicsContextType,
 		HINSTANCE _hInstance,
 		PCWSTR _lpWindowName,
-		DWORD _dwStyle,
 		int _nCmdShow = 5,
+		int _nWidth = 1280,
+		int _nHeight = 720,
+		DWORD _dwStyle = WS_OVERLAPPEDWINDOW,
 		DWORD _dwExStyle = 0,
 		PCWSTR _lpClassName = L"SlingshotWindow",
 		int _xCoord = CW_USEDEFAULT,
 		int _yCoord = CW_USEDEFAULT,
-		int _nWidth = CW_USEDEFAULT,
-		int _nHeight = CW_USEDEFAULT,
 		HWND _hWndParent = 0,
 		HMENU _hMenu = 0) :
-		graphicsContextType(_graphicsContextType),
 		hInstance(_hInstance),
 		lpWindowName(_lpWindowName),
-		dwStyle(_dwStyle),
 		nCmdShow(_nCmdShow),
+		nWidth(_nWidth), nHeight(_nHeight),
+		dwStyle(_dwStyle),
 		dwExStyle(_dwExStyle),
 		lpClassName(_lpClassName),
 		xCoord(_xCoord), yCoord(_yCoord),
-		nWidth(_nWidth), nHeight(_nHeight),
 		hWndParent(_hWndParent),
 		hMenu(_hMenu) {}
 };
@@ -44,12 +41,12 @@ struct WINDOW_DESC {
 class Window
 {
 public:
-	Window() : m_hWnd(nullptr), m_pDesc(nullptr) {}
-	BOOL Create(WINDOW_DESC * window_desc);
-	int OnUpdate(bool & isRunning);
-	GraphicsContext* GetGraphicsContext();
+	static Window* Create(WINDOW_DESC* window_desc, CORE_DESC* core_desc);
+	int OnUpdate(bool& isRunning);	
+	Core* GetMessageHandler();
 	BOOL Shutdown();
 private:
+	Window(WINDOW_DESC* window_desc, CORE_DESC* core_desc);
 	HWND m_hWnd;
 	WINDOW_DESC* m_pDesc;
 };
