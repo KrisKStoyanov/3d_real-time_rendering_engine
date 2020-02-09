@@ -7,6 +7,7 @@ class Renderer
 public:
 	Renderer() : m_Window(NULL), m_GC(NULL), m_Camera(NULL) {}
 
+	Renderer Create(Window* win);
 	BOOL OnStart(Window* win);
 	void OnUpdate();
 private:

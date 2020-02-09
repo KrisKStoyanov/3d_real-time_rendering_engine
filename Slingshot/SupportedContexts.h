@@ -1,7 +1,7 @@
 #pragma once
 
 //Graphics Context
-enum class GC : unsigned int {
+enum class GraphicsContextType : unsigned int {
 	D3D11 = 0,
 	D3D12,
 	OpenGL,

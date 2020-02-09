@@ -21,9 +21,9 @@ LRESULT CALLBACK SetupProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	if (uMsg == WM_CREATE) {
 		GraphicsContext* pGC;
 		CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
-		GC* gcTag = reinterpret_cast<GC*>(pCreate->lpCreateParams);
+		GraphicsContextType* gcTag = reinterpret_cast<GraphicsContextType*>(pCreate->lpCreateParams);
 		switch (*gcTag) {
-		case GC::D3D11:
+		case GraphicsContextType::D3D11:
 			pGC = new D3D11GraphicsContext(hwnd);
 			break;
 		default:
@@ -43,29 +43,21 @@ LRESULT CALLBACK SetupProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 BOOL Window::Create(
-	GC graphicsContext,
-	HINSTANCE hInstance,
-	PCWSTR lpWindowName, 
-	DWORD dwStyle, 
-	DWORD dwExStyle, 
-	int xCoord, int yCoord, 
-	int nWidth, int nHeight, 
-	HWND hWndParent, HMENU hMenu,
-	int nCmdShow)
+	WINDOW_DESC * window_desc)
 {
 
 	WNDCLASSEXW wc = {};
 	wc.cbSize = sizeof(WNDCLASSEX);
-	wc.style = dwExStyle;
+	wc.style = window_desc->dwExStyle;
 	wc.lpfnWndProc = SetupProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
-	wc.hInstance = hInstance;
+	wc.hInstance = window_desc->hInstance;
 	wc.hIcon = NULL;
 	wc.hCursor = LoadCursorW(NULL, IDC_ARROW);
 	wc.hbrBackground = NULL;
 	wc.lpszMenuName = NULL;
-	wc.lpszClassName = m_wcName;
+	wc.lpszClassName = window_desc->lpClassName;
 	wc.hIconSm = NULL;
 
 	if (!RegisterClassExW(&wc)) {
@@ -73,31 +65,40 @@ BOOL Window::Create(
 	};
 
 	m_hWnd = CreateWindowExW(
-		dwExStyle,
-		m_wcName,
-		lpWindowName,
-		dwStyle,
-		xCoord,
-		yCoord,
-		nWidth,
-		nHeight,
-		hWndParent,
-		hMenu,
-		hInstance,
-		&graphicsContext);
+		window_desc->dwExStyle,
+		window_desc->lpClassName,
+		window_desc->lpWindowName,
+		window_desc->dwStyle,
+		window_desc->xCoord,
+		window_desc->yCoord,
+		window_desc->nWidth,
+		window_desc->nHeight,
+		window_desc->hWndParent,
+		window_desc->hMenu,
+		window_desc->hInstance,
+		&window_desc->graphicsContextType);
 	
-	ShowWindow(m_hWnd, nCmdShow);
+	if (!m_hWnd) {
+		return false;
+	}
+
+	ShowWindow(m_hWnd, window_desc->nCmdShow);
+	m_pDesc = window_desc;
 
 	return true;
 }
 
-void Window::OnUpdate()
+int Window::OnUpdate(bool & isRunning)
 {
 	MSG msg = {};
-	while (GetMessageW(&msg, NULL, 0, 0)) {
+	while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
 		TranslateMessage(&msg);
 		DispatchMessageW(&msg);
+		if (msg.message == WM_QUIT) {
+			isRunning = false;
+		}
 	}
+	return (int)msg.wParam;
 }
 
 GraphicsContext* Window::GetGraphicsContext()
@@ -105,4 +106,10 @@ GraphicsContext* Window::GetGraphicsContext()
 	LONG_PTR ptr = GetWindowLongPtrW(m_hWnd, GWLP_USERDATA);
 	GraphicsContext* pGC = reinterpret_cast<GraphicsContext*>(ptr);
 	return pGC;
+}
+
+BOOL Window::Shutdown()
+{
+	DestroyWindow(m_hWnd);
+	return UnregisterClassW(m_pDesc->lpClassName, m_pDesc->hInstance);
 }

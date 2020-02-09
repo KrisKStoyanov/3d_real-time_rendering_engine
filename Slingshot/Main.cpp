@@ -1,4 +1,5 @@
-#include "Renderer.h"
+#include "Macros.h"
+#include "Core.h"
 
 //SAL annotations for entry point parameter config 
 //(https://docs.microsoft.com/en-us/visualstudio/code-quality/understanding-sal?view=vs-2015)
@@ -8,16 +9,18 @@ int CALLBACK wWinMain(
 	_In_ PWSTR lpCmdLine, 
 	_In_ int nCmdShow) 
 {
-	Window win;
-	if (win.Create(GC::D3D11, 
-		hInstance,
-		L"Slingshot Graphics", 
-		WS_OVERLAPPEDWINDOW, 
-		nCmdShow)) {
-		Renderer renderer;
-		if (renderer.OnStart(&win)) {
-			renderer.OnUpdate();
-		}
+	int status = EXIT_FAILURE;
+
+	Core* core = new Core();
+	if (core->Initialize(
+			&WINDOW_DESC(GraphicsContextType::D3D11,
+			hInstance,
+			L"Slingshot Graphics",
+			WS_OVERLAPPEDWINDOW,
+			nCmdShow))) {
+		status = core->Run();
 	}
-	return 0;
+	SAFE_SHUTDOWN(core);
+
+	return status;
 }
