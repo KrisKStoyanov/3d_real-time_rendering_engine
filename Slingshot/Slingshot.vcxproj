@@ -178,11 +178,13 @@
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="D3D11Context.cpp" />
     <ClCompile Include="D3D11GraphicsContext.cpp" />
-    <ClCompile Include="DXManager.cpp" />
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Entity.cpp" />
     <ClCompile Include="FileHandler.cpp" />
+    <ClCompile Include="GraphicsProps.cpp" />
     <ClCompile Include="GUIConsole.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -192,24 +194,35 @@
     <ClInclude Include="CUDAContextScheduler.cuh" />
     <ClInclude Include="D3D11Context.h" />
     <ClInclude Include="D3D11GraphicsContext.h" />
-    <ClInclude Include="DXManager.h" />
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="FileHandler.h" />
     <ClInclude Include="GraphicsContext.h" />
+    <ClInclude Include="GraphicsProps.h" />
     <ClInclude Include="GraphicsWrappers.h" />
     <ClInclude Include="GUIConsole.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="Macros.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="Vertex.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="CUDAContextScheduler.cu" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ColorShader.hlsli" />
     <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="ColorShader_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="ColorShader_VS.hlsl" />
     <FxCompile Include="DomainShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Domain</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>

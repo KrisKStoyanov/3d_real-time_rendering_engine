@@ -1,5 +1,19 @@
 #pragma once
-#include "Core.h"
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <shellapi.h>
+
+#include <windef.h>
+#include <windowsx.h>
+
+#include <wrl.h>
+#include <wrl/client.h>
+#include <algorithm>
+#include <cassert>
+#include <chrono>
+#include <vector>
+#include <fstream>
 
 struct WINDOW_DESC {
 	HINSTANCE hInstance;

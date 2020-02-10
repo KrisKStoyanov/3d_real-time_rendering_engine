@@ -7,6 +7,11 @@ D3D11Context* D3D11Context::Create(HWND hWnd)
 
 D3D11Context::D3D11Context(HWND hWnd)
 {
+	RECT winRect;
+	GetWindowRect(hWnd, &winRect);
+	UINT winWidth = winRect.right - winRect.left;
+	UINT winHeight = winRect.bottom - winRect.top;
+
 	m_clearColor[0] = 0.2f;
 	m_clearColor[1] = 0.8f;
 	m_clearColor[2] = 1.0f;
@@ -22,12 +27,23 @@ D3D11Context::D3D11Context(HWND hWnd)
 	CreateSwapChain(
 		pAdapter,
 		m_pSwapChain.GetAddressOf(), 
-		hWnd);
+		hWnd, winWidth, winHeight);
 
 	CreateRenderTargetView(
 		m_pDevice.Get(),
 		m_pSwapChain.Get(),
 		m_pRenderTargetView.GetAddressOf());
+
+	CreateDepthStencilBuffer(
+		m_pDevice.Get(),
+		m_pDepthStencilBuffer.GetAddressOf(), 
+		winWidth, 
+		winHeight);
+
+	CreateDepthStencilView(
+		m_pDevice.Get(),
+		m_pDepthStencilBuffer.Get(),
+		m_pDepthStencilView.GetAddressOf());
 
 	pAdapter->Release();
 }
@@ -104,14 +120,9 @@ void D3D11Context::CreateDeviceAndContext(
 void D3D11Context::CreateSwapChain(
 	IDXGIAdapter* adapter, 
 	IDXGISwapChain1** swapChain, 
-	HWND hWnd)
+	HWND hWnd, UINT winWidth, UINT winHeight)
 {
-	RECT winRect;
-	GetWindowRect(hWnd, &winRect);
-	UINT winWidth = winRect.right - winRect.left;
-	UINT winHeight = winRect.bottom - winRect.top;
-
-	DXGI_SWAP_CHAIN_DESC1 sd = {};
+	DXGI_SWAP_CHAIN_DESC1 sd;
 	ZeroMemory(&sd, sizeof(sd));
 	sd.Width = winWidth;
 	sd.Height = winHeight;
@@ -156,14 +167,71 @@ void D3D11Context::CreateRenderTargetView(
 	}
 }
 
+void D3D11Context::CreateDepthStencilBuffer(
+	ID3D11Device* device,
+	ID3D11Texture2D** depthStencilBuffer,
+	UINT winWidth, UINT winHeight)
+{
+	D3D11_TEXTURE2D_DESC depthBufferDesc;
+	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
+	depthBufferDesc.Width = winWidth;
+	depthBufferDesc.Height = winHeight;
+	depthBufferDesc.MipLevels = 1;
+	depthBufferDesc.ArraySize = 1;
+	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthBufferDesc.SampleDesc.Count = 1;
+	depthBufferDesc.SampleDesc.Quality = 0;
+	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthBufferDesc.CPUAccessFlags = 0;
+	depthBufferDesc.MiscFlags = 0;
+
+	DX::ThrowIfFailed(device->CreateTexture2D(&depthBufferDesc, nullptr, depthStencilBuffer));
+}
+
+void D3D11Context::CreateDepthStencilView(
+	ID3D11Device* device,
+	ID3D11Texture2D* depthStencilBuffer, 
+	ID3D11DepthStencilView** depthStencilView)
+{
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	DX::ThrowIfFailed(
+		device->CreateDepthStencilView(
+			depthStencilBuffer, 
+			&depthStencilViewDesc, 
+			depthStencilView));
+}
+
+void D3D11Context::SetupViewport(D3D11_VIEWPORT viewport, UINT winWidth, UINT winHeight)
+{
+	ZeroMemory(&viewport, sizeof(viewport));
+	viewport.Width = static_cast<float>(winWidth);
+	viewport.Height = static_cast<float>(winHeight);
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+}
+
 bool D3D11Context::Initialize()
 {
+	m_pImmediateContext->OMSetRenderTargets(1, 
+		m_pRenderTargetView.GetAddressOf(), 
+		m_pDepthStencilView.Get());
+	m_pImmediateContext->RSSetViewports(1, &m_viewport);
+
 	return true;
 }
 
 void D3D11Context::StartFrameRender()
 {
 	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_clearColor);
+	m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
 void D3D11Context::EndFrameRender()
@@ -174,8 +242,20 @@ void D3D11Context::EndFrameRender()
 
 void D3D11Context::Shutdown()
 {
+	m_pDepthStencilBuffer->Release();
+	m_pDepthStencilView->Release();
 	m_pRenderTargetView->Release();
 	m_pSwapChain->Release();
 	m_pDevice->Release();
 	m_pImmediateContext->Release();
+}
+
+ID3D11Device* D3D11Context::GetDevice()
+{
+	return m_pDevice.Get();
+}
+
+ID3D11DeviceContext* D3D11Context::GetDeviceContext()
+{
+	return m_pImmediateContext.Get();
 }

@@ -2,11 +2,10 @@
 
 bool Engine::Initialize(WINDOW_DESC* window_desc, CORE_DESC* core_desc)
 {
-	m_pWindow = Window::Create(window_desc);
-	if (m_pWindow) {
-		m_pCore = Core::Create(core_desc, m_pWindow->GetHandle());
-		if (m_pCore) {
-			m_isRunning = m_pCore->Initialize();
+	if (m_pWindow = Window::Create(window_desc)) {
+		HWND hWnd = m_pWindow->GetHandle();
+		if (m_pCore = Core::Create(core_desc, hWnd)) {
+			m_isRunning = m_pCore->Initialize(hWnd);
 		}
 	}
 	return m_isRunning;
@@ -23,14 +22,13 @@ int Engine::Run()
 				m_isRunning = false;
 			}
 		}
-		//Use Core to process input, render, etc
-		m_pCore->OnFrameRender();
+		m_pCore->OnUpdate();
 	}
 	return (int)msg.wParam;
 }
 
 void Engine::Shutdown()
 {
-	m_pWindow->Shutdown();
-	m_pCore->Shutdown();
+	SAFE_SHUTDOWN(m_pCore);
+	SAFE_SHUTDOWN(m_pWindow);
 }

@@ -1,18 +1,16 @@
 #pragma once
-#include "Window.h"
+//Include other supported contexts for multiple setup & render variants
 #include "Camera.h"
+#include "Entity.h"
 
-class Renderer
-{
+class Renderer {
 public:
-	Renderer() : m_Window(NULL), m_GC(NULL), m_Camera(NULL) {}
+	bool Initialize(HWND hWnd, GraphicsContextType graphicsContextType);
+	void OnFrameRender();
+	void Shutdown();
 
-	Renderer Create(Window* win);
-	BOOL OnStart(Window* win);
-	void OnUpdate();
+	bool Setup(D3D11Context* context, Entity* entity);
+	void Render(D3D11Context* context, Entity* entity);
 private:
-	Window* m_Window;
-	GraphicsContext* m_GC;
-	Camera* m_Camera;
+	D3D11Context* m_pGraphicsContext;
 };
-

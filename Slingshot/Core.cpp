@@ -21,7 +21,7 @@ Core* Core::Create(CORE_DESC* core_desc, HWND hWnd)
 	return new Core(core_desc, hWnd);
 }
 
-Core::Core(CORE_DESC* core_desc, HWND hWnd) : m_pDesc(nullptr), m_pGraphicsContext(nullptr)
+Core::Core(CORE_DESC* core_desc, HWND hWnd) : m_pDesc(nullptr), m_pRenderer(nullptr)
 {
 	SetWindowLongPtrW(
 		hWnd, GWLP_USERDATA,
@@ -30,19 +30,6 @@ Core::Core(CORE_DESC* core_desc, HWND hWnd) : m_pDesc(nullptr), m_pGraphicsConte
 		hWnd, GWLP_WNDPROC,
 		reinterpret_cast<LONG_PTR>(CoreProc));
 
-	switch (core_desc->graphicsContextType)
-	{
-	case GraphicsContextType::D3D11:
-	{
-		m_pGraphicsContext = D3D11Context::Create(hWnd);
-	}
-	break;
-	default:
-	{
-		m_pGraphicsContext = D3D11Context::Create(hWnd);
-	}
-	break;
-	}
 	m_pDesc = core_desc;
 }
 
@@ -51,7 +38,7 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	switch (uMsg) {
 	case WM_PAINT:
 	{
-		OnFrameRender();
+		m_pRenderer->OnFrameRender();
 	}
 	break;
 	case WM_SYSKEYDOWN:
@@ -80,20 +67,19 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-bool Core::Initialize()
+bool Core::Initialize(HWND hWnd)
 {
-	bool success = m_pGraphicsContext->Initialize();
+	bool success = m_pRenderer->Initialize(hWnd, m_pDesc->graphicsContextType);
+	//Room for subsystems expansion
 	return success;
 }
 
-void Core::OnFrameRender(void)
+void Core::OnUpdate(void)
 {
-	m_pGraphicsContext->StartFrameRender();
-	//Render something
-	m_pGraphicsContext->EndFrameRender();
+	m_pRenderer->OnFrameRender();
 }
 
-void Core::Shutdown()
+void Core::Shutdown(void)
 {
-	m_pGraphicsContext->Shutdown();
+	m_pRenderer->Shutdown();
 }

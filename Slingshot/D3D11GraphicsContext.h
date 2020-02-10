@@ -14,7 +14,7 @@
 #include "GraphicsWrappers.h"
 #include "CUDAContextScheduler.cuh"
 
-class D3D11GraphicsContext : public GraphicsContext
+class D3D11GraphicsContext
 {
 public:
 	D3D11GraphicsContext(HWND hwnd);
