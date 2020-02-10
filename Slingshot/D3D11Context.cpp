@@ -12,15 +12,15 @@ D3D11Context::D3D11Context(HWND hWnd)
 	m_clearColor[2] = 1.0f;
 	m_clearColor[3] = 1.0f;
 
-	Microsoft::WRL::ComPtr<IDXGIAdapter> pAdapter = GetLatestDiscreteAdapter();
+	IDXGIAdapter* pAdapter = GetLatestDiscreteAdapter();
 	
 	CreateDeviceAndContext(
-		pAdapter.Get(), 
+		pAdapter, 
 		m_pDevice.GetAddressOf(), 
 		m_pImmediateContext.GetAddressOf());
 
 	CreateSwapChain(
-		pAdapter.Get(),
+		pAdapter,
 		m_pSwapChain.GetAddressOf(), 
 		hWnd);
 
@@ -34,14 +34,14 @@ D3D11Context::D3D11Context(HWND hWnd)
 
 std::vector<IDXGIAdapter*> D3D11Context::QueryAdapters()
 {
-	Microsoft::WRL::ComPtr<IDXGIAdapter> pAdapter;
+	IDXGIAdapter* pAdapter;
 	std::vector<IDXGIAdapter*> vpAdapters;
-	Microsoft::WRL::ComPtr<IDXGIFactory2> pFactory;
+	IDXGIFactory2* pFactory;
 
 	DX::ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&pFactory)));
 	for (UINT i = 0;
-		pFactory->EnumAdapters(i, pAdapter.GetAddressOf()) != DXGI_ERROR_NOT_FOUND; ++i) {
-		vpAdapters.push_back(pAdapter.Get());
+		pFactory->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND; ++i) {
+		vpAdapters.push_back(pAdapter);
 	}
 
 	pFactory->Release();
@@ -106,10 +106,15 @@ void D3D11Context::CreateSwapChain(
 	IDXGISwapChain1** swapChain, 
 	HWND hWnd)
 {
+	RECT winRect;
+	GetWindowRect(hWnd, &winRect);
+	UINT winWidth = winRect.right - winRect.left;
+	UINT winHeight = winRect.bottom - winRect.top;
+
 	DXGI_SWAP_CHAIN_DESC1 sd = {};
 	ZeroMemory(&sd, sizeof(sd));
-	sd.Width = 1280;
-	sd.Height = 720;
+	sd.Width = winWidth;
+	sd.Height = winHeight;
 	sd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	sd.Stereo = FALSE;
 	sd.SampleDesc = { 1, 0 };
@@ -120,21 +125,22 @@ void D3D11Context::CreateSwapChain(
 	sd.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 	sd.Flags = 0;
 
-	Microsoft::WRL::ComPtr<IDXGIOutput> pOutput;
+	IDXGIOutput* pOutput;
 	adapter->EnumOutputs(0, &pOutput);
 
-	Microsoft::WRL::ComPtr<IDXGIFactory2> pFactory;
+	IDXGIFactory2* pFactory;
 	DX::ThrowIfFailed(adapter->GetParent(IID_PPV_ARGS(&pFactory)));
 	DX::ThrowIfFailed(pFactory->CreateSwapChainForHwnd(
 		m_pDevice.Get(),
 		hWnd,
 		&sd,
 		NULL,
-		pOutput.Get(),
+		pOutput,
 		swapChain
 	));
 
 	pOutput->Release();
+	pFactory->Release();
 }
 
 void D3D11Context::CreateRenderTargetView(
@@ -142,9 +148,12 @@ void D3D11Context::CreateRenderTargetView(
 	IDXGISwapChain1* swapChain, 
 	ID3D11RenderTargetView** rtv)
 {
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> pBackBuffer;
+	ID3D11Texture2D* pBackBuffer;
 	DX::ThrowIfFailed(swapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
-	DX::ThrowIfFailed(device->CreateRenderTargetView(pBackBuffer.Get(), NULL, rtv));
+	if (pBackBuffer != nullptr) {
+		DX::ThrowIfFailed(device->CreateRenderTargetView(pBackBuffer, NULL, rtv));
+		pBackBuffer->Release();
+	}
 }
 
 bool D3D11Context::Initialize()
@@ -155,11 +164,12 @@ bool D3D11Context::Initialize()
 void D3D11Context::StartFrameRender()
 {
 	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_clearColor);
-	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
 }
 
 void D3D11Context::EndFrameRender()
 {
+	//V-Sync enabled
+	DX::ThrowIfFailed(m_pSwapChain->Present(1, 0));
 }
 
 void D3D11Context::Shutdown()

@@ -15,6 +15,7 @@ public:
 	LRESULT CALLBACK HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	bool Initialize();
 	void Shutdown();
+	void OnFrameRender(void);
 private:
 	Core(CORE_DESC* core_desc, HWND hWnd);
 	CORE_DESC* m_pDesc;

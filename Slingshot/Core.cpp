@@ -28,11 +28,9 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	switch (uMsg) {
 	case WM_PAINT:
 	{
-		//Render
-		m_pGraphicsContext->StartFrameRender();
+		OnFrameRender();
 	}
 	break;
-
 	case WM_SYSKEYDOWN:
 	case WM_KEYDOWN:
 	{
@@ -44,8 +42,6 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 	}
 	break;
-	case WM_SYSCHAR:
-		break;
 	case WM_QUIT:
 	case WM_DESTROY:
 	{
@@ -65,6 +61,13 @@ bool Core::Initialize()
 {
 	bool success = m_pGraphicsContext->Initialize();
 	return success;
+}
+
+void Core::OnFrameRender(void)
+{
+	m_pGraphicsContext->StartFrameRender();
+	//Render something
+	m_pGraphicsContext->EndFrameRender();
 }
 
 void Core::Shutdown()
