@@ -41,12 +41,11 @@ struct WINDOW_DESC {
 class Window
 {
 public:
-	static Window* Create(WINDOW_DESC* window_desc, CORE_DESC* core_desc);
-	int OnUpdate(bool& isRunning);	
-	Core* GetMessageHandler();
+	static Window* Create(WINDOW_DESC* window_desc);
+	HWND GetHandle();
 	BOOL Shutdown();
 private:
-	Window(WINDOW_DESC* window_desc, CORE_DESC* core_desc);
+	Window(WINDOW_DESC* window_desc);
 	HWND m_hWnd;
 	WINDOW_DESC* m_pDesc;
 };

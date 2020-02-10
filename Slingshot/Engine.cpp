@@ -2,11 +2,11 @@
 
 bool Engine::Initialize(WINDOW_DESC* window_desc, CORE_DESC* core_desc)
 {
-	m_pWindow = Window::Create(window_desc, core_desc);
+	m_pWindow = Window::Create(window_desc);
 	if (m_pWindow) {
-		m_pCore = m_pWindow->GetMessageHandler();
+		m_pCore = Core::Create(core_desc, m_pWindow->GetHandle());
 		if (m_pCore) {
-			m_isRunning = true;
+			m_isRunning = m_pCore->Initialize();
 		}
 	}
 	return m_isRunning;
@@ -14,12 +14,19 @@ bool Engine::Initialize(WINDOW_DESC* window_desc, CORE_DESC* core_desc)
 
 int Engine::Run()
 {
-	int status = EXIT_SUCCESS;
+	MSG msg = {};
 	while (m_isRunning) {
-		status = m_pWindow->OnUpdate(m_isRunning);
-		//Do stuff with Core here
+		while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessageW(&msg);
+			if (msg.message == WM_QUIT) {
+				m_isRunning = false;
+			}
+		}
+		//Use Core to process input, render, etc
+		m_pCore->OnFrameRender();
 	}
-	return status;
+	return (int)msg.wParam;
 }
 
 void Engine::Shutdown()

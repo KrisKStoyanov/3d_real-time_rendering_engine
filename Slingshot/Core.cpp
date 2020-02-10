@@ -1,5 +1,21 @@
 #include "Core.h"
 
+LRESULT CALLBACK CoreProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	Core* pCore =
+		reinterpret_cast<Core*>
+		(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+
+	if (pCore) {
+		return pCore->HandleMessage(hwnd, uMsg, wParam, lParam);
+	}
+	else {
+		DestroyWindow(hwnd);
+		PostQuitMessage(0);
+	}
+	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
+}
+
 Core* Core::Create(CORE_DESC* core_desc, HWND hWnd)
 {
 	return new Core(core_desc, hWnd);
@@ -7,6 +23,13 @@ Core* Core::Create(CORE_DESC* core_desc, HWND hWnd)
 
 Core::Core(CORE_DESC* core_desc, HWND hWnd) : m_pDesc(nullptr), m_pGraphicsContext(nullptr)
 {
+	SetWindowLongPtrW(
+		hWnd, GWLP_USERDATA,
+		reinterpret_cast<LONG_PTR>(this));
+	SetWindowLongPtrW(
+		hWnd, GWLP_WNDPROC,
+		reinterpret_cast<LONG_PTR>(CoreProc));
+
 	switch (core_desc->graphicsContextType)
 	{
 	case GraphicsContextType::D3D11:
