@@ -1,9 +1,4 @@
-## Welcome to my largest project yet
+## Welcome
 
-Slingshot is an aspiration to achieve a product worth of several years of studying graphics programming starting from 2016. My aim is to combine multiple 3D Graphics APIs under one banner in an application which I can use to continuously hone my skills in this craft.
-
-### D3D11, OpenGL, D3D12, Vulkan <-> CUDA, OptiX, OpenCL
-
-Those are some of the APIs and platforms I currently plan to integrate at some point.
-Thanks for stopping by and I hope you find what you are looking for.
+This is where update and maintain an ongoing project related to the development of a 3D graphics engine. I use this project as an opportunity to keep my skills in shape while learning and testing new technologies related to the field that I find interesting.
 
