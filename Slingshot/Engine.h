@@ -10,7 +10,7 @@ public:
 	{}
 	bool Initialize(
 		WINDOW_DESC* window_desc,
-		CORE_DESC* core_desc);
+		RENDERER_DESC* renderer_desc);
 	int Run();
 	void Shutdown();
 private:

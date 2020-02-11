@@ -7,3 +7,6 @@ enum class GraphicsContextType : unsigned int {
 	OpenGL,
 	Vulkan
 };
+
+//TODO:
+//virtual abstract class for extending functionality across different context types through polymorphism

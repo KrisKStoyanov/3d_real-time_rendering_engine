@@ -1,5 +1,6 @@
 #pragma once
 #include "D3D11Context.h"
+#include "Vertex.h"
 
 class GraphicsProps {
 public:

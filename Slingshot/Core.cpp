@@ -16,12 +16,12 @@ LRESULT CALLBACK CoreProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
-Core* Core::Create(CORE_DESC* core_desc, HWND hWnd)
+Core* Core::Create(HWND hWnd)
 {
-	return new Core(core_desc, hWnd);
+	return new Core(hWnd);
 }
 
-Core::Core(CORE_DESC* core_desc, HWND hWnd) : m_pDesc(nullptr), m_pRenderer(nullptr)
+Core::Core(HWND hWnd) : m_hWnd(nullptr), m_pRenderer(nullptr)
 {
 	SetWindowLongPtrW(
 		hWnd, GWLP_USERDATA,
@@ -29,8 +29,7 @@ Core::Core(CORE_DESC* core_desc, HWND hWnd) : m_pDesc(nullptr), m_pRenderer(null
 	SetWindowLongPtrW(
 		hWnd, GWLP_WNDPROC,
 		reinterpret_cast<LONG_PTR>(CoreProc));
-
-	m_pDesc = core_desc;
+	m_hWnd = hWnd;
 }
 
 LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -67,11 +66,13 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-bool Core::Initialize(HWND hWnd)
+bool Core::InitializeRenderer(RENDERER_DESC* renderer_desc)
 {
-	m_pRenderer = new Renderer();
-	bool success = m_pRenderer->Initialize(hWnd, m_pDesc->graphicsContextType);
-	//Room for subsystems expansion
+	m_pRenderer = Renderer::Create(m_hWnd, renderer_desc);
+	bool success = (m_pRenderer != nullptr);
+	if (success) {
+		success = m_pRenderer->Initialize();
+	}
 	return success;
 }
 
@@ -82,5 +83,5 @@ void Core::OnUpdate(void)
 
 void Core::Shutdown(void)
 {
-	m_pRenderer->Shutdown();
+	SAFE_SHUTDOWN(m_pRenderer);
 }

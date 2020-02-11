@@ -31,12 +31,17 @@ bool GraphicsProps::Setup(D3D11Context* context)
 	VS_inputLayout[1].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
 	VS_inputLayout[1].InstanceDataStepRate = 0;
 
+	SAFE_DELETE_ARRAY(VS_bytecode);
+	SAFE_DELETE_ARRAY(PS_bytecode);
+
 	return setup;
 }
 
 void GraphicsProps::Clear()
 {
-
+	SAFE_RELEASE(m_pVS);
+	SAFE_RELEASE(m_pPS);
+	SAFE_RELEASE(m_pIL);
 }
 
 bool GraphicsProps::GetSetupStatus()

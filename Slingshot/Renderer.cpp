@@ -1,8 +1,13 @@
 #include "Renderer.h"
 
-bool Renderer::Initialize(HWND hWnd, GraphicsContextType graphicsContextType)
+Renderer* Renderer::Create(HWND hWnd, RENDERER_DESC* renderer_desc)
 {
-	switch (graphicsContextType)
+	return new Renderer(hWnd, renderer_desc);
+}
+
+Renderer::Renderer(HWND hWnd, RENDERER_DESC* renderer_desc) : m_pDesc(nullptr), m_pGraphicsContext(nullptr)
+{
+	switch (renderer_desc->graphicsContextType)
 	{
 	case GraphicsContextType::D3D11:
 	{
@@ -17,9 +22,15 @@ bool Renderer::Initialize(HWND hWnd, GraphicsContextType graphicsContextType)
 	}
 
 	if (!m_pGraphicsContext) {
-		return false;
+		return;
 	}
-	return true;
+	m_pDesc = renderer_desc;
+}
+
+bool Renderer::Initialize()
+{
+	bool status = m_pGraphicsContext->Initialize();
+	return status;
 }
 
 void Renderer::OnFrameRender()
@@ -33,3 +44,4 @@ void Renderer::Shutdown()
 {
 	m_pGraphicsContext->Shutdown();
 }
+

@@ -13,11 +13,11 @@ int CALLBACK wWinMain(
 	Engine* engine = new Engine();
 	if (engine->Initialize(
 			&WINDOW_DESC(
-			hInstance,
-			L"Slingshot Graphics",
-			nCmdShow,
-			1280, 720),
-			&CORE_DESC(
+				hInstance,
+				L"Slingshot Graphics",
+				nCmdShow,
+				1280, 720),
+			&RENDERER_DESC(
 				GraphicsContextType::D3D11
 			)
 		)) {

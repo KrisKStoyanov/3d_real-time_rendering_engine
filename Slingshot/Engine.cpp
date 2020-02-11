@@ -1,11 +1,11 @@
 #include "Engine.h"
 
-bool Engine::Initialize(WINDOW_DESC* window_desc, CORE_DESC* core_desc)
+bool Engine::Initialize(WINDOW_DESC* window_desc, RENDERER_DESC* renderer_desc)
 {
 	if (m_pWindow = Window::Create(window_desc)) {
 		HWND hWnd = m_pWindow->GetHandle();
-		if (m_pCore = Core::Create(core_desc, hWnd)) {
-			m_isRunning = m_pCore->Initialize(hWnd);
+		if (m_pCore = Core::Create(hWnd)) {
+			m_isRunning = m_pCore->InitializeRenderer(renderer_desc);
 		}
 	}
 	return m_isRunning;

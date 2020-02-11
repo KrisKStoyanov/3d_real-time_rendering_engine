@@ -5,9 +5,15 @@
 class Entity {
 
 public:
-	Transform* GetTransform();
-	GraphicsProps* GetGraphicsProps();
+	Entity();
+	~Entity();
+
+	void AttachGraphicsProps(GraphicsProps gProps);
+	void DetachGraphicsProps();
+
+	Transform GetTransform();
+	GraphicsProps GetGraphicsProps();
 private:
-	Transform* m_pTransform;
-	GraphicsProps* m_gProps;
+	Transform m_transform;
+	GraphicsProps m_gProps;
 };
