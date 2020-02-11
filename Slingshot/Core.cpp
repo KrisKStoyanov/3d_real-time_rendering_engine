@@ -69,6 +69,7 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 bool Core::Initialize(HWND hWnd)
 {
+	m_pRenderer = new Renderer();
 	bool success = m_pRenderer->Initialize(hWnd, m_pDesc->graphicsContextType);
 	//Room for subsystems expansion
 	return success;
