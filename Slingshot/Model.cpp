@@ -8,7 +8,7 @@ Model* Model::Create(D3D11Context* context, MODEL_DESC* model_desc)
 Model::Model(D3D11Context* graphicsContext, MODEL_DESC* model_desc) : m_pMesh(nullptr)
 {
 	if ((m_pMesh = Mesh::Create(graphicsContext, model_desc->mesh_desc)) != nullptr) {
-		m_pMesh->SetGraphicsProps(graphicsContext, model_desc->shader_desc);
+		m_pMesh->SetGraphicsProps(graphicsContext, model_desc->shader_desc, model_desc->mesh_desc->vertexType);
 	}
 }
 

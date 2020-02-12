@@ -11,14 +11,31 @@ void Mesh::Shutdown()
 }
 
 Mesh::Mesh(D3D11Context* graphicsContext, MESH_DESC* mesh_desc) :
-	m_pGraphicsProps(nullptr), 
-	m_pVBuffer(nullptr), m_pIBuffer(nullptr), 
-	m_vertexCount(mesh_desc->vertexCount), m_indexCount(mesh_desc->indexCount)
+	m_pGraphicsProps(nullptr),
+	m_pVBuffer(nullptr), m_pIBuffer(nullptr),
+	m_vertexCount(mesh_desc->vertexCount), m_indexCount(mesh_desc->indexCount),
+	m_VBufferStride(0), m_VBufferOffset(0), m_topology(mesh_desc->topology)
 {
+	switch (mesh_desc->vertexType)
+	{
+	case VertexType::ColorShaderVertex:
+	{
+		m_VBufferStride = sizeof(ColorShaderVertex);
+		m_VBufferOffset = 0;
+	}
+	break;
+	default:
+	{
+		m_VBufferStride = sizeof(ColorShaderVertex);
+		m_VBufferOffset = 0;
+	}
+	break;
+	}
+
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(*mesh_desc->vertexCollection) * mesh_desc->vertexCount;
+	vertexBufferDesc.ByteWidth = m_VBufferStride * mesh_desc->vertexCount;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = 0;
 	vertexBufferDesc.MiscFlags = 0;
@@ -55,18 +72,16 @@ Mesh::Mesh(D3D11Context* graphicsContext, MESH_DESC* mesh_desc) :
 	SAFE_DELETE_ARRAY(mesh_desc->indexCollection);
 }
 
-void Mesh::SetGraphicsProps(D3D11Context* renderer, SHADER_DESC* shader_desc)
+void Mesh::SetGraphicsProps(D3D11Context* renderer, SHADER_DESC* shader_desc, VertexType vertexType)
 {
-	m_pGraphicsProps = GraphicsProps::Create(renderer, shader_desc);
+	m_pGraphicsProps = GraphicsProps::Create(renderer, shader_desc, vertexType);
 }
 
 void Mesh::Render(D3D11Context* graphicsContext)
 {
-	unsigned int stride = sizeof(ColorShaderVertex);
-	unsigned int offset = 0;
-	graphicsContext->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_pVBuffer, &stride, &offset);
+	graphicsContext->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_pVBuffer, &m_VBufferStride, &m_VBufferOffset);
 	graphicsContext->GetDeviceContext()->IASetIndexBuffer(m_pIBuffer, DXGI_FORMAT_R32_UINT, 0);
-	graphicsContext->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	graphicsContext->GetDeviceContext()->IASetPrimitiveTopology(m_topology);
 
 	graphicsContext->GetDeviceContext()->IASetInputLayout(m_pGraphicsProps->GetInputLayout());
 	graphicsContext->GetDeviceContext()->VSSetShader(m_pGraphicsProps->GetVertexShader(), nullptr, 0);

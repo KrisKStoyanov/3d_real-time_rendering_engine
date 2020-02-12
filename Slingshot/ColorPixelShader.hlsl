@@ -1,13 +1,4 @@
-struct PS_INPUT
-{
-    float4 position : SV_Position;
-    float4 color : COLOR;
-};
-
-struct PS_OUTPUT
-{
-    float4 color : SV_Target;
-};
+#include "ColorShader.hlsli"
 
 PS_OUTPUT main(PS_INPUT ps_input)
 {

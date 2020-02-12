@@ -73,7 +73,7 @@ void Core::OnUpdate(Stage* stage)
 {
 	unsigned int entityCount = stage->GetEntityCount();
 	Entity* entityCollection = stage->GetEntityCollection();
-	for (int i = 0; i < entityCount; ++i) {
+	for (unsigned int i = 0; i < entityCount; ++i) {
 		Model* model = entityCollection->GetModel();
 		if (model != nullptr) {
 			m_pRenderer->OnFrameRender(model);

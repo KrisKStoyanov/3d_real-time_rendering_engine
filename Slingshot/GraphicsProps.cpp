@@ -1,17 +1,17 @@
 #include "GraphicsProps.h"
 
-GraphicsProps* GraphicsProps::Create(D3D11Context* graphicsContext, SHADER_DESC* shader_desc)
+GraphicsProps* GraphicsProps::Create(D3D11Context* graphicsContext, SHADER_DESC* shader_desc, VertexType vertexType)
 {
-	return new GraphicsProps(graphicsContext, shader_desc);
+	return new GraphicsProps(graphicsContext, shader_desc, vertexType);
 }
 
-GraphicsProps::GraphicsProps(D3D11Context* graphicsContext, SHADER_DESC* shader_desc) :
+GraphicsProps::GraphicsProps(D3D11Context* graphicsContext, SHADER_DESC* shader_desc, VertexType vertexType) :
 	m_pVS(nullptr), m_pPS(nullptr), m_pIL(nullptr)
 {
 	graphicsContext->GetDevice()->CreateVertexShader(shader_desc->VS_bytecode, shader_desc->VS_size, nullptr, &m_pVS);
 	graphicsContext->GetDevice()->CreatePixelShader(shader_desc->PS_bytecode, shader_desc->PS_size, nullptr, &m_pPS);
 
-	switch (shader_desc->vertexType)
+	switch (vertexType)
 	{
 	case VertexType::ColorShaderVertex:
 	{

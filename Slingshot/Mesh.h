@@ -2,15 +2,20 @@
 #include "GraphicsProps.h"
 
 struct MESH_DESC {
-	ColorShaderVertex* vertexCollection;
+	VertexType vertexType;
+	Vertex* vertexCollection;
 	unsigned int vertexCount;
 	unsigned int* indexCollection;
 	unsigned int indexCount;
+	D3D11_PRIMITIVE_TOPOLOGY topology;
 	MESH_DESC(
-		ColorShaderVertex* _vertexCollection, unsigned int _vertexCount, 
-		unsigned int* _indexCollection, unsigned int _indexCount) : 
+		VertexType _vertexType, D3D11_PRIMITIVE_TOPOLOGY _topology,
+		Vertex* _vertexCollection, unsigned int _vertexCount,
+		unsigned int* _indexCollection, unsigned int _indexCount) :
+		vertexType(_vertexType), topology(_topology),
 		vertexCollection(_vertexCollection), vertexCount(_vertexCount), 
-		indexCollection(_indexCollection), indexCount(_indexCount) {}
+		indexCollection(_indexCollection), indexCount(_indexCount)
+	{}
 };
 
 class Mesh {
@@ -18,7 +23,7 @@ public:
 	static Mesh* Create(D3D11Context* graphicsContext, MESH_DESC* mesh_desc);
 	void Shutdown();
 
-	void SetGraphicsProps(D3D11Context* graphicsContext, SHADER_DESC* shader_desc);
+	void SetGraphicsProps(D3D11Context* graphicsContext, SHADER_DESC* shader_desc, VertexType vertexType);
 	void Render(D3D11Context* graphicsContext);
 
 	int GetVertexCount();
@@ -32,4 +37,9 @@ private:
 
 	unsigned int m_vertexCount;
 	unsigned int m_indexCount;
+
+	unsigned int m_VBufferStride;
+	unsigned int m_VBufferOffset;
+
+	D3D11_PRIMITIVE_TOPOLOGY m_topology;
 };

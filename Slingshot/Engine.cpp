@@ -12,6 +12,8 @@ bool Engine::Initialize(WINDOW_DESC* window_desc, RENDERER_DESC* renderer_desc)
 
 	if (m_isRunning) 
 	{
+		Entity* testEntity = new Entity();
+
 		ColorShaderVertex* vertexCollection = new ColorShaderVertex[3];
 		vertexCollection[0].position = DirectX::XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f);
 		vertexCollection[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -30,11 +32,16 @@ bool Engine::Initialize(WINDOW_DESC* window_desc, RENDERER_DESC* renderer_desc)
 		ColorVS_bytecode = GetFileBytecode("ColorVertexShader.cso", ColorVS_size);
 		ColorPS_bytecode = GetFileBytecode("ColorPixelShader.cso", ColorPS_size);
 
-		Entity* testEntity = new Entity();
 		m_isRunning = testEntity->SetModel(m_pCore->GetRenderer(), 
 			&MODEL_DESC(
-				&MESH_DESC(vertexCollection, 3, indexCollection, 3),
-				&SHADER_DESC(ColorVS_bytecode, ColorVS_size, ColorPS_bytecode, ColorPS_size, VertexType::ColorShaderVertex)
+				&MESH_DESC(
+					VertexType::ColorShaderVertex,
+					D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
+					vertexCollection, 3, 
+					indexCollection, 3),
+				&SHADER_DESC(
+					ColorVS_bytecode, ColorVS_size, 
+					ColorPS_bytecode, ColorPS_size)
 			)
 		);
 

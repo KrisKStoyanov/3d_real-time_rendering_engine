@@ -221,6 +221,7 @@
     <CudaCompile Include="CUDAContextScheduler.cu" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ColorShader.hlsli" />
     <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
