@@ -1,19 +1,21 @@
 #pragma once
 #include "Transform.h"
-#include "GraphicsProps.h"
+#include "Renderer.h"
 
 class Entity {
 
 public:
-	Entity();
+	Entity(TRANSFORM_DESC* transform_desc = nullptr);
 	~Entity();
 
-	void AttachGraphicsProps(GraphicsProps gProps);
-	void DetachGraphicsProps();
+	void Shutdown();
 
-	Transform GetTransform();
-	GraphicsProps GetGraphicsProps();
+	bool SetModel(Renderer* renderer, MODEL_DESC* model_desc);
+	void UnsetModel();
+
+	Transform* GetTransform();
+	Model* GetModel();
 private:
-	Transform m_transform;
-	GraphicsProps m_gProps;
+	Transform* m_pTransform;
+	Model* m_pModel;
 };

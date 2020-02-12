@@ -1,29 +1,40 @@
 #include "Entity.h"
 
-Entity::Entity()
+Entity::Entity(TRANSFORM_DESC* transform_desc) : m_pTransform(nullptr), m_pModel(nullptr)
 {
+	if (transform_desc) {
+		m_pTransform = new Transform(transform_desc);
+	}
+	else {
+		m_pTransform = new Transform();
+	}
 }
 
 Entity::~Entity()
 {
 }
 
-void Entity::AttachGraphicsProps(GraphicsProps gProps)
+void Entity::Shutdown()
 {
-	m_gProps = gProps;
+
 }
 
-void Entity::DetachGraphicsProps()
+bool Entity::SetModel(Renderer* renderer, MODEL_DESC* model_desc)
 {
-	m_gProps.Clear();
+	return ((m_pModel = Model::Create(renderer->GetGraphicsContext(), model_desc)) != nullptr);
 }
 
-Transform Entity::GetTransform()
+void Entity::UnsetModel()
 {
-	return m_transform;
+
 }
 
-GraphicsProps Entity::GetGraphicsProps()
+Transform* Entity::GetTransform()
 {
-	return m_gProps;
+	return m_pTransform;
+}
+
+Model* Entity::GetModel()
+{
+	return m_pModel;
 }

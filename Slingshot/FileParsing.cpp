@@ -1,4 +1,4 @@
-#include "FileHandler.h"
+#include "FileParsing.h"
 
 char* GetFileBytecode(const char* filename, size_t& filesize)
 {

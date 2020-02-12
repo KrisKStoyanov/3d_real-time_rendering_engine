@@ -2,15 +2,38 @@
 #include "D3D11Context.h"
 #include "Vertex.h"
 
+struct SHADER_DESC {
+
+	char* VS_bytecode;
+	size_t VS_size;
+
+	char* PS_bytecode;
+	size_t PS_size;
+	
+	VertexType vertexType;
+
+	SHADER_DESC(
+		char* _VS_bytecode, size_t _VS_size, 
+		char* _PS_bytecode, size_t _PS_size,
+		VertexType _vertexType) :
+		VS_bytecode(_VS_bytecode), VS_size(_VS_size),
+		PS_bytecode(_PS_bytecode), PS_size(_PS_size),
+		vertexType(_vertexType)
+	{}
+};
+
 class GraphicsProps {
 public:
-	bool Setup(D3D11Context* context);
-	void Clear();
-	bool GetSetupStatus();
+	static GraphicsProps* Create(D3D11Context* graphicsContext, SHADER_DESC* shader_desc);
+	void Shutdown();
+
+	ID3D11VertexShader* GetVertexShader();
+	ID3D11PixelShader* GetPixelShader();
+	ID3D11InputLayout* GetInputLayout();
 private:
-	char* GetShaderBytecode(const char* filename, size_t& filesize);
-	bool setup;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_pVS;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pPS;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_pIL;
+	GraphicsProps(D3D11Context* graphicsContext, SHADER_DESC* shader_desc);
+
+	ID3D11VertexShader* m_pVS;
+	ID3D11PixelShader* m_pPS;
+	ID3D11InputLayout* m_pIL;
 };

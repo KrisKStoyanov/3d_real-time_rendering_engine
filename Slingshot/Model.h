@@ -1,29 +1,21 @@
 #pragma once
-#include <vector>
-#include "Vertex.h"
+#include "Mesh.h"
 
-enum class PrimitiveType : unsigned int {
-	Triangle = 0,
-	Point,
-	Line,
+struct MODEL_DESC {
+	MESH_DESC* mesh_desc;
+	SHADER_DESC* shader_desc;
+	MODEL_DESC(MESH_DESC* _mesh_desc, SHADER_DESC* _shader_desc) :
+		mesh_desc(_mesh_desc), shader_desc(_shader_desc) {}
 };
 
-class Model
-{
+class Model {
 public:
-	Model(std::vector<Vertex> vData);
+	static Model* Create(D3D11Context* graphicsContext, MODEL_DESC* model_desc);
+	void Render(D3D11Context* graphicsContext);
+	void Shutdown();
 
-	void Setup(
-		bool rIndexed = false, 
-		bool sOutput = false, 
-		PrimitiveType pType = PrimitiveType::Triangle);
-	void Clear();
-
-	std::vector<Vertex> m_VertexData;
-
-	bool renderIndexed = false;
-	bool streamOutput = false;
-	PrimitiveType primitiveType = PrimitiveType::Triangle;
-
+private:
+	Model(D3D11Context* graphicsContext, MODEL_DESC* model_desc);
+	Mesh* m_pMesh;
 };
 

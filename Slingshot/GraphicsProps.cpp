@@ -1,65 +1,70 @@
 #include "GraphicsProps.h"
 
-bool GraphicsProps::Setup(D3D11Context* context)
+GraphicsProps* GraphicsProps::Create(D3D11Context* graphicsContext, SHADER_DESC* shader_desc)
 {
-	size_t VS_size, PS_size;
-	char* VS_bytecode = nullptr, * PS_bytecode = nullptr;
-
-	if ((VS_bytecode = GetShaderBytecode("ColorShader_VS.cso", VS_size)) == nullptr) {
-		setup = false;
-	}
-
-	if ((PS_bytecode = GetShaderBytecode("ColorShader_PS.cso", PS_size)) == nullptr) {
-		setup = false;
-	}
-
-	D3D11_INPUT_ELEMENT_DESC VS_inputLayout[2];
-
-	VS_inputLayout[0].SemanticName = "POSITION";
-	VS_inputLayout[0].SemanticIndex = 0;
-	VS_inputLayout[0].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
-	VS_inputLayout[0].InputSlot = 0;
-	VS_inputLayout[0].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	VS_inputLayout[0].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
-	VS_inputLayout[0].InstanceDataStepRate = 0;
-
-	VS_inputLayout[1].SemanticName = "COLOR";
-	VS_inputLayout[1].SemanticIndex = 0;
-	VS_inputLayout[1].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
-	VS_inputLayout[1].InputSlot = 0;
-	VS_inputLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-	VS_inputLayout[1].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
-	VS_inputLayout[1].InstanceDataStepRate = 0;
-
-	SAFE_DELETE_ARRAY(VS_bytecode);
-	SAFE_DELETE_ARRAY(PS_bytecode);
-
-	return setup;
+	return new GraphicsProps(graphicsContext, shader_desc);
 }
 
-void GraphicsProps::Clear()
+GraphicsProps::GraphicsProps(D3D11Context* graphicsContext, SHADER_DESC* shader_desc) :
+	m_pVS(nullptr), m_pPS(nullptr), m_pIL(nullptr)
+{
+	graphicsContext->GetDevice()->CreateVertexShader(shader_desc->VS_bytecode, shader_desc->VS_size, nullptr, &m_pVS);
+	graphicsContext->GetDevice()->CreatePixelShader(shader_desc->PS_bytecode, shader_desc->PS_size, nullptr, &m_pPS);
+
+	switch (shader_desc->vertexType)
+	{
+	case VertexType::ColorShaderVertex:
+	{
+		D3D11_INPUT_ELEMENT_DESC VS_inputLayout[2];
+
+		VS_inputLayout[0].SemanticName = "POSITION";
+		VS_inputLayout[0].SemanticIndex = 0;
+		VS_inputLayout[0].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+		VS_inputLayout[0].InputSlot = 0;
+		VS_inputLayout[0].AlignedByteOffset = 0;
+		VS_inputLayout[0].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+		VS_inputLayout[0].InstanceDataStepRate = 0;
+
+		VS_inputLayout[1].SemanticName = "COLOR";
+		VS_inputLayout[1].SemanticIndex = 0;
+		VS_inputLayout[1].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+		VS_inputLayout[1].InputSlot = 0;
+		VS_inputLayout[1].AlignedByteOffset = sizeof(float) * 4;
+		VS_inputLayout[1].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+		VS_inputLayout[1].InstanceDataStepRate = 0;
+		graphicsContext->GetDevice()->CreateInputLayout(VS_inputLayout, 2, shader_desc->VS_bytecode, shader_desc->VS_size, &m_pIL);
+	}
+	break;
+	default:
+	{
+		return;
+	}
+	break;
+	}
+	
+	SAFE_DELETE_ARRAY(shader_desc->VS_bytecode);
+	SAFE_DELETE_ARRAY(shader_desc->PS_bytecode);
+}
+
+void GraphicsProps::Shutdown()
 {
 	SAFE_RELEASE(m_pVS);
 	SAFE_RELEASE(m_pPS);
 	SAFE_RELEASE(m_pIL);
 }
 
-bool GraphicsProps::GetSetupStatus()
+ID3D11VertexShader* GraphicsProps::GetVertexShader()
 {
-	return setup;
+	return m_pVS;
 }
 
-char* GraphicsProps::GetShaderBytecode(const char* filename, size_t& filesize)
+ID3D11PixelShader* GraphicsProps::GetPixelShader()
 {
-	std::ifstream shaderFileStream;
-	shaderFileStream.open(filename, std::ios::in | std::ios::binary | std::ios::ate);
-	if (shaderFileStream.is_open()) {
-		shaderFileStream.seekg(0, std::ios::end);
-		filesize = static_cast<size_t>(shaderFileStream.tellg());
-		shaderFileStream.seekg(0, std::ios::beg);
-		char* bytecode = new char[filesize];
-		shaderFileStream.read(bytecode, filesize);
-		return bytecode;
-	}
-	return nullptr;
+	return m_pPS;
 }
+
+ID3D11InputLayout* GraphicsProps::GetInputLayout()
+{
+	return m_pIL;
+}
+

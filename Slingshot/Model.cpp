@@ -1,18 +1,22 @@
 #include "Model.h"
 
-Model::Model(std::vector<Vertex> vData)
+Model* Model::Create(D3D11Context* context, MODEL_DESC* model_desc)
 {
-	m_VertexData = vData;
+	return new Model(context, model_desc);
 }
 
-void Model::Setup(bool rIndexed, bool sOutput, PrimitiveType pType)
+Model::Model(D3D11Context* graphicsContext, MODEL_DESC* model_desc) : m_pMesh(nullptr)
 {
-	renderIndexed = rIndexed;
-	streamOutput = sOutput;
-	primitiveType = pType;
+	if ((m_pMesh = Mesh::Create(graphicsContext, model_desc->mesh_desc)) != nullptr) {
+		m_pMesh->SetGraphicsProps(graphicsContext, model_desc->shader_desc);
+	}
 }
 
-void Model::Clear()
+void Model::Render(D3D11Context* graphicsContext)
 {
-	m_VertexData.clear();
+	m_pMesh->Render(graphicsContext);
+}
+
+void Model::Shutdown()
+{
 }

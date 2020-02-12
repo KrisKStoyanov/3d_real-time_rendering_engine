@@ -1,9 +1,9 @@
 #include "ColorShader.hlsli"
 
-PS_INPUT main(VS_INPUT input)
+VS_OUTPUT main(VS_INPUT input)
 {
-    PS_INPUT output;
-    output.position = input.position;
+    VS_OUTPUT output;
+    output.pos = input.pos;
     output.color = input.color;
     return output;
 }

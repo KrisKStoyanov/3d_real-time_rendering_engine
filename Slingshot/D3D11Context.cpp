@@ -45,6 +45,8 @@ D3D11Context::D3D11Context(HWND hWnd)
 		m_pDepthStencilBuffer.Get(),
 		m_pDepthStencilView.GetAddressOf());
 
+	SetupViewport(winWidth, winHeight);
+
 	pAdapter->Release();
 }
 
@@ -162,7 +164,7 @@ void D3D11Context::CreateRenderTargetView(
 	ID3D11Texture2D* pBackBuffer;
 	DX::ThrowIfFailed(swapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
 	if (pBackBuffer != nullptr) {
-		DX::ThrowIfFailed(device->CreateRenderTargetView(pBackBuffer, NULL, rtv));
+		DX::ThrowIfFailed(device->CreateRenderTargetView(pBackBuffer, nullptr, rtv));
 		pBackBuffer->Release();
 	}
 }
@@ -207,8 +209,9 @@ void D3D11Context::CreateDepthStencilView(
 			depthStencilView));
 }
 
-void D3D11Context::SetupViewport(D3D11_VIEWPORT viewport, UINT winWidth, UINT winHeight)
+void D3D11Context::SetupViewport(UINT winWidth, UINT winHeight)
 {
+	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(viewport));
 	viewport.Width = static_cast<float>(winWidth);
 	viewport.Height = static_cast<float>(winHeight);
@@ -216,6 +219,7 @@ void D3D11Context::SetupViewport(D3D11_VIEWPORT viewport, UINT winWidth, UINT wi
 	viewport.MaxDepth = 1.0f;
 	viewport.TopLeftX = 0.0f;
 	viewport.TopLeftY = 0.0f;
+	m_pImmediateContext->RSSetViewports(1, &viewport);
 }
 
 bool D3D11Context::Initialize()
@@ -223,7 +227,6 @@ bool D3D11Context::Initialize()
 	m_pImmediateContext->OMSetRenderTargets(1, 
 		m_pRenderTargetView.GetAddressOf(), 
 		m_pDepthStencilView.Get());
-	m_pImmediateContext->RSSetViewports(1, &m_viewport);
 
 	return true;
 }
@@ -231,7 +234,10 @@ bool D3D11Context::Initialize()
 void D3D11Context::StartFrameRender()
 {
 	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_clearColor);
-	m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 1);
+	m_pImmediateContext->OMSetRenderTargets(1,
+		m_pRenderTargetView.GetAddressOf(),
+		m_pDepthStencilView.Get());
 }
 
 void D3D11Context::EndFrameRender()

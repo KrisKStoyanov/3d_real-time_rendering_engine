@@ -126,6 +126,9 @@
       <ShaderModel>5.0</ShaderModel>
       <ObjectFileOutput>$(SolutionDir)\$(ProjectName)\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
+    <PostBuildEvent>
+      <Command>xcopy "$(OutDir)*.cso" "$(MSBuildProjectDirectory)" /Y /C</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -172,6 +175,9 @@
       <ShaderModel>5.0</ShaderModel>
       <ObjectFileOutput>$(SolutionDir)\$(ProjectName)\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
+    <PostBuildEvent>
+      <Command>xcopy "$(OutDir)*.cso" "$(MSBuildProjectDirectory)" /Y /C</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
@@ -179,11 +185,14 @@
     <ClCompile Include="D3D11Context.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Entity.cpp" />
-    <ClCompile Include="FileHandler.cpp" />
+    <ClCompile Include="FileParsing.cpp" />
     <ClCompile Include="GraphicsProps.cpp" />
     <ClCompile Include="GUIConsole.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Stage.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -194,14 +203,16 @@
     <ClInclude Include="D3D11Context.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Entity.h" />
-    <ClInclude Include="FileHandler.h" />
+    <ClInclude Include="FileParsing.h" />
     <ClInclude Include="GraphicsContext.h" />
     <ClInclude Include="GraphicsProps.h" />
-    <ClInclude Include="GraphicsWrappers.h" />
     <ClInclude Include="GUIConsole.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="Macros.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Stage.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="Window.h" />
@@ -210,17 +221,21 @@
     <CudaCompile Include="CUDAContextScheduler.cu" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ColorShader.hlsli" />
     <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="ColorShader_PS.hlsl">
+    <FxCompile Include="ColorPixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="ColorShader_VS.hlsl" />
+    <FxCompile Include="ColorVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,7 +5,7 @@ Renderer* Renderer::Create(HWND hWnd, RENDERER_DESC* renderer_desc)
 	return new Renderer(hWnd, renderer_desc);
 }
 
-Renderer::Renderer(HWND hWnd, RENDERER_DESC* renderer_desc) : m_pDesc(nullptr), m_pGraphicsContext(nullptr)
+Renderer::Renderer(HWND hWnd, RENDERER_DESC* renderer_desc) : m_pDesc(renderer_desc), m_pGraphicsContext(nullptr)
 {
 	switch (renderer_desc->graphicsContextType)
 	{
@@ -24,7 +24,6 @@ Renderer::Renderer(HWND hWnd, RENDERER_DESC* renderer_desc) : m_pDesc(nullptr), 
 	if (!m_pGraphicsContext) {
 		return;
 	}
-	m_pDesc = renderer_desc;
 }
 
 bool Renderer::Initialize()
@@ -33,10 +32,10 @@ bool Renderer::Initialize()
 	return status;
 }
 
-void Renderer::OnFrameRender()
+void Renderer::OnFrameRender(Model* model)
 {
 	m_pGraphicsContext->StartFrameRender();
-	//Render something
+	model->Render(m_pGraphicsContext);
 	m_pGraphicsContext->EndFrameRender();
 }
 
@@ -45,3 +44,7 @@ void Renderer::Shutdown()
 	m_pGraphicsContext->Shutdown();
 }
 
+D3D11Context* Renderer::GetGraphicsContext()
+{
+	return m_pGraphicsContext;
+}

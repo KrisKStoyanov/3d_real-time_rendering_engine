@@ -1,6 +1,8 @@
 #include "ColorShader.hlsli"
 
-float4 main(PS_INPUT input) :SV_Target
+PS_OUTPUT main(PS_INPUT input)
 {
-    return input.color * input.position;
+    PS_OUTPUT output;
+    output.color = input.color;
+    return output;
 }

@@ -49,9 +49,7 @@ private:
 		ID3D11Texture2D* depthStencilBuffer,
 		ID3D11DepthStencilView** depthStencilView);
 
-	void SetupViewport(
-		D3D11_VIEWPORT viewport, 
-		UINT winWidth, UINT winHeight);
+	void SetupViewport(UINT winWidth, UINT winHeight);
 
 	float m_clearColor[4];
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
@@ -61,5 +59,4 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_pDepthStencilBuffer;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_pDepthStencilView;
-	D3D11_VIEWPORT m_viewport;
 };
