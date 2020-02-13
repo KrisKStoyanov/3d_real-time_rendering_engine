@@ -57,8 +57,8 @@ HWND Window::GetHandle()
 	return m_hWnd;
 }
 
-BOOL Window::Shutdown()
+void Window::Shutdown()
 {
 	DestroyWindow(m_hWnd);
-	return UnregisterClassW(m_pDesc->lpClassName, m_pDesc->hInstance);
+	UnregisterClassW(m_pDesc->lpClassName, m_pDesc->hInstance);
 }

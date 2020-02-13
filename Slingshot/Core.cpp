@@ -21,7 +21,7 @@ Core* Core::Create(HWND hWnd)
 	return new Core(hWnd);
 }
 
-Core::Core(HWND hWnd) : m_hWnd(hWnd), m_pRenderer(nullptr)
+Core::Core(HWND hWnd) : m_hWnd(hWnd), m_pRenderer(nullptr), m_isActive(true)
 {
 	SetWindowLongPtrW(
 		hWnd, GWLP_USERDATA,
@@ -47,6 +47,7 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_QUIT:
 	case WM_DESTROY:
 	{
+		m_isActive = false;
 		PostQuitMessage(0);
 	}
 	break;
@@ -69,21 +70,24 @@ bool Core::InitializeRenderer(RENDERER_DESC* renderer_desc)
 	return success;
 }
 
-void Core::OnUpdate(Stage* stage)
+bool Core::OnUpdate(Stage* stage)
 {
 	unsigned int entityCount = stage->GetEntityCount();
 	Entity* entityCollection = stage->GetEntityCollection();
 	for (unsigned int i = 0; i < entityCount; ++i) {
-		Model* model = entityCollection->GetModel();
+		Model* model = (entityCollection + i)->GetModel();
 		if (model != nullptr) {
-			m_pRenderer->OnFrameRender(model);
+			m_pRenderer->OnFrameRender(
+				model, 
+				(entityCollection + i)->GetTransform(), 
+				stage->GetMainCamera());
 		}
 	}
+	return m_isActive;
 }
 
 void Core::Shutdown(void)
 {
-	//SAFE_SHUTDOWN(m_pStage);
 	SAFE_SHUTDOWN(m_pRenderer);
 }
 

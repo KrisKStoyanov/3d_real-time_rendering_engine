@@ -57,7 +57,7 @@ class Window
 public:
 	static Window* Create(WINDOW_DESC* window_desc);
 	HWND GetHandle();
-	BOOL Shutdown();
+	void Shutdown();
 private:
 	Window(WINDOW_DESC* window_desc);
 	HWND m_hWnd;

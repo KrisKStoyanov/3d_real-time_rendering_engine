@@ -11,9 +11,10 @@ struct MODEL_DESC {
 class Model {
 public:
 	static Model* Create(D3D11Context* graphicsContext, MODEL_DESC* model_desc);
-	void Render(D3D11Context* graphicsContext);
+	void Render(D3D11Context* graphicsContext, DirectX::XMMATRIX = DirectX::XMMatrixIdentity());
 	void Shutdown();
 
+	Mesh* GetMesh();
 private:
 	Model(D3D11Context* graphicsContext, MODEL_DESC* model_desc);
 	Mesh* m_pMesh;

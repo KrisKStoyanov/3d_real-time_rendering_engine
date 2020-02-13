@@ -14,6 +14,7 @@ public:
 		WINDOW_DESC* window_desc,
 		RENDERER_DESC* renderer_desc);
 	int Run();
+	bool SetupStage(Stage* stage);
 	void Shutdown();
 private:
 	Window* m_pWindow;

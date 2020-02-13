@@ -1,6 +1,14 @@
 #pragma once
 #include <DirectXMath.h>
 
+struct VS_CONSTANT_BUFFER
+{
+	DirectX::XMMATRIX wvpMatrix;
+	VS_CONSTANT_BUFFER(
+		DirectX::XMMATRIX _wvpMatrix = DirectX::XMMatrixIdentity()) : 
+		wvpMatrix(_wvpMatrix) {}
+};
+
 enum class VertexType : unsigned int {
 	ColorShaderVertex = 0
 };

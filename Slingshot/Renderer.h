@@ -13,13 +13,12 @@ class Renderer {
 public:
 	static Renderer* Create(HWND hWnd, RENDERER_DESC* renderer_desc);
 	bool Initialize();
-	void OnFrameRender(Model* model);
+	void OnFrameRender(Model* model, Transform* transform, Camera* camera);
 	void Shutdown();
 
 	D3D11Context* GetGraphicsContext();
 private:
 	Renderer(HWND hWnd, RENDERER_DESC* renderer_desc);
-	RENDERER_DESC* m_pDesc;
 	
 	D3D11Context* m_pGraphicsContext;
 };

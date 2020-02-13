@@ -3,11 +3,11 @@
 
 struct MESH_DESC {
 	VertexType vertexType;
+	D3D11_PRIMITIVE_TOPOLOGY topology;
 	Vertex* vertexCollection;
 	unsigned int vertexCount;
 	unsigned int* indexCollection;
 	unsigned int indexCount;
-	D3D11_PRIMITIVE_TOPOLOGY topology;
 	MESH_DESC(
 		VertexType _vertexType, D3D11_PRIMITIVE_TOPOLOGY _topology,
 		Vertex* _vertexCollection, unsigned int _vertexCount,
@@ -24,13 +24,15 @@ public:
 	void Shutdown();
 
 	void SetGraphicsProps(D3D11Context* graphicsContext, SHADER_DESC* shader_desc, VertexType vertexType);
-	void Render(D3D11Context* graphicsContext);
+	void Render(D3D11Context* graphicsContext, DirectX::XMMATRIX wvp = DirectX::XMMatrixIdentity());
 
 	int GetVertexCount();
 	int GetIndexCount();
 private:
 	Mesh(D3D11Context* graphicsContext, MESH_DESC* mesh_desc);
 	GraphicsProps* m_pGraphicsProps;
+
+	ID3D11Buffer* m_pVSCB;
 
 	ID3D11Buffer* m_pVBuffer;
 	ID3D11Buffer* m_pIBuffer;

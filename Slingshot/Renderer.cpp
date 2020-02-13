@@ -5,7 +5,7 @@ Renderer* Renderer::Create(HWND hWnd, RENDERER_DESC* renderer_desc)
 	return new Renderer(hWnd, renderer_desc);
 }
 
-Renderer::Renderer(HWND hWnd, RENDERER_DESC* renderer_desc) : m_pDesc(renderer_desc), m_pGraphicsContext(nullptr)
+Renderer::Renderer(HWND hWnd, RENDERER_DESC* renderer_desc) : m_pGraphicsContext(nullptr)
 {
 	switch (renderer_desc->graphicsContextType)
 	{
@@ -32,10 +32,15 @@ bool Renderer::Initialize()
 	return status;
 }
 
-void Renderer::OnFrameRender(Model* model)
+void Renderer::OnFrameRender(Model* model, Transform* transform, Camera* camera)
 {
 	m_pGraphicsContext->StartFrameRender();
-	model->Render(m_pGraphicsContext);
+	model->Render(
+		m_pGraphicsContext, 
+		DirectX::XMMatrixTranspose(
+		transform->GetWorldMatrix() * 
+		camera->GetViewMatrix() * 
+		camera->GetProjectionMatrix()));
 	m_pGraphicsContext->EndFrameRender();
 }
 
