@@ -25,11 +25,11 @@ bool Engine::SetupStage(Stage* stage)
 	Entity* testEntity = new Entity();
 
 	ColorShaderVertex* vertexCollection = new ColorShaderVertex[3];
-	vertexCollection[0].position = DirectX::XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f);
+	vertexCollection[0].position = DirectX::XMFLOAT4(0.0f, 0.5f, 1.0f, 1.0f);
 	vertexCollection[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	vertexCollection[1].position = DirectX::XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f);
+	vertexCollection[1].position = DirectX::XMFLOAT4(0.5f, -0.5f, 1.0f, 1.0f);
 	vertexCollection[1].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	vertexCollection[2].position = DirectX::XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f);
+	vertexCollection[2].position = DirectX::XMFLOAT4(-0.5f, -0.5f, 1.0f, 1.0f);
 	vertexCollection[2].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
 
 	unsigned int* indexCollection = new unsigned int[3];
@@ -65,7 +65,7 @@ bool Engine::SetupStage(Stage* stage)
 			75.0f,
 			winWidth,
 			winHeight,
-			1.0f, 1000.0f,
+			1.0f, 1000.0f, 
 			&TRANSFORM_DESC()));
 
 	success = ((m_pStage = Stage::Create(mainCamera, 1, 0, testEntity, 1)) != nullptr);

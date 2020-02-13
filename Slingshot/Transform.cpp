@@ -35,8 +35,37 @@ DirectX::XMVECTOR Transform::GetUpDir()
 	return m_upDir;
 }
 
+void Transform::OnUpdate()
+{
+	m_worldMatrix = DirectX::XMMatrixIdentity();
+	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_translatioMatrix);
+	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_rotationMatrix);
+	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_scalingMatrix);
+}
+
+void Transform::Translate(DirectX::XMVECTOR translation)
+{
+	m_position = DirectX::XMVectorAdd(m_position, translation);
+	m_translatioMatrix = DirectX::XMMatrixTranslationFromVector(m_position);
+}
+
+void Transform::Rotate(DirectX::XMVECTOR rotation)
+{
+	m_rotationMatrix = DirectX::XMMatrixRotationRollPitchYawFromVector(rotation);
+	m_forwardDir = DirectX::XMVector4Transform(m_defaultForwardDir, m_rotationMatrix);
+	m_forwardDir = DirectX::XMVector4Normalize(m_forwardDir);
+}
+
+void Transform::Scale(DirectX::XMVECTOR scale)
+{
+	m_scalingMatrix = DirectX::XMMatrixScalingFromVector(scale);
+}
+
 Transform::Transform(TRANSFORM_DESC* transform_desc) : 
-	m_worldMatrix(), m_position(), m_rotation(), m_scale(), m_forwardDir(), m_upDir()
+	m_worldMatrix(), 
+	m_translatioMatrix(), m_rotationMatrix(), m_scalingMatrix(),
+	m_position(), m_rotation(), m_scale(), 
+	m_forwardDir(), m_rightDir(), m_upDir()
 {
 	m_worldMatrix = DirectX::XMMatrixIdentity();
 
@@ -64,9 +93,33 @@ Transform::Transform(TRANSFORM_DESC* transform_desc) :
 		transform_desc->forwardDir.z,
 		transform_desc->forwardDir.w);
 
+	m_rightDir = DirectX::XMVectorSet(
+		transform_desc->rightDir.x,
+		transform_desc->rightDir.y,
+		transform_desc->rightDir.z,
+		transform_desc->rightDir.w);
+
 	m_upDir = DirectX::XMVectorSet(
 		transform_desc->upDir.x,
 		transform_desc->upDir.y,
 		transform_desc->upDir.z,
 		transform_desc->upDir.w);
+
+	m_defaultForwardDir = DirectX::XMVectorSet(
+		0.0f,
+		0.0f,
+		1.0f,
+		0.0f);
+
+	m_defaultRightDir = DirectX::XMVectorSet(
+		1.0f,
+		0.0f,
+		0.0f,
+		0.0f);
+
+	m_defaultUpDir = DirectX::XMVectorSet(
+		0.0f,
+		1.0f,
+		0.0f,
+		0.0f);
 }

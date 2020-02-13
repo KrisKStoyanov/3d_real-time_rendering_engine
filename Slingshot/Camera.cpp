@@ -15,6 +15,12 @@ DirectX::XMMATRIX Camera::GetProjectionMatrix()
 	return m_projectionMatrix;
 }
 
+void Camera::OnUpdate()
+{
+	m_pTransform->Rotate(m_pTransform->GetRotation());
+	m_pTransform->OnUpdate();
+}
+
 Transform* Camera::GetTransform()
 {
 	return m_pTransform;
@@ -27,14 +33,14 @@ Camera::Camera(CAMERA_DESC* camera_desc) :
 	camera_desc->transform_desc != nullptr ?
 		m_pTransform = Transform::Create(camera_desc->transform_desc) :
 		m_pTransform = Transform::Create(&TRANSFORM_DESC());
-	
+
 	m_viewMatrix = DirectX::XMMatrixLookAtLH(
 		m_pTransform->GetPosition(), 
-		m_pTransform->GetForwardDir(), 
+		DirectX::XMVectorAdd(m_pTransform->GetPosition(), m_pTransform->GetForwardDir()),
 		m_pTransform->GetUpDir());
 
 	m_projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(
-		camera_desc->fov * 3.14f,
+		DirectX::XMConvertToRadians(camera_desc->verticalFovAngle),
 		camera_desc->lenseWidth / camera_desc->lenseHeight,
 		camera_desc->nearClipDist,
 		camera_desc->farClipDist);

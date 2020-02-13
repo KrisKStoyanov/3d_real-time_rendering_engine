@@ -2,20 +2,20 @@
 #include "Transform.h"
 
 struct CAMERA_DESC {
-	float fov;
+	float verticalFovAngle; //angle in degrees, converted during setup
 	float lenseWidth;
 	float lenseHeight;
 	float nearClipDist;
 	float farClipDist;
 	TRANSFORM_DESC* transform_desc;
 	CAMERA_DESC(
-		float _fov,
+		float _verticalFovAngle,
 		float _lenseWidth,
 		float _lenseHeight,
 		float _nearClipDist,
 		float _farClipDist,
 		TRANSFORM_DESC* _transform_desc = nullptr) :
-		fov(_fov),
+		verticalFovAngle(_verticalFovAngle),
 		lenseWidth(_lenseWidth),
 		lenseHeight(_lenseHeight),
 		nearClipDist(_nearClipDist),
@@ -31,6 +31,8 @@ public:
 
 	DirectX::XMMATRIX GetViewMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix();
+
+	void OnUpdate();
 
 	Transform* GetTransform();
 private:
