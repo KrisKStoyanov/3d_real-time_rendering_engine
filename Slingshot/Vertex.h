@@ -1,5 +1,5 @@
 #pragma once
-#include <DirectXMath.h>
+#include "Transform.h"
 
 struct VS_CONSTANT_BUFFER
 {

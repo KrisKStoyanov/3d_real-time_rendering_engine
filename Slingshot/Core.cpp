@@ -21,7 +21,10 @@ Core* Core::Create(HWND hWnd)
 	return new Core(hWnd);
 }
 
-Core::Core(HWND hWnd) : m_hWnd(hWnd), m_pRenderer(nullptr), m_isActive(true)
+Core::Core(HWND hWnd) : 
+	m_hWnd(hWnd), m_pStage(nullptr), 
+	m_pStageEntities(nullptr), m_stageEntityCount(0),
+	m_pRenderer(nullptr), m_isActive(true)
 {
 	SetWindowLongPtrW(
 		hWnd, GWLP_USERDATA,
@@ -34,13 +37,44 @@ Core::Core(HWND hWnd) : m_hWnd(hWnd), m_pRenderer(nullptr), m_isActive(true)
 LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg) {
+	case WM_MOUSEMOVE:
+	{
+		int xPos = GET_X_LPARAM(lParam);
+		int yPos = GET_Y_LPARAM(lParam);
+		Entity* mainCamera = m_pStage->GetMainCamera();
+	}
 	case WM_KEYDOWN:
 	{
 		switch (wParam) {
+		case 0x57: //W 
+		{
+			Entity* triangle = m_pStage->GetEntityCollection()+1;
+			triangle->GetTransform()->Translate(DirectX::XMVectorSet(0.0f, 0.0, 1.0, 0.0f));
+		}
+		break;
+		case 0x41: //A
+		{
+			Entity* triangle = m_pStage->GetEntityCollection()+1;
+			triangle->GetTransform()->Translate(DirectX::XMVectorSet(-1.0f, 0.0, 0.0, 0.0f));
+		}
+		break;
+		case 0x53: //S
+		{
+			Entity* triangle = m_pStage->GetEntityCollection()+1;
+			triangle->GetTransform()->Translate(DirectX::XMVectorSet(0.0f, 0.0, -1.0, 0.0f));
+		}
+		break;
+		case 0x44: //D
+		{
+			Entity* triangle = m_pStage->GetEntityCollection()+1;
+			triangle->GetTransform()->Translate(DirectX::XMVectorSet(1.0f, 0.0, 0.0, 0.0f));
+		}
+		break;
 		case VK_ESCAPE:
 		{
 			DestroyWindow(hWnd);
 		}
+		break;
 		}
 	}
 	break;
@@ -70,19 +104,16 @@ bool Core::InitializeRenderer(RENDERER_DESC* renderer_desc)
 	return success;
 }
 
-bool Core::OnUpdate(Stage* stage)
+void Core::LoadStage(Stage* stage)
 {
-	unsigned int entityCount = stage->GetEntityCount();
-	Entity* entityCollection = stage->GetEntityCollection();
-	for (unsigned int i = 0; i < entityCount; ++i) {
-		Model* model = (entityCollection + i)->GetModel();
-		if (model != nullptr) {
-			m_pRenderer->OnFrameRender(
-				model, 
-				(entityCollection + i)->GetTransform(), 
-				stage->GetMainCamera());
-		}
-	}
+	m_pStage = stage;
+	m_pStageEntities = m_pStage->GetEntityCollection();
+	m_stageEntityCount = m_pStage->GetEntityCount();
+}
+
+bool Core::OnUpdate(void)
+{
+	m_pRenderer->OnFrameRender(m_pStage);
 	return m_isActive;
 }
 
@@ -94,4 +125,9 @@ void Core::Shutdown(void)
 Renderer* Core::GetRenderer()
 {
 	return m_pRenderer;
+}
+
+Stage* Core::GetStage()
+{
+	return m_pStage;
 }

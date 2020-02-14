@@ -13,6 +13,10 @@ bool Engine::Initialize(WINDOW_DESC* window_desc, RENDERER_DESC* renderer_desc)
 	if (m_isRunning) 
 	{
 		m_isRunning = SetupStage(m_pStage);
+		if (m_isRunning)
+		{
+			m_pCore->LoadStage(m_pStage);
+		}
 	}
 
 	return m_isRunning;
@@ -22,8 +26,26 @@ bool Engine::SetupStage(Stage* stage)
 {
 	bool success;
 
-	Entity* testEntity = new Entity();
+	Entity* entityCollection = new Entity[2];
 
+	//Setup main camera
+	//------------------------------
+	RECT winRect;
+	GetWindowRect(m_pWindow->GetHandle(), &winRect);
+	float winWidth = static_cast<float>(winRect.right - winRect.left);
+	float winHeight = static_cast<float>(winRect.bottom - winRect.top);
+
+	entityCollection[0].SetCamera(
+		&CAMERA_DESC(
+			75.0f,
+			winWidth,
+			winHeight,
+			1.0f, 1000.0f));
+	//------------------------------
+
+
+	//Setup rendering test triangle
+	//------------------------------
 	ColorShaderVertex* vertexCollection = new ColorShaderVertex[3];
 	vertexCollection[0].position = DirectX::XMFLOAT4(0.0f, 0.5f, 1.0f, 1.0f);
 	vertexCollection[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -42,7 +64,8 @@ bool Engine::SetupStage(Stage* stage)
 	ColorVS_bytecode = GetFileBytecode("ColorVertexShader.cso", ColorVS_size);
 	ColorPS_bytecode = GetFileBytecode("ColorPixelShader.cso", ColorPS_size);
 
-	success = testEntity->SetModel(m_pCore->GetRenderer(),
+	success = entityCollection[1].SetModel(
+		m_pCore->GetRenderer()->GetGraphicsContext(),
 		&MODEL_DESC(
 			&MESH_DESC(
 				VertexType::ColorShaderVertex,
@@ -51,24 +74,10 @@ bool Engine::SetupStage(Stage* stage)
 				indexCollection, 3),
 			&SHADER_DESC(
 				ColorVS_bytecode, ColorVS_size,
-				ColorPS_bytecode, ColorPS_size)
-		)
-	);
+				ColorPS_bytecode, ColorPS_size)));
+	//------------------------------
 
-	RECT winRect;
-	GetWindowRect(m_pWindow->GetHandle(), &winRect);
-	float winWidth = static_cast<float>(winRect.right - winRect.left);
-	float winHeight = static_cast<float>(winRect.bottom - winRect.top);
-
-	Camera* mainCamera = Camera::Create(
-		&CAMERA_DESC(
-			75.0f,
-			winWidth,
-			winHeight,
-			1.0f, 1000.0f, 
-			&TRANSFORM_DESC()));
-
-	success = ((m_pStage = Stage::Create(mainCamera, 1, 0, testEntity, 1)) != nullptr);
+	success = ((m_pStage = Stage::Create(0, &STAGE_DESC(entityCollection, 2, 0))) != nullptr);
 	return success;
 }
 
@@ -80,9 +89,14 @@ int Engine::Run()
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
 		}
-		m_isRunning = m_pCore->OnUpdate(m_pStage);
+		m_isRunning = m_pCore->OnUpdate();
 	}
 	return (int)msg.wParam;
+}
+
+unsigned int Engine::GetActiveStageID()
+{
+	return m_pCore->GetStage()->GetID();
 }
 
 void Engine::Shutdown()

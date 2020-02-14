@@ -1,8 +1,8 @@
 #include "Camera.h"
 
-Camera* Camera::Create(CAMERA_DESC* camera_desc)
+Camera* Camera::Create(CAMERA_DESC* camera_desc, Transform* transform)
 {
-	return new Camera(camera_desc);
+	return new Camera(camera_desc, transform);
 }
 
 DirectX::XMMATRIX Camera::GetViewMatrix()
@@ -15,29 +15,18 @@ DirectX::XMMATRIX Camera::GetProjectionMatrix()
 	return m_projectionMatrix;
 }
 
-void Camera::OnUpdate()
+void Camera::OnFrameRender(Transform* transform)
 {
-	m_pTransform->Rotate(m_pTransform->GetRotation());
-	m_pTransform->OnUpdate();
+
 }
 
-Transform* Camera::GetTransform()
+Camera::Camera(CAMERA_DESC* camera_desc, Transform * transform) :
+	m_viewMatrix(), m_projectionMatrix()
 {
-	return m_pTransform;
-}
-
-
-Camera::Camera(CAMERA_DESC* camera_desc) :
-	m_viewMatrix(), m_projectionMatrix(), m_pTransform(nullptr)
-{
-	camera_desc->transform_desc != nullptr ?
-		m_pTransform = Transform::Create(camera_desc->transform_desc) :
-		m_pTransform = Transform::Create(&TRANSFORM_DESC());
-
 	m_viewMatrix = DirectX::XMMatrixLookAtLH(
-		m_pTransform->GetPosition(), 
-		DirectX::XMVectorAdd(m_pTransform->GetPosition(), m_pTransform->GetForwardDir()),
-		m_pTransform->GetUpDir());
+		transform->GetPosition(),
+		DirectX::XMVectorAdd(transform->GetPosition(), transform->GetForwardDir()),
+		transform->GetUpDir());
 
 	m_projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(
 		DirectX::XMConvertToRadians(camera_desc->verticalFovAngle),

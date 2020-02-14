@@ -1,6 +1,5 @@
 #pragma once
-#include "Model.h"
-#include "Camera.h"
+#include "Stage.h"
 
 struct RENDERER_DESC {
 	GraphicsContextType graphicsContextType;
@@ -13,7 +12,7 @@ class Renderer {
 public:
 	static Renderer* Create(HWND hWnd, RENDERER_DESC* renderer_desc);
 	bool Initialize();
-	void OnFrameRender(Model* model, Transform* transform, Camera* camera);
+	void OnFrameRender(Stage* stage);
 	void Shutdown();
 
 	D3D11Context* GetGraphicsContext();

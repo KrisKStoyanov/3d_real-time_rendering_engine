@@ -106,7 +106,7 @@ void Mesh::SetGraphicsProps(D3D11Context* renderer, SHADER_DESC* shader_desc, Ve
 	m_pGraphicsProps = GraphicsProps::Create(renderer, shader_desc, vertexType);
 }
 
-void Mesh::Render(D3D11Context* graphicsContext, DirectX::XMMATRIX wvp)
+void Mesh::OnFrameRender(D3D11Context* graphicsContext, DirectX::XMMATRIX wvp)
 {
 	ID3D11DeviceContext* deviceContext = graphicsContext->GetDeviceContext();
 	deviceContext->IASetVertexBuffers(0, 1, &m_pVBuffer, &m_VBufferStride, &m_VBufferOffset);

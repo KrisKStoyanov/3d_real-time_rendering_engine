@@ -15,10 +15,12 @@ public:
 		RENDERER_DESC* renderer_desc);
 	int Run();
 	bool SetupStage(Stage* stage);
+	unsigned int GetActiveStageID();
 	void Shutdown();
 private:
 	Window* m_pWindow;
 	Core* m_pCore;
+	
 	Stage* m_pStage;
 
 	bool m_isRunning;

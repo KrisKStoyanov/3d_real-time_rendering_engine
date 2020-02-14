@@ -11,7 +11,7 @@ struct MODEL_DESC {
 class Model {
 public:
 	static Model* Create(D3D11Context* graphicsContext, MODEL_DESC* model_desc);
-	void Render(D3D11Context* graphicsContext, DirectX::XMMATRIX = DirectX::XMMatrixIdentity());
+	void OnFrameRender(D3D11Context* graphicsContext, DirectX::XMMATRIX = DirectX::XMMatrixIdentity());
 	void Shutdown();
 
 	Mesh* GetMesh();

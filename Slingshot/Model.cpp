@@ -12,9 +12,9 @@ Model::Model(D3D11Context* graphicsContext, MODEL_DESC* model_desc) : m_pMesh(nu
 	}
 }
 
-void Model::Render(D3D11Context* graphicsContext, DirectX::XMMATRIX wvp)
+void Model::OnFrameRender(D3D11Context* graphicsContext, DirectX::XMMATRIX wvp)
 {
-	m_pMesh->Render(graphicsContext, wvp);
+	m_pMesh->OnFrameRender(graphicsContext, wvp);
 }
 
 void Model::Shutdown()

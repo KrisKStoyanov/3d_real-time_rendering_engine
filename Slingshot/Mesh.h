@@ -24,7 +24,7 @@ public:
 	void Shutdown();
 
 	void SetGraphicsProps(D3D11Context* graphicsContext, SHADER_DESC* shader_desc, VertexType vertexType);
-	void Render(D3D11Context* graphicsContext, DirectX::XMMATRIX wvp = DirectX::XMMatrixIdentity());
+	void OnFrameRender(D3D11Context* graphicsContext, DirectX::XMMATRIX wvp = DirectX::XMMatrixIdentity());
 
 	int GetVertexCount();
 	int GetIndexCount();

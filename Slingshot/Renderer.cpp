@@ -28,19 +28,25 @@ Renderer::Renderer(HWND hWnd, RENDERER_DESC* renderer_desc) : m_pGraphicsContext
 
 bool Renderer::Initialize()
 {
-	bool status = m_pGraphicsContext->Initialize();
-	return status;
+	return (m_pGraphicsContext->Initialize());
 }
 
-void Renderer::OnFrameRender(Model* model, Transform* transform, Camera* camera)
+void Renderer::OnFrameRender(Stage* stage)
 {
 	m_pGraphicsContext->StartFrameRender();
-	model->Render(
-		m_pGraphicsContext, 
-		DirectX::XMMatrixTranspose(
-		transform->GetWorldMatrix() * 
-		camera->GetViewMatrix() * 
-		camera->GetProjectionMatrix()));
+	stage->GetMainCamera()->GetTransform()->OnFrameRender();
+	stage->GetMainCamera()->GetCamera()->OnFrameRender(stage->GetMainCamera()->GetTransform());
+	for (unsigned int i = 0; i < stage->GetEntityCount(); ++i) {
+		(stage->GetEntityCollection() + i)->GetTransform()->OnFrameRender();
+		Model* model = (stage->GetEntityCollection() + i)->GetModel();
+		if (model != nullptr) {
+			model->OnFrameRender(m_pGraphicsContext, 
+				DirectX::XMMatrixTranspose(
+					(stage->GetEntityCollection() + i)->GetTransform()->GetWorldMatrix() *
+					stage->GetMainCamera()->GetCamera()->GetViewMatrix() *
+					stage->GetMainCamera()->GetCamera()->GetProjectionMatrix()));
+		}
+	}
 	m_pGraphicsContext->EndFrameRender();
 }
 

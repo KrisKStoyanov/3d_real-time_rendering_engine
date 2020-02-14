@@ -36,9 +36,10 @@ public:
 	DirectX::XMVECTOR GetScale();
 
 	DirectX::XMVECTOR GetForwardDir();
+	DirectX::XMVECTOR GetRightDir();
 	DirectX::XMVECTOR GetUpDir();
 
-	void OnUpdate();
+	void OnFrameRender();
 
 	void Translate(DirectX::XMVECTOR translation);
 	void Rotate(DirectX::XMVECTOR rotation);

@@ -1,40 +1,41 @@
 #pragma once
 #include "Entity.h"
 
+struct STAGE_DESC {
+	Entity* entityCollection;
+	unsigned int entityCount;
+	unsigned int mainCameraId;
+	STAGE_DESC(
+		Entity* _entityCollection,
+		unsigned int _entityCount,
+		unsigned int _mainCameraId) :
+		entityCollection(_entityCollection),
+		entityCount(_entityCount),
+		mainCameraId(_mainCameraId)
+	{}
+};
+
 class Stage {
 public:
-	static Stage* Create(
-		Camera* cameraCollection, 
-		unsigned int cameraCount,
-		unsigned int mainCameraId,
-		Entity* entityCollection, 
-		unsigned int entityCount);
+	static Stage* Create(unsigned int id, STAGE_DESC* stage_desc);
 	void Shutdown();
+	unsigned int GetID();
 
-	void SetMainCamera(unsigned int mainCameraId);
-	Camera* GetMainCamera();
+	Entity* GetMainCamera();
 
 	Entity* GetEntityCollection();
 	unsigned int GetEntityCount();
 private:
-	Stage(
-		Camera* cameraCollection,
-		unsigned int cameraCount,
-		unsigned int mainCameraId,
-		Entity* entityCollection,
-		unsigned int entityCount) :
-		m_cameraCollection(cameraCollection),
-		m_cameraCount(cameraCount),
-		m_mainCameraId(mainCameraId),
-		m_entityCollection(entityCollection), 
-		m_entityCount(entityCount) 
+	Stage(unsigned int id, STAGE_DESC* stage_desc) :
+		m_id(id),
+		m_pEntityCollection(stage_desc->entityCollection),
+		m_entityCount(stage_desc->entityCount),
+		m_mainCameraId(stage_desc->mainCameraId)
 	{}
 
-	Camera* m_cameraCollection;
-	unsigned int m_cameraCount;
+	unsigned int m_id;
 
-	unsigned int m_mainCameraId;
-
-	Entity* m_entityCollection;
+	Entity* m_pEntityCollection;
 	unsigned int m_entityCount;
+	unsigned int m_mainCameraId;
 };

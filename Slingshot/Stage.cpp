@@ -1,37 +1,30 @@
 #include "Stage.h"
 
-Stage* Stage::Create(
-	Camera* cameraCollection,
-	unsigned int cameraCount,
-	unsigned int mainCameraId,
-	Entity* entityCollection,
-	unsigned int entityCount)
+Stage* Stage::Create(unsigned int id, STAGE_DESC* stage_desc)
 {
-	return new Stage(cameraCollection, cameraCount, mainCameraId, entityCollection, entityCount);
+	return new Stage(id, stage_desc);
 }
 
 void Stage::Shutdown()
 {
 	for (unsigned int i = 0; i < m_entityCount; ++i) {
-		(m_entityCollection + i)->Shutdown();
+		(m_pEntityCollection + i)->Shutdown();
 	}
 }
 
-void Stage::SetMainCamera(unsigned int mainCameraId)
+unsigned int Stage::GetID()
 {
-	if (mainCameraId < m_cameraCount) {
-		m_mainCameraId = mainCameraId;
-	}
+	return m_id;
 }
 
-Camera* Stage::GetMainCamera()
+Entity* Stage::GetMainCamera()
 {
-	return (m_cameraCollection + m_mainCameraId);
+	return (m_pEntityCollection+m_mainCameraId);
 }
 
 Entity* Stage::GetEntityCollection()
 {
-	return m_entityCollection;
+	return m_pEntityCollection;
 }
 
 unsigned int Stage::GetEntityCount()

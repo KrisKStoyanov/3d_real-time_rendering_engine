@@ -5,74 +5,18 @@ Transform* Transform::Create(TRANSFORM_DESC* transform_desc)
 	return new Transform(transform_desc);
 }
 
-DirectX::XMMATRIX Transform::GetWorldMatrix()
-{
-	return m_worldMatrix;
-}
-
-DirectX::XMVECTOR Transform::GetPosition()
-{
-	return m_position;
-}
-
-DirectX::XMVECTOR Transform::GetRotation()
-{
-	return m_rotation;
-}
-
-DirectX::XMVECTOR Transform::GetScale()
-{
-	return m_scale;
-}
-
-DirectX::XMVECTOR Transform::GetForwardDir()
-{
-	return m_forwardDir;
-}
-
-DirectX::XMVECTOR Transform::GetUpDir()
-{
-	return m_upDir;
-}
-
-void Transform::OnUpdate()
-{
-	m_worldMatrix = DirectX::XMMatrixIdentity();
-	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_translatioMatrix);
-	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_rotationMatrix);
-	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_scalingMatrix);
-}
-
-void Transform::Translate(DirectX::XMVECTOR translation)
-{
-	m_position = DirectX::XMVectorAdd(m_position, translation);
-	m_translatioMatrix = DirectX::XMMatrixTranslationFromVector(m_position);
-}
-
-void Transform::Rotate(DirectX::XMVECTOR rotation)
-{
-	m_rotationMatrix = DirectX::XMMatrixRotationRollPitchYawFromVector(rotation);
-	m_forwardDir = DirectX::XMVector4Transform(m_defaultForwardDir, m_rotationMatrix);
-	m_forwardDir = DirectX::XMVector4Normalize(m_forwardDir);
-}
-
-void Transform::Scale(DirectX::XMVECTOR scale)
-{
-	m_scalingMatrix = DirectX::XMMatrixScalingFromVector(scale);
-}
-
-Transform::Transform(TRANSFORM_DESC* transform_desc) : 
-	m_worldMatrix(), 
-	m_translatioMatrix(), m_rotationMatrix(), m_scalingMatrix(),
-	m_position(), m_rotation(), m_scale(), 
+Transform::Transform(TRANSFORM_DESC* transform_desc) :
+	m_worldMatrix(DirectX::XMMatrixIdentity()),
+	m_translatioMatrix(DirectX::XMMatrixIdentity()), 
+	m_rotationMatrix(DirectX::XMMatrixIdentity()), 
+	m_scalingMatrix(DirectX::XMMatrixIdentity()),
+	m_position(), m_rotation(), m_scale(),
 	m_forwardDir(), m_rightDir(), m_upDir()
 {
-	m_worldMatrix = DirectX::XMMatrixIdentity();
-
 	m_position = DirectX::XMVectorSet(
-		transform_desc->position.x, 
-		transform_desc->position.y, 
-		transform_desc->position.z, 
+		transform_desc->position.x,
+		transform_desc->position.y,
+		transform_desc->position.z,
 		transform_desc->position.w);
 
 	m_rotation = DirectX::XMVectorSet(
@@ -122,4 +66,65 @@ Transform::Transform(TRANSFORM_DESC* transform_desc) :
 		1.0f,
 		0.0f,
 		0.0f);
+}
+
+DirectX::XMMATRIX Transform::GetWorldMatrix()
+{
+	return m_worldMatrix;
+}
+
+DirectX::XMVECTOR Transform::GetPosition()
+{
+	return m_position;
+}
+
+DirectX::XMVECTOR Transform::GetRotation()
+{
+	return m_rotation;
+}
+
+DirectX::XMVECTOR Transform::GetScale()
+{
+	return m_scale;
+}
+
+DirectX::XMVECTOR Transform::GetForwardDir()
+{
+	return m_forwardDir;
+}
+
+DirectX::XMVECTOR Transform::GetRightDir()
+{
+	return m_rightDir;
+}
+
+DirectX::XMVECTOR Transform::GetUpDir()
+{
+	return m_upDir;
+}
+
+void Transform::OnFrameRender()
+{
+	m_worldMatrix = DirectX::XMMatrixIdentity();
+	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_translatioMatrix);
+	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_rotationMatrix);
+	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_scalingMatrix);
+}
+
+void Transform::Translate(DirectX::XMVECTOR translation)
+{
+	m_position = DirectX::XMVectorSetW(DirectX::XMVectorAdd(m_position, translation), 1.0f);
+	m_translatioMatrix = DirectX::XMMatrixTranslationFromVector(m_position);
+}
+
+void Transform::Rotate(DirectX::XMVECTOR rotation)
+{
+	m_rotationMatrix = DirectX::XMMatrixRotationRollPitchYawFromVector(rotation);
+	m_forwardDir = DirectX::XMVector4Transform(m_defaultForwardDir, m_rotationMatrix);
+	m_forwardDir = DirectX::XMVector4Normalize(m_forwardDir);
+}
+
+void Transform::Scale(DirectX::XMVECTOR scale)
+{
+	m_scalingMatrix = DirectX::XMMatrixScalingFromVector(scale);
 }
