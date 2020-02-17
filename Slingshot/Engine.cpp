@@ -4,9 +4,9 @@ bool Engine::Initialize(WINDOW_DESC* window_desc, RENDERER_DESC* renderer_desc)
 {
 	if ((m_pWindow = Window::Create(window_desc)) != nullptr) {
 		HWND hWnd = m_pWindow->GetHandle();
-		m_isRunning = ((m_pCore = Core::Create(hWnd)) != nullptr);
-		if (m_isRunning) {
-			m_isRunning = m_pCore->InitializeRenderer(renderer_desc);
+		if ((m_pCore = Core::Create(hWnd)) != nullptr) 
+		{
+			m_isRunning = m_pCore->InitializeRenderer(hWnd, renderer_desc);
 		}
 	}
 
@@ -84,8 +84,10 @@ bool Engine::SetupStage(Stage* stage)
 int Engine::Run()
 {
 	MSG msg = {};
-	while (m_isRunning) {
-		while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
+	while (m_isRunning) 
+	{
+		while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) 
+		{
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
 		}

@@ -37,37 +37,48 @@ Core::Core(HWND hWnd) :
 LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg) {
+	case WM_LBUTTONDOWN:
+	{
+		SetCapture(hWnd);
+		RECT rcClip;		
+		GetClientRect(hWnd, &rcClip);
+		POINT pt = { rcClip.left, rcClip.top };
+		POINT pt2 = { rcClip.right, rcClip.bottom };
+		ClientToScreen(hWnd, &pt);
+		ClientToScreen(hWnd, &pt2);
+		SetRect(&rcClip, pt.x, pt.y, pt2.x, pt2.y);
+		ClipCursor(&rcClip);
+		ShowCursor(false);
+	}
+	break;
 	case WM_MOUSEMOVE:
 	{
 		int xPos = GET_X_LPARAM(lParam);
 		int yPos = GET_Y_LPARAM(lParam);
-		Entity* mainCamera = m_pStage->GetMainCamera();
+		m_pStage->GetMainCamera()->GetTransform()->Rotate(static_cast<float>(xPos), static_cast<float>(yPos), 0.0f);
 	}
+	break;
 	case WM_KEYDOWN:
 	{
 		switch (wParam) {
 		case 0x57: //W 
 		{
-			Entity* triangle = m_pStage->GetEntityCollection()+1;
-			triangle->GetTransform()->Translate(DirectX::XMVectorSet(0.0f, 0.0, 1.0, 0.0f));
+			m_pStage->GetMainCamera()->GetTransform()->Translate(DirectX::XMVectorSet(0.0f, 0.0, 1.0, 0.0f));
 		}
 		break;
 		case 0x41: //A
 		{
-			Entity* triangle = m_pStage->GetEntityCollection()+1;
-			triangle->GetTransform()->Translate(DirectX::XMVectorSet(-1.0f, 0.0, 0.0, 0.0f));
+			m_pStage->GetMainCamera()->GetTransform()->Translate(DirectX::XMVectorSet(-1.0f, 0.0, 0.0, 0.0f));
 		}
 		break;
 		case 0x53: //S
 		{
-			Entity* triangle = m_pStage->GetEntityCollection()+1;
-			triangle->GetTransform()->Translate(DirectX::XMVectorSet(0.0f, 0.0, -1.0, 0.0f));
+			m_pStage->GetMainCamera()->GetTransform()->Translate(DirectX::XMVectorSet(0.0f, 0.0, -1.0, 0.0f));
 		}
 		break;
 		case 0x44: //D
 		{
-			Entity* triangle = m_pStage->GetEntityCollection()+1;
-			triangle->GetTransform()->Translate(DirectX::XMVectorSet(1.0f, 0.0, 0.0, 0.0f));
+			m_pStage->GetMainCamera()->GetTransform()->Translate(DirectX::XMVectorSet(1.0f, 0.0, 0.0, 0.0f));
 		}
 		break;
 		case VK_ESCAPE:
@@ -76,6 +87,13 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 		}
+	}
+	break;
+	case WM_KILLFOCUS: 
+	{
+		ReleaseCapture();
+		ShowCursor(true);
+		return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 	}
 	break;
 	case WM_QUIT:
@@ -87,16 +105,16 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	break;
 	default:
 	{
-		DefWindowProcW(hWnd, uMsg, wParam, lParam);
+		return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 	}
 	break;
 	}
 	return 0;
 }
 
-bool Core::InitializeRenderer(RENDERER_DESC* renderer_desc)
+bool Core::InitializeRenderer(HWND hWnd, RENDERER_DESC* renderer_desc)
 {
-	m_pRenderer = Renderer::Create(m_hWnd, renderer_desc);
+	m_pRenderer = Renderer::Create(hWnd, renderer_desc);
 	bool success = (m_pRenderer != nullptr);
 	if (success) {
 		success = m_pRenderer->Initialize();

@@ -17,7 +17,10 @@ DirectX::XMMATRIX Camera::GetProjectionMatrix()
 
 void Camera::OnFrameRender(Transform* transform)
 {
-
+	m_viewMatrix = DirectX::XMMatrixLookAtLH(
+		transform->GetPosition(),
+		DirectX::XMVectorAdd(transform->GetPosition(), transform->GetForwardDir()),
+		transform->GetUpDir());
 }
 
 Camera::Camera(CAMERA_DESC* camera_desc, Transform * transform) :

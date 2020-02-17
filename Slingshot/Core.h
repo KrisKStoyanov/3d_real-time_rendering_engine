@@ -6,7 +6,7 @@ class Core
 public:
 	static Core* Create(HWND hWnd);
 	LRESULT CALLBACK HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	bool InitializeRenderer(RENDERER_DESC* core_desc);
+	bool InitializeRenderer(HWND hWnd, RENDERER_DESC* core_desc);
 	void LoadStage(Stage* stage);
 	bool OnUpdate(void);
 	void Shutdown(void);

@@ -42,7 +42,7 @@ public:
 	void OnFrameRender();
 
 	void Translate(DirectX::XMVECTOR translation);
-	void Rotate(DirectX::XMVECTOR rotation);
+	void Rotate(float eulerX, float eulerY, float eulerZ);
 	void Scale(DirectX::XMVECTOR scale);
 private:
 	Transform(TRANSFORM_DESC* transform_desc);
