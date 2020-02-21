@@ -1,8 +1,9 @@
 #include "Entity.h"
 
-Entity::Entity(TRANSFORM_DESC* transform_desc) : m_pTransform(nullptr), m_pCamera(nullptr), m_pModel(nullptr)
+Entity::Entity() : m_pTransform(nullptr), m_pCamera(nullptr), m_pModel(nullptr)
 {
-	transform_desc != nullptr ? m_pTransform = Transform::Create(transform_desc) : m_pTransform = Transform::Create(&TRANSFORM_DESC());
+	TRANSFORM_DESC transform_desc;
+	m_pTransform = Transform::Create(transform_desc);
 }
 
 void Entity::Shutdown()
@@ -11,19 +12,19 @@ void Entity::Shutdown()
 	SAFE_DELETE(m_pTransform);
 }
 
-bool Entity::SetTransform(TRANSFORM_DESC* transform_desc)
+bool Entity::SetTransform(TRANSFORM_DESC& transform_desc)
 {
 	return ((m_pTransform = Transform::Create(transform_desc)) != nullptr);
 }
 
-bool Entity::SetModel(D3D11Context* graphicsContext, MODEL_DESC* model_desc)
+bool Entity::SetModel(D3D11Context& graphicsContext, MODEL_DESC& model_desc)
 {
 	return ((m_pModel = Model::Create(graphicsContext, model_desc)) != nullptr);
 }
 
-bool Entity::SetCamera(CAMERA_DESC* camera_desc)
+bool Entity::SetCamera(CAMERA_DESC& camera_desc)
 {
-	return ((m_pCamera = Camera::Create(camera_desc, m_pTransform)) != nullptr);
+	return ((m_pCamera = Camera::Create(camera_desc, *m_pTransform)) != nullptr);
 }
 
 Transform* Entity::GetTransform()

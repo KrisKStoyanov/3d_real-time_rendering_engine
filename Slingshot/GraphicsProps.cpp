@@ -1,15 +1,15 @@
 #include "GraphicsProps.h"
 
-GraphicsProps* GraphicsProps::Create(D3D11Context* graphicsContext, SHADER_DESC* shader_desc, VertexType vertexType)
+GraphicsProps* GraphicsProps::Create(D3D11Context& graphicsContext, SHADER_DESC& shader_desc, VertexType vertexType)
 {
 	return new GraphicsProps(graphicsContext, shader_desc, vertexType);
 }
 
-GraphicsProps::GraphicsProps(D3D11Context* graphicsContext, SHADER_DESC* shader_desc, VertexType vertexType) :
+GraphicsProps::GraphicsProps(D3D11Context& graphicsContext, SHADER_DESC& shader_desc, VertexType vertexType) :
 	m_pVS(nullptr), m_pPS(nullptr), m_pIL(nullptr)
 {
-	graphicsContext->GetDevice()->CreateVertexShader(shader_desc->VS_bytecode, shader_desc->VS_size, nullptr, &m_pVS);
-	graphicsContext->GetDevice()->CreatePixelShader(shader_desc->PS_bytecode, shader_desc->PS_size, nullptr, &m_pPS);
+	graphicsContext.GetDevice()->CreateVertexShader(shader_desc.VS_bytecode, shader_desc.VS_size, nullptr, &m_pVS);
+	graphicsContext.GetDevice()->CreatePixelShader(shader_desc.PS_bytecode, shader_desc.PS_size, nullptr, &m_pPS);
 
 	switch (vertexType)
 	{
@@ -32,7 +32,7 @@ GraphicsProps::GraphicsProps(D3D11Context* graphicsContext, SHADER_DESC* shader_
 		VS_inputLayout[1].AlignedByteOffset = sizeof(float) * 4;
 		VS_inputLayout[1].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
 		VS_inputLayout[1].InstanceDataStepRate = 0;
-		graphicsContext->GetDevice()->CreateInputLayout(VS_inputLayout, 2, shader_desc->VS_bytecode, shader_desc->VS_size, &m_pIL);
+		graphicsContext.GetDevice()->CreateInputLayout(VS_inputLayout, 2, shader_desc.VS_bytecode, shader_desc.VS_size, &m_pIL);
 	}
 	break;
 	default:
@@ -41,9 +41,6 @@ GraphicsProps::GraphicsProps(D3D11Context* graphicsContext, SHADER_DESC* shader_
 	}
 	break;
 	}
-	
-	SAFE_DELETE_ARRAY(shader_desc->VS_bytecode);
-	SAFE_DELETE_ARRAY(shader_desc->PS_bytecode);
 }
 
 void GraphicsProps::Shutdown()

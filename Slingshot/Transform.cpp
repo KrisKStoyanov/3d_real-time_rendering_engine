@@ -1,11 +1,11 @@
 #include "Transform.h"
 
-Transform* Transform::Create(TRANSFORM_DESC* transform_desc)
+Transform* Transform::Create(TRANSFORM_DESC& transform_desc)
 {
 	return new Transform(transform_desc);
 }
 
-Transform::Transform(TRANSFORM_DESC* transform_desc) :
+Transform::Transform(TRANSFORM_DESC& transform_desc) :
 	m_worldMatrix(DirectX::XMMatrixIdentity()),
 	m_translatioMatrix(DirectX::XMMatrixIdentity()), 
 	m_rotationMatrix(DirectX::XMMatrixIdentity()), 
@@ -14,40 +14,40 @@ Transform::Transform(TRANSFORM_DESC* transform_desc) :
 	m_forwardDir(), m_rightDir(), m_upDir()
 {
 	m_position = DirectX::XMVectorSet(
-		transform_desc->position.x,
-		transform_desc->position.y,
-		transform_desc->position.z,
-		transform_desc->position.w);
+		transform_desc.position.x,
+		transform_desc.position.y,
+		transform_desc.position.z,
+		transform_desc.position.w);
 
 	m_rotation = DirectX::XMVectorSet(
-		transform_desc->rotation.x,
-		transform_desc->rotation.y,
-		transform_desc->rotation.z,
-		transform_desc->rotation.w);
+		transform_desc.rotation.x,
+		transform_desc.rotation.y,
+		transform_desc.rotation.z,
+		transform_desc.rotation.w);
 
 	m_scale = DirectX::XMVectorSet(
-		transform_desc->scale.x,
-		transform_desc->scale.y,
-		transform_desc->scale.z,
-		transform_desc->scale.w);
+		transform_desc.scale.x,
+		transform_desc.scale.y,
+		transform_desc.scale.z,
+		transform_desc.scale.w);
 
 	m_forwardDir = DirectX::XMVectorSet(
-		transform_desc->forwardDir.x,
-		transform_desc->forwardDir.y,
-		transform_desc->forwardDir.z,
-		transform_desc->forwardDir.w);
+		transform_desc.forwardDir.x,
+		transform_desc.forwardDir.y,
+		transform_desc.forwardDir.z,
+		transform_desc.forwardDir.w);
 
 	m_rightDir = DirectX::XMVectorSet(
-		transform_desc->rightDir.x,
-		transform_desc->rightDir.y,
-		transform_desc->rightDir.z,
-		transform_desc->rightDir.w);
+		transform_desc.rightDir.x,
+		transform_desc.rightDir.y,
+		transform_desc.rightDir.z,
+		transform_desc.rightDir.w);
 
 	m_upDir = DirectX::XMVectorSet(
-		transform_desc->upDir.x,
-		transform_desc->upDir.y,
-		transform_desc->upDir.z,
-		transform_desc->upDir.w);
+		transform_desc.upDir.x,
+		transform_desc.upDir.y,
+		transform_desc.upDir.z,
+		transform_desc.upDir.w);
 
 	m_defaultForwardDir = DirectX::XMVectorSet(
 		0.0f,

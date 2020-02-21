@@ -20,16 +20,16 @@ struct MESH_DESC {
 
 class Mesh {
 public:
-	static Mesh* Create(D3D11Context* graphicsContext, MESH_DESC* mesh_desc);
+	static Mesh* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc);
 	void Shutdown();
 
-	void SetGraphicsProps(D3D11Context* graphicsContext, SHADER_DESC* shader_desc, VertexType vertexType);
-	void OnFrameRender(D3D11Context* graphicsContext, DirectX::XMMATRIX wvp = DirectX::XMMatrixIdentity());
+	void SetGraphicsProps(D3D11Context& graphicsContext, SHADER_DESC& shader_desc, VertexType vertexType);
+	void OnFrameRender(D3D11Context& graphicsContext, DirectX::XMMATRIX wvp = DirectX::XMMatrixIdentity());
 
 	int GetVertexCount();
 	int GetIndexCount();
 private:
-	Mesh(D3D11Context* graphicsContext, MESH_DESC* mesh_desc);
+	Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc);
 	GraphicsProps* m_pGraphicsProps;
 
 	ID3D11Buffer* m_pVSCB;

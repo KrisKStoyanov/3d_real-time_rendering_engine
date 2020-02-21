@@ -38,12 +38,12 @@ bool Engine::EditStage(Stage* stage)
 	float winWidth = static_cast<float>(winRect.right - winRect.left);
 	float winHeight = static_cast<float>(winRect.bottom - winRect.top);
 
-	entityCollection[0].SetCamera(
-		&CAMERA_DESC(
-			75.0f,
-			winWidth,
-			winHeight,
-			1.0f, 1000.0f));
+	CAMERA_DESC camera_desc(75.0f,
+		winWidth,
+		winHeight,
+		1.0f, 1000.0f);
+
+	entityCollection[0].SetCamera(camera_desc);
 	//------------------------------
 
 
@@ -67,20 +67,27 @@ bool Engine::EditStage(Stage* stage)
 	ColorVS_bytecode = GetFileBytecode("ColorVertexShader.cso", ColorVS_size);
 	ColorPS_bytecode = GetFileBytecode("ColorPixelShader.cso", ColorPS_size);
 
+	MESH_DESC mesh_desc(VertexType::ColorShaderVertex,
+		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
+		vertexCollection, 3,
+		indexCollection, 3);
+
+	SHADER_DESC shader_desc(ColorVS_bytecode, ColorVS_size,
+		ColorPS_bytecode, ColorPS_size);
+
+	MODEL_DESC model_desc(mesh_desc, shader_desc);
+
 	success = entityCollection[1].SetModel(
-		m_pRenderer->GetGraphicsContext(),
-		&MODEL_DESC(
-			&MESH_DESC(
-				VertexType::ColorShaderVertex,
-				D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
-				vertexCollection, 3,
-				indexCollection, 3),
-			&SHADER_DESC(
-				ColorVS_bytecode, ColorVS_size,
-				ColorPS_bytecode, ColorPS_size)));
+		*m_pRenderer->GetGraphicsContext(), model_desc);
 	//------------------------------
 
 	success = ((m_pStage = Stage::Create(0, &STAGE_DESC(entityCollection, 2, 0))) != nullptr);
+
+	SAFE_DELETE_ARRAY(vertexCollection);
+	SAFE_DELETE_ARRAY(indexCollection);
+	SAFE_DELETE_ARRAY(ColorVS_bytecode);
+	SAFE_DELETE_ARRAY(ColorPS_bytecode);
+
 	return success;
 }
 

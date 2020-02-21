@@ -27,7 +27,7 @@ struct TRANSFORM_DESC {
 class Transform
 {
 public:
-	static Transform* Create(TRANSFORM_DESC* transform_desc);
+	static Transform* Create(TRANSFORM_DESC& transform_desc);
 
 	DirectX::XMMATRIX GetWorldMatrix();
 
@@ -45,7 +45,7 @@ public:
 	void Rotate(float eulerX, float eulerY, float eulerZ);
 	void Scale(DirectX::XMVECTOR scale);
 private:
-	Transform(TRANSFORM_DESC* transform_desc);
+	Transform(TRANSFORM_DESC& transform_desc);
 
 	DirectX::XMMATRIX m_worldMatrix;
 

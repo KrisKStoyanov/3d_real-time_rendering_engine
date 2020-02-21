@@ -24,14 +24,14 @@ struct CAMERA_DESC {
 class Camera
 {
 public:
-	static Camera* Create(CAMERA_DESC* camera_desc, Transform* transform);
+	static Camera* Create(CAMERA_DESC& camera_desc, Transform& transform);
 
 	DirectX::XMMATRIX GetViewMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix();
 
-	void OnFrameRender(Transform* transform);
+	void OnFrameRender(Transform& transform);
 private:
-	Camera(CAMERA_DESC* camera_desc, Transform* transform);
+	Camera(CAMERA_DESC& camera_desc, Transform& transform);
 
 	DirectX::XMMATRIX m_viewMatrix;
 	DirectX::XMMATRIX m_projectionMatrix;
