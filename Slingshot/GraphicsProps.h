@@ -2,20 +2,13 @@
 #include "D3D11Context.h"
 #include "Vertex.h"
 
-struct SHADER_DESC {
-
-	char* VS_bytecode;
+struct SHADER_DESC 
+{
+	const char* VS_bytecode;
 	size_t VS_size;
 
-	char* PS_bytecode;
+	const char* PS_bytecode;
 	size_t PS_size;
-
-	SHADER_DESC(
-		char* _VS_bytecode, size_t _VS_size, 
-		char* _PS_bytecode, size_t _PS_size) :
-		VS_bytecode(_VS_bytecode), VS_size(_VS_size),
-		PS_bytecode(_PS_bytecode), PS_size(_PS_size)
-	{}
 };
 
 class GraphicsProps {

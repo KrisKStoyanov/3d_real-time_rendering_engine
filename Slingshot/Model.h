@@ -4,8 +4,6 @@
 struct MODEL_DESC {
 	MESH_DESC mesh_desc;
 	SHADER_DESC shader_desc;
-	MODEL_DESC(MESH_DESC _mesh_desc, SHADER_DESC _shader_desc) :
-		mesh_desc(_mesh_desc), shader_desc(_shader_desc) {}
 };
 
 class Model {

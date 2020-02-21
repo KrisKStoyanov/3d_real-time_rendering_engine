@@ -2,20 +2,12 @@
 #include "GraphicsProps.h"
 
 struct MESH_DESC {
-	VertexType vertexType;
-	D3D11_PRIMITIVE_TOPOLOGY topology;
+	VertexType vertexType = VertexType::ColorShaderVertex;
 	Vertex* vertexCollection;
 	unsigned int vertexCount;
 	unsigned int* indexCollection;
 	unsigned int indexCount;
-	MESH_DESC(
-		VertexType _vertexType, D3D11_PRIMITIVE_TOPOLOGY _topology,
-		Vertex* _vertexCollection, unsigned int _vertexCount,
-		unsigned int* _indexCollection, unsigned int _indexCount) :
-		vertexType(_vertexType), topology(_topology),
-		vertexCollection(_vertexCollection), vertexCount(_vertexCount), 
-		indexCollection(_indexCollection), indexCount(_indexCount)
-	{}
+	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 };
 
 class Mesh {

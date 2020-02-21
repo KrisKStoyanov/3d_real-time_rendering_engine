@@ -111,10 +111,10 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-void Core::LoadStage(Stage* stage)
+void Core::LoadStage(Stage& stage)
 {
-	m_pStage = stage;
-	m_pStageEntities = m_pStage->GetEntityCollection();
+	m_pStage = new Stage(stage);
+	m_pStageEntities = new Entity(*m_pStage->GetEntityCollection());
 	m_stageEntityCount = m_pStage->GetEntityCount();
 }
 

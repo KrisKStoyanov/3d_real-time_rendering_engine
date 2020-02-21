@@ -17,7 +17,7 @@ struct Vertex {
 
 };
 
-struct ColorShaderVertex : Vertex {
+struct ColorShaderVertex : public Vertex {
 	DirectX::XMFLOAT4 position;
 	DirectX::XMFLOAT4 color;
 };

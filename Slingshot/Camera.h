@@ -2,23 +2,11 @@
 #include "Transform.h"
 
 struct CAMERA_DESC {
-	float verticalFovAngle; //angle in degrees, converted to radians during setup
-	float lenseWidth;
-	float lenseHeight;
-	float nearClipDist;
-	float farClipDist;
-	CAMERA_DESC(
-		float _verticalFovAngle,
-		float _lenseWidth,
-		float _lenseHeight,
-		float _nearClipDist,
-		float _farClipDist) :
-		verticalFovAngle(_verticalFovAngle),
-		lenseWidth(_lenseWidth),
-		lenseHeight(_lenseHeight),
-		nearClipDist(_nearClipDist),
-		farClipDist(_farClipDist)
-	{}
+	float verticalFovAngle = 75.0f; //in degrees, converted to radians during setup
+	float lenseWidth = 1280;
+	float lenseHeight = 720;
+	float nearClipDist = 1.0f;
+	float farClipDist = 1000.0f;
 };
 
 class Camera

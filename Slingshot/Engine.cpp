@@ -18,7 +18,7 @@ bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 		m_isRunning = EditStage(m_pStage);
 		if (m_isRunning)
 		{
-			m_pCore->LoadStage(m_pStage);
+			m_pCore->LoadStage(*m_pStage);
 		}
 	}
 
@@ -31,23 +31,22 @@ bool Engine::EditStage(Stage* stage)
 
 	Entity* entityCollection = new Entity[2];
 
-	//Setup main camera
+	//Main Camera
 	//------------------------------
 	RECT winRect;
 	GetWindowRect(m_pWindow->GetHandle(), &winRect);
 	float winWidth = static_cast<float>(winRect.right - winRect.left);
 	float winHeight = static_cast<float>(winRect.bottom - winRect.top);
 
-	CAMERA_DESC camera_desc(75.0f,
-		winWidth,
-		winHeight,
-		1.0f, 1000.0f);
+	CAMERA_DESC camera_desc;
+	camera_desc.lenseWidth = winWidth;
+	camera_desc.lenseHeight = winHeight;
 
 	entityCollection[0].SetCamera(camera_desc);
 	//------------------------------
 
 
-	//Setup rendering test triangle
+	//Triangle Object
 	//------------------------------
 	ColorShaderVertex* vertexCollection = new ColorShaderVertex[3];
 	vertexCollection[0].position = DirectX::XMFLOAT4(0.0f, 0.5f, 1.0f, 1.0f);
@@ -62,20 +61,28 @@ bool Engine::EditStage(Stage* stage)
 	indexCollection[1] = 1;
 	indexCollection[2] = 2;
 
-	char* ColorVS_bytecode = nullptr, * ColorPS_bytecode = nullptr;
+	const char* ColorVS_bytecode = nullptr, * ColorPS_bytecode = nullptr;
 	size_t ColorVS_size, ColorPS_size;
 	ColorVS_bytecode = GetFileBytecode("ColorVertexShader.cso", ColorVS_size);
 	ColorPS_bytecode = GetFileBytecode("ColorPixelShader.cso", ColorPS_size);
 
-	MESH_DESC mesh_desc(VertexType::ColorShaderVertex,
-		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
-		vertexCollection, 3,
-		indexCollection, 3);
+	MESH_DESC mesh_desc;
+	mesh_desc.vertexType = VertexType::ColorShaderVertex;
+	mesh_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+	mesh_desc.vertexCollection = vertexCollection;
+	mesh_desc.vertexCount = 3;
+	mesh_desc.indexCollection = indexCollection;
+	mesh_desc.indexCount = 3;
 
-	SHADER_DESC shader_desc(ColorVS_bytecode, ColorVS_size,
-		ColorPS_bytecode, ColorPS_size);
+	SHADER_DESC shader_desc;
+	shader_desc.VS_bytecode = ColorVS_bytecode;
+	shader_desc.VS_size = ColorVS_size;
+	shader_desc.PS_bytecode = ColorPS_bytecode;
+	shader_desc.PS_size = ColorPS_size;
 
-	MODEL_DESC model_desc(mesh_desc, shader_desc);
+	MODEL_DESC model_desc;
+	model_desc.mesh_desc = mesh_desc;
+	model_desc.shader_desc = shader_desc;
 
 	success = entityCollection[1].SetModel(
 		*m_pRenderer->GetGraphicsContext(), model_desc);
@@ -96,10 +103,10 @@ int Engine::Run()
 	MSG msg = {};
 	while (m_isRunning) 
 	{
-		while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) 
+		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) 
 		{
 			TranslateMessage(&msg);
-			DispatchMessageW(&msg);
+			DispatchMessage(&msg);
 		}
 		m_isRunning = m_pCore->OnUpdate(*m_pRenderer);
 	}

@@ -1,27 +1,15 @@
 #pragma once
 #include <DirectXMath.h>
 
-struct TRANSFORM_DESC {
-	DirectX::XMFLOAT4 position;
-	DirectX::XMFLOAT4 rotation;
-	DirectX::XMFLOAT4 scale;
-	DirectX::XMFLOAT4 forwardDir;
-	DirectX::XMFLOAT4 rightDir;
-	DirectX::XMFLOAT4 upDir;
-	TRANSFORM_DESC(
-		DirectX::XMFLOAT4 _position = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f),
-		DirectX::XMFLOAT4 _rotation = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f),
-		DirectX::XMFLOAT4 _scale = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		DirectX::XMFLOAT4 _forwardDir = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f), //must differ from position for camera view matrix setup
-		DirectX::XMFLOAT4 _rightDir = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f),
-		DirectX::XMFLOAT4 _upDir = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f)) :
-		position(_position),
-		rotation(_rotation),
-		scale(_scale),
-		forwardDir(_forwardDir),
-		rightDir(_rightDir),
-		upDir(_upDir)
-	{}
+struct TRANSFORM_DESC 
+{
+	DirectX::XMFLOAT4 position = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	DirectX::XMFLOAT4 rotation = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	DirectX::XMFLOAT4 scale = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	DirectX::XMFLOAT4 forwardDir = DirectX::XMFLOAT4(0.0f, 0.0f ,1.0f, 0.0f);
+	DirectX::XMFLOAT4 rightDir = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
+	DirectX::XMFLOAT4 upDir = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 };
 
 class Transform
