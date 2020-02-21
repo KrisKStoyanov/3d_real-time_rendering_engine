@@ -4,7 +4,7 @@ LRESULT CALLBACK CoreProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	Core* pCore =
 		reinterpret_cast<Core*>
-		(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+		(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
 	if (pCore) {
 		return pCore->HandleMessage(hwnd, uMsg, wParam, lParam);
@@ -13,7 +13,7 @@ LRESULT CALLBACK CoreProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		DestroyWindow(hwnd);
 		PostQuitMessage(0);
 	}
-	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
 Core* Core::Create(HWND hWnd)
@@ -23,13 +23,12 @@ Core* Core::Create(HWND hWnd)
 
 Core::Core(HWND hWnd) : 
 	m_hWnd(hWnd), m_pStage(nullptr), 
-	m_pStageEntities(nullptr), m_stageEntityCount(0),
-	m_pRenderer(nullptr), m_isActive(true)
+	m_pStageEntities(nullptr), m_stageEntityCount(0), m_isActive(true)
 {
-	SetWindowLongPtrW(
+	SetWindowLongPtr(
 		hWnd, GWLP_USERDATA,
 		reinterpret_cast<LONG_PTR>(this));
-	SetWindowLongPtrW(
+	SetWindowLongPtr(
 		hWnd, GWLP_WNDPROC,
 		reinterpret_cast<LONG_PTR>(CoreProc));
 }
@@ -93,7 +92,7 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		ReleaseCapture();
 		ShowCursor(true);
-		return DefWindowProcW(hWnd, uMsg, wParam, lParam);
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 	break;
 	case WM_QUIT:
@@ -105,21 +104,11 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	break;
 	default:
 	{
-		return DefWindowProcW(hWnd, uMsg, wParam, lParam);
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 	break;
 	}
 	return 0;
-}
-
-bool Core::InitializeRenderer(HWND hWnd, RENDERER_DESC* renderer_desc)
-{
-	m_pRenderer = Renderer::Create(hWnd, renderer_desc);
-	bool success = (m_pRenderer != nullptr);
-	if (success) {
-		success = m_pRenderer->Initialize();
-	}
-	return success;
 }
 
 void Core::LoadStage(Stage* stage)
@@ -129,20 +118,15 @@ void Core::LoadStage(Stage* stage)
 	m_stageEntityCount = m_pStage->GetEntityCount();
 }
 
-bool Core::OnUpdate(void)
+bool Core::OnUpdate(Renderer& renderer)
 {
-	m_pRenderer->OnFrameRender(m_pStage);
+	renderer.OnFrameRender(m_pStage);
 	return m_isActive;
 }
 
 void Core::Shutdown(void)
 {
-	SAFE_SHUTDOWN(m_pRenderer);
-}
 
-Renderer* Core::GetRenderer()
-{
-	return m_pRenderer;
 }
 
 Stage* Core::GetStage()

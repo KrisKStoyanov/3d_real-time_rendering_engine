@@ -1,18 +1,21 @@
 #include "Engine.h"
 
-bool Engine::Initialize(WINDOW_DESC* window_desc, RENDERER_DESC* renderer_desc)
+bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 {
 	if ((m_pWindow = Window::Create(window_desc)) != nullptr) {
 		HWND hWnd = m_pWindow->GetHandle();
-		if ((m_pCore = Core::Create(hWnd)) != nullptr) 
-		{
-			m_isRunning = m_pCore->InitializeRenderer(hWnd, renderer_desc);
-		}
+		m_isRunning = (m_pCore = Core::Create(hWnd)) != nullptr;
+		m_isRunning = (m_pRenderer = Renderer::Create(hWnd, renderer_desc)) != nullptr;
 	}
 
 	if (m_isRunning) 
 	{
-		m_isRunning = SetupStage(m_pStage);
+		m_isRunning = m_pRenderer->Initialize();
+	}
+	
+	if (m_isRunning) 
+	{
+		m_isRunning = EditStage(m_pStage);
 		if (m_isRunning)
 		{
 			m_pCore->LoadStage(m_pStage);
@@ -22,7 +25,7 @@ bool Engine::Initialize(WINDOW_DESC* window_desc, RENDERER_DESC* renderer_desc)
 	return m_isRunning;
 }
 
-bool Engine::SetupStage(Stage* stage)
+bool Engine::EditStage(Stage* stage)
 {
 	bool success;
 
@@ -65,7 +68,7 @@ bool Engine::SetupStage(Stage* stage)
 	ColorPS_bytecode = GetFileBytecode("ColorPixelShader.cso", ColorPS_size);
 
 	success = entityCollection[1].SetModel(
-		m_pCore->GetRenderer()->GetGraphicsContext(),
+		m_pRenderer->GetGraphicsContext(),
 		&MODEL_DESC(
 			&MESH_DESC(
 				VertexType::ColorShaderVertex,
@@ -91,19 +94,20 @@ int Engine::Run()
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
 		}
-		m_isRunning = m_pCore->OnUpdate();
+		m_isRunning = m_pCore->OnUpdate(*m_pRenderer);
 	}
 	return (int)msg.wParam;
-}
-
-unsigned int Engine::GetActiveStageID()
-{
-	return m_pCore->GetStage()->GetID();
 }
 
 void Engine::Shutdown()
 {
 	SAFE_SHUTDOWN(m_pStage);
 	SAFE_SHUTDOWN(m_pCore);
+	SAFE_SHUTDOWN(m_pRenderer);
 	SAFE_SHUTDOWN(m_pWindow);
+}
+
+Renderer* Engine::GetRenderer()
+{
+	return m_pRenderer;
 }

@@ -1,13 +1,13 @@
 #include "Renderer.h"
 
-Renderer* Renderer::Create(HWND hWnd, RENDERER_DESC* renderer_desc)
+Renderer* Renderer::Create(HWND hWnd, RENDERER_DESC& renderer_desc)
 {
 	return new Renderer(hWnd, renderer_desc);
 }
 
-Renderer::Renderer(HWND hWnd, RENDERER_DESC* renderer_desc) : m_pGraphicsContext(nullptr)
+Renderer::Renderer(HWND hWnd, RENDERER_DESC& renderer_desc) : m_pGraphicsContext(nullptr)
 {
-	switch (renderer_desc->graphicsContextType)
+	switch (renderer_desc.graphicsContextType)
 	{
 	case GraphicsContextType::D3D11:
 	{

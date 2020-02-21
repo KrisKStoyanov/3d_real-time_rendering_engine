@@ -10,20 +10,21 @@ int CALLBACK wWinMain(
 {
 	int status = EXIT_FAILURE;
 
-	Engine* engine = new Engine();
-	if (engine->Initialize(
-			&WINDOW_DESC(
-				hInstance,
-				L"Slingshot Graphics",
-				nCmdShow,
-				1280, 720),
-			&RENDERER_DESC(
-				GraphicsContextType::D3D11
-			)
-		)) {
-		status = engine->Run();
+	WINDOW_DESC window_desc;
+	window_desc.hInstance = hInstance;
+	window_desc.nCmdShow = nCmdShow;
+	window_desc.nWidth = 1280;
+	window_desc.nHeight = 720;
+
+	RENDERER_DESC renderer_desc;
+
+	Engine engine = Engine::Get();
+
+	if (engine.Initialize(window_desc, renderer_desc))
+	{
+		status = engine.Run();
 	}
-	SAFE_SHUTDOWN(engine);
+	engine.Shutdown();
 
 	return status;
 }
