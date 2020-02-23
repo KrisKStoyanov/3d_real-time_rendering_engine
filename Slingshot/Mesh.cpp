@@ -96,6 +96,9 @@ Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc) :
 	DX::ThrowIfFailed(graphicsContext.GetDevice()->CreateBuffer(&vs_cb_desc, &vs_cb_data, &m_pVSCB));
 
 	//----------------------------------
+
+	SAFE_DELETE_ARRAY(mesh_desc.vertexCollection);
+	SAFE_DELETE_ARRAY(mesh_desc.indexCollection);
 }
 
 void Mesh::SetGraphicsProps(D3D11Context& renderer, SHADER_DESC& shader_desc, VertexType vertexType)

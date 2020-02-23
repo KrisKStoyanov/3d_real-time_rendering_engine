@@ -2,13 +2,14 @@
 #include "Entity.h"
 
 struct STAGE_DESC {
+	Entity* entityCollection;
 	unsigned int entityCount;
 	unsigned int mainCameraId;
 };
 
 class Stage {
 public:
-	static Stage* Create(unsigned int id, STAGE_DESC& stage_desc, Entity& entityCol);
+	static Stage* Create(unsigned int id, STAGE_DESC& stage_desc);
 	void Shutdown();
 	unsigned int GetID();
 
@@ -17,7 +18,7 @@ public:
 	Entity* GetEntityCollection();
 	unsigned int GetEntityCount();
 private:
-	Stage(unsigned int id, STAGE_DESC& stage_desc, Entity& entityCol);
+	Stage(unsigned int id, STAGE_DESC& stage_desc);
 
 	unsigned int m_id;
 

@@ -92,15 +92,16 @@ bool Engine::EditStage(Stage* stage)
 		*m_pRenderer->GetGraphicsContext(), model_desc);
 	//------------------------------
 	STAGE_DESC stage_desc;
+	stage_desc.entityCollection = new Entity[2];
+	memcpy(stage_desc.entityCollection, entityCollection, sizeof(Entity) * 2);
 	stage_desc.entityCount = 2;
 	stage_desc.mainCameraId = 0;
-	success = ((m_pStage = Stage::Create(0, stage_desc, *entityCollection)) != nullptr);
+	success = ((m_pStage = Stage::Create(0, stage_desc)) != nullptr);
 
 	SAFE_DELETE_ARRAY(vertexCollection);
 	SAFE_DELETE_ARRAY(indexCollection);
 	SAFE_DELETE_ARRAY(ColorVS_bytecode);
 	SAFE_DELETE_ARRAY(ColorPS_bytecode);
-
 	SAFE_DELETE_ARRAY(entityCollection);
 
 	return success;

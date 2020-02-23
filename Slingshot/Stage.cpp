@@ -1,8 +1,8 @@
 #include "Stage.h"
 
-Stage* Stage::Create(unsigned int id, STAGE_DESC& stage_desc, Entity& entityCol)
+Stage* Stage::Create(unsigned int id, STAGE_DESC& stage_desc)
 {
-	return new Stage(id, stage_desc, entityCol);
+	return new Stage(id, stage_desc);
 }
 
 void Stage::Shutdown()
@@ -32,10 +32,11 @@ unsigned int Stage::GetEntityCount()
 	return m_entityCount;
 }
 
-Stage::Stage(unsigned int id, STAGE_DESC& stage_desc, Entity& entityCol)
+Stage::Stage(unsigned int id, STAGE_DESC& stage_desc)
 	: m_id(id), m_entityCount(stage_desc.entityCount), m_mainCameraId(stage_desc.mainCameraId)
 {
 	m_pEntityCollection = new Entity[m_entityCount];
-	memcpy(m_pEntityCollection, &entityCol, sizeof(Entity) * m_entityCount);
+	memcpy(m_pEntityCollection, stage_desc.entityCollection, sizeof(Entity) * m_entityCount);
+	SAFE_DELETE_ARRAY(stage_desc.entityCollection);
 }
 
