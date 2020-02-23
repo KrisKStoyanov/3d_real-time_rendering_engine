@@ -4,11 +4,21 @@
 
 struct SHADER_DESC 
 {
-	const char* VS_bytecode;
+	char* VS_bytecode;
 	size_t VS_size;
 
-	const char* PS_bytecode;
+	char* PS_bytecode;
 	size_t PS_size;
+
+	//SHADER_DESC(const SHADER_DESC& other)
+	//	: VS_size(other.VS_size), PS_size(other.PS_size)
+	//{
+	//	VS_bytecode = new char[VS_size + 1];
+	//	memcpy(VS_bytecode, other.VS_bytecode, VS_size);
+
+	//	PS_bytecode = new char[PS_size + 1];
+	//	memcpy(PS_bytecode, other.PS_bytecode, PS_size);
+	//}
 };
 
 class GraphicsProps {

@@ -61,7 +61,7 @@ bool Engine::EditStage(Stage* stage)
 	indexCollection[1] = 1;
 	indexCollection[2] = 2;
 
-	const char* ColorVS_bytecode = nullptr, * ColorPS_bytecode = nullptr;
+	char* ColorVS_bytecode = nullptr, * ColorPS_bytecode = nullptr;
 	size_t ColorVS_size, ColorPS_size;
 	ColorVS_bytecode = GetFileBytecode("ColorVertexShader.cso", ColorVS_size);
 	ColorPS_bytecode = GetFileBytecode("ColorPixelShader.cso", ColorPS_size);
@@ -69,15 +69,19 @@ bool Engine::EditStage(Stage* stage)
 	MESH_DESC mesh_desc;
 	mesh_desc.vertexType = VertexType::ColorShaderVertex;
 	mesh_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-	mesh_desc.vertexCollection = vertexCollection;
+	mesh_desc.vertexCollection = new ColorShaderVertex[3];
+	memcpy(mesh_desc.vertexCollection, vertexCollection, sizeof(ColorShaderVertex)* 3);
 	mesh_desc.vertexCount = 3;
-	mesh_desc.indexCollection = indexCollection;
+	mesh_desc.indexCollection = new unsigned int[3];
+	memcpy(mesh_desc.indexCollection, indexCollection, sizeof(unsigned int) * 3);
 	mesh_desc.indexCount = 3;
 
 	SHADER_DESC shader_desc;
-	shader_desc.VS_bytecode = ColorVS_bytecode;
+	shader_desc.VS_bytecode = new char[ColorVS_size];
+	memcpy(shader_desc.VS_bytecode, ColorVS_bytecode, ColorVS_size);
 	shader_desc.VS_size = ColorVS_size;
-	shader_desc.PS_bytecode = ColorPS_bytecode;
+	shader_desc.PS_bytecode = new char[ColorPS_size];
+	memcpy(shader_desc.PS_bytecode, ColorPS_bytecode, ColorPS_size);
 	shader_desc.PS_size = ColorPS_size;
 
 	MODEL_DESC model_desc;
@@ -87,13 +91,17 @@ bool Engine::EditStage(Stage* stage)
 	success = entityCollection[1].SetModel(
 		*m_pRenderer->GetGraphicsContext(), model_desc);
 	//------------------------------
-
-	success = ((m_pStage = Stage::Create(0, &STAGE_DESC(entityCollection, 2, 0))) != nullptr);
+	STAGE_DESC stage_desc;
+	stage_desc.entityCount = 2;
+	stage_desc.mainCameraId = 0;
+	success = ((m_pStage = Stage::Create(0, stage_desc, *entityCollection)) != nullptr);
 
 	SAFE_DELETE_ARRAY(vertexCollection);
 	SAFE_DELETE_ARRAY(indexCollection);
 	SAFE_DELETE_ARRAY(ColorVS_bytecode);
 	SAFE_DELETE_ARRAY(ColorPS_bytecode);
+
+	SAFE_DELETE_ARRAY(entityCollection);
 
 	return success;
 }

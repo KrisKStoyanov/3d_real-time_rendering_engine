@@ -35,12 +35,10 @@ GraphicsProps::GraphicsProps(D3D11Context& graphicsContext, SHADER_DESC& shader_
 		graphicsContext.GetDevice()->CreateInputLayout(VS_inputLayout, 2, shader_desc.VS_bytecode, shader_desc.VS_size, &m_pIL);
 	}
 	break;
-	default:
-	{
-		return;
 	}
-	break;
-	}
+
+	SAFE_DELETE_ARRAY(shader_desc.VS_bytecode);
+	SAFE_DELETE_ARRAY(shader_desc.PS_bytecode);
 }
 
 void GraphicsProps::Shutdown()

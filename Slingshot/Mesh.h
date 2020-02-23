@@ -1,5 +1,6 @@
 #pragma once
 #include "GraphicsProps.h"
+#include <vector>
 
 struct MESH_DESC {
 	VertexType vertexType = VertexType::ColorShaderVertex;
@@ -8,6 +9,16 @@ struct MESH_DESC {
 	unsigned int* indexCollection;
 	unsigned int indexCount;
 	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+
+	//MESH_DESC(const MESH_DESC& other)
+	//	: vertexCount(other.vertexCount), indexCount(other.indexCount) 
+	//{
+	//	vertexCollection = new Vertex[vertexCount];
+	//	memcpy(vertexCollection, other.vertexCollection, vertexCount);
+
+	//	indexCollection = new unsigned int[indexCount];
+	//	memcpy(indexCollection, other.indexCollection, indexCount);
+	//}
 };
 
 class Mesh {
