@@ -279,6 +279,7 @@ void D3D11Context::InitializeNvAPI()
 
 void D3D11Context::ShutdownNvAPI()
 {
+	NvAPI_Unload();
 }
 
 NV_D3D1x_GRAPHICS_CAPS D3D11Context::QueryGraphicsCapabilities()
