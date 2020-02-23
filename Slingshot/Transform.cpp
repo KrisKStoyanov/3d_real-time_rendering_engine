@@ -106,15 +106,17 @@ DirectX::XMVECTOR Transform::GetUpDir()
 void Transform::OnFrameRender()
 {
 	m_worldMatrix = DirectX::XMMatrixIdentity();
+	m_scalingMatrix = DirectX::XMMatrixScalingFromVector(m_scale);
 	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_scalingMatrix);
+	m_rotationMatrix = DirectX::XMMatrixRotationRollPitchYawFromVector(m_rotation);
 	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_rotationMatrix);
+	m_translatioMatrix = DirectX::XMMatrixTranslationFromVector(m_position);
 	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_translatioMatrix);
 }
 
 void Transform::Translate(DirectX::XMVECTOR translation)
 {
 	m_position = DirectX::XMVectorSetW(DirectX::XMVectorAdd(m_position, translation), 1.0f);
-	m_translatioMatrix = DirectX::XMMatrixTranslationFromVector(m_position);
 }
 
 void Transform::Rotate(float pitch, float head, float roll)
@@ -126,7 +128,6 @@ void Transform::Rotate(float pitch, float head, float roll)
 			DirectX::XMConvertToDegrees(head), 
 			DirectX::XMConvertToDegrees(roll), 
 			0.0f));
-	m_rotationMatrix = DirectX::XMMatrixRotationRollPitchYawFromVector(m_rotation);
 
 	m_forwardDir = DirectX::XMVector3Normalize(DirectX::XMVector3Transform(m_defaultForwardDir, m_rotationMatrix));	
 	m_rightDir = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(m_forwardDir, m_defaultUpDir));

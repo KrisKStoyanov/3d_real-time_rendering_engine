@@ -61,50 +61,66 @@ bool Engine::EditStage(Stage* stage)
 	//Cube Object
 	//------------------------------
 	const int ENTITY0_VERTEX_COUNT = 8;
-	const int ENTITY0_INDEX_COUNT = 10;
+	const int ENTITY0_INDEX_COUNT = 18;
 
-	ColorShaderVertex* triV_Collection = new ColorShaderVertex[ENTITY0_VERTEX_COUNT];
-	triV_Collection[0].position = DirectX::XMFLOAT4(-2.0f, -2.0f, -2.0f, 1.0f);
-	triV_Collection[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	triV_Collection[1].position = DirectX::XMFLOAT4(-2.0f, 2.0f, -2.0f, 1.0f);
-	triV_Collection[1].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	triV_Collection[2].position = DirectX::XMFLOAT4(2.0f, 2.0f, -2.0f, 1.0f);
-	triV_Collection[2].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-	triV_Collection[3].position = DirectX::XMFLOAT4(2.0f, -2.0f, -2.0f, 1.0f);
-	triV_Collection[3].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	triV_Collection[4].position = DirectX::XMFLOAT4(-2.0f, -2.0f, 2.0f, 1.0f);
-	triV_Collection[4].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	triV_Collection[5].position = DirectX::XMFLOAT4(-2.0f, 2.0f, 2.0f, 1.0f);
-	triV_Collection[5].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-	triV_Collection[6].position = DirectX::XMFLOAT4(2.0f, 2.0f, 2.0f, 1.0f);
-	triV_Collection[6].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	triV_Collection[7].position = DirectX::XMFLOAT4(2.0f, -2.0f, 2.0f, 1.0f);
-	triV_Collection[7].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	ColorShaderVertex* cubeV_collection = new ColorShaderVertex[ENTITY0_VERTEX_COUNT];
+	cubeV_collection[0].position = DirectX::XMFLOAT4(-2.0f, -2.0f, -2.0f, 1.0f);
+	cubeV_collection[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	cubeV_collection[1].position = DirectX::XMFLOAT4(-2.0f, 2.0f, -2.0f, 1.0f);
+	cubeV_collection[1].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	cubeV_collection[2].position = DirectX::XMFLOAT4(2.0f, -2.0f, -2.0f, 1.0f);
+	cubeV_collection[2].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	cubeV_collection[3].position = DirectX::XMFLOAT4(2.0f, 2.0f, -2.0f, 1.0f);
+	cubeV_collection[3].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	cubeV_collection[4].position = DirectX::XMFLOAT4(-2.0f, -2.0f, 2.0f, 1.0f);
+	cubeV_collection[4].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	cubeV_collection[5].position = DirectX::XMFLOAT4(-2.0f, 2.0f, 2.0f, 1.0f);
+	cubeV_collection[5].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	cubeV_collection[6].position = DirectX::XMFLOAT4(2.0f, -2.0f, 2.0f, 1.0f);
+	cubeV_collection[6].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	cubeV_collection[7].position = DirectX::XMFLOAT4(2.0f, 2.0f, 2.0f, 1.0f);
+	cubeV_collection[7].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
 
-	unsigned int* triI_Collection = new unsigned int[ENTITY0_INDEX_COUNT];
-	triI_Collection[0] = 0;
-	triI_Collection[1] = 1;
-	triI_Collection[2] = 2;
-	triI_Collection[3] = 3;
-	triI_Collection[4] = 6;
-	triI_Collection[5] = 5;
-	triI_Collection[6] = 4;
-	triI_Collection[7] = 7;
-	triI_Collection[8] = 8;
-	triI_Collection[9] = 9;
+	unsigned int* cubeI_collection = new unsigned int[ENTITY0_INDEX_COUNT];
 
-	//TRANSFORM_DESC triT_desc;
-	//triT_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 3.0f, 1.0f);
-	//entityCollection[1].SetTransform(triT_desc);
+	//Front
+	cubeI_collection[0] = 0;
+	cubeI_collection[1] = 1;
+	cubeI_collection[2] = 2;
+	cubeI_collection[3] = 3;
+
+	//Right
+	cubeI_collection[4] = 6;
+	cubeI_collection[5] = 7;
+
+	//Back
+	cubeI_collection[6] = 4;
+	cubeI_collection[7] = 5;
+
+	//Left
+	cubeI_collection[8] = 0;
+	cubeI_collection[9] = 1;
+
+	//Top
+	cubeI_collection[10] = 1; //Degenerate: switches winding order
+	cubeI_collection[11] = 5;
+	cubeI_collection[12] = 3;
+	cubeI_collection[13] = 7;
+
+	//Bottom
+	cubeI_collection[14] = 2; //Degenerate: switches winding order
+	cubeI_collection[15] = 6; //Degenerate: switches winding order
+	cubeI_collection[16] = 0;
+	cubeI_collection[17] = 4;
 
 	MESH_DESC triM_desc;
 	triM_desc.vertexType = VertexType::ColorShaderVertex;
 	triM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 	triM_desc.vertexCollection = new ColorShaderVertex[ENTITY0_VERTEX_COUNT];
-	memcpy(triM_desc.vertexCollection, triV_Collection, sizeof(ColorShaderVertex) * ENTITY0_VERTEX_COUNT);
+	memcpy(triM_desc.vertexCollection, cubeV_collection, sizeof(ColorShaderVertex) * ENTITY0_VERTEX_COUNT);
 	triM_desc.vertexCount = ENTITY0_VERTEX_COUNT;
 	triM_desc.indexCollection = new unsigned int[ENTITY0_INDEX_COUNT];
-	memcpy(triM_desc.indexCollection, triI_Collection, sizeof(unsigned int) * ENTITY0_INDEX_COUNT);
+	memcpy(triM_desc.indexCollection, cubeI_collection, sizeof(unsigned int) * ENTITY0_INDEX_COUNT);
 	triM_desc.indexCount = ENTITY0_INDEX_COUNT;
 
 	SHADER_DESC triS_desc;
@@ -119,6 +135,10 @@ bool Engine::EditStage(Stage* stage)
 	triModel_desc.mesh_desc = triM_desc;
 	triModel_desc.shader_desc = triS_desc;
 
+	TRANSFORM_DESC triT_desc;
+	triT_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 20.0f, 1.0f);
+	entityCollection[1].SetTransform(triT_desc);
+
 	success = entityCollection[1].SetModel(
 		*m_pRenderer->GetGraphicsContext(), triModel_desc);
 	//------------------------------
@@ -129,19 +149,19 @@ bool Engine::EditStage(Stage* stage)
 	const int ENTITY1_INDEX_COUNT = 4;
 
 	ColorShaderVertex* groundV_Collection = new ColorShaderVertex[ENTITY1_VERTEX_COUNT];
-	groundV_Collection[0].position = DirectX::XMFLOAT4(-20.0f, -3.0f, 40.0f, 1.0f);
+	groundV_Collection[0].position = DirectX::XMFLOAT4(-20.0f, -3.0f, 0.0f, 1.0f);
 	groundV_Collection[0].color = DirectX::XMFLOAT4(0.0f, 0.4f, 0.3f, 1.0f);
-	groundV_Collection[1].position = DirectX::XMFLOAT4(20.0f, -3.0f, 0.0f, 1.0f);
+	groundV_Collection[1].position = DirectX::XMFLOAT4(-20.0f, -3.0f, 40.0f, 1.0f);
 	groundV_Collection[1].color = DirectX::XMFLOAT4(0.0f, 0.4f, 0.3f, 1.0f);
-	groundV_Collection[2].position = DirectX::XMFLOAT4(-20.0f, -3.0f, 0.0f, 1.0f);
+	groundV_Collection[2].position = DirectX::XMFLOAT4(20.0f, -3.0f, 0.0f, 1.0f);
 	groundV_Collection[2].color = DirectX::XMFLOAT4(0.0f, 0.4f, 0.3f, 1.0f);
-	groundV_Collection[3].position = DirectX::XMFLOAT4(20.0f, -3.0f, 40.0f, 1.0f);
+	groundV_Collection[3].position = DirectX::XMFLOAT4(20.0f, -3.0f, 40.0f, 1.0f); 
 	groundV_Collection[3].color = DirectX::XMFLOAT4(0.0f, 0.4f, 0.3f, 1.0f);
 
 	unsigned int* groundI_Collection = new unsigned int[ENTITY1_INDEX_COUNT];
-	groundI_Collection[0] = 2;
-	groundI_Collection[1] = 0;
-	groundI_Collection[2] = 1;
+	groundI_Collection[0] = 0;
+	groundI_Collection[1] = 1;
+	groundI_Collection[2] = 2;
 	groundI_Collection[3] = 3;
 
 	MESH_DESC groundM_desc;
@@ -177,8 +197,8 @@ bool Engine::EditStage(Stage* stage)
 	stage_desc.mainCameraId = 0;
 	success = ((m_pStage = Stage::Create(0, stage_desc)) != nullptr);
 
-	SAFE_DELETE_ARRAY(triV_Collection);
-	SAFE_DELETE_ARRAY(triI_Collection);
+	SAFE_DELETE_ARRAY(cubeV_collection);
+	SAFE_DELETE_ARRAY(cubeI_collection);
 	SAFE_DELETE_ARRAY(groundV_Collection);
 	SAFE_DELETE_ARRAY(groundI_Collection);
 	SAFE_DELETE_ARRAY(ColorVS_bytecode);
