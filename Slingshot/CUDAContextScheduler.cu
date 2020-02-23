@@ -1,6 +1,7 @@
 #include "CUDAContextScheduler.cuh"
 
-namespace HC {
+namespace HC 
+{
 	__global__ void k_ComputeSurfacePixels(ComputeVertex* buffer, int nPixels, int surfaceW, int surfaceH) {
 		
 		int tid = threadIdx.x + blockIdx.x * blockDim.x;

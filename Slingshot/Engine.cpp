@@ -43,11 +43,11 @@ bool Engine::EditStage(Stage* stage)
 	camera_desc.lenseWidth = winWidth;
 	camera_desc.lenseHeight = winHeight;
 
-	TRANSFORM_DESC transform_desc;
-	transform_desc.position = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	TRANSFORM_DESC mc_transform_desc;
+	mc_transform_desc.position = DirectX::XMFLOAT4(0.0f, 1.0f, -5.0f, 1.0f);
 
 	entityCollection[0].SetCamera(camera_desc);
-	entityCollection[0].SetTransform(transform_desc);
+	entityCollection[0].SetTransform(mc_transform_desc);
 	//------------------------------
 
 	//Color Shader
@@ -58,23 +58,44 @@ bool Engine::EditStage(Stage* stage)
 	ColorPS_bytecode = GetFileBytecode("ColorPixelShader.cso", ColorPS_size);
 	//------------------------------
 
-	//Triangle Object
+	//Cube Object
 	//------------------------------
-	const int ENTITY0_VERTEX_COUNT = 3;
-	const int ENTITY0_INDEX_COUNT = 3;
+	const int ENTITY0_VERTEX_COUNT = 8;
+	const int ENTITY0_INDEX_COUNT = 10;
 
 	ColorShaderVertex* triV_Collection = new ColorShaderVertex[ENTITY0_VERTEX_COUNT];
-	triV_Collection[0].position = DirectX::XMFLOAT4(0.0f, 1.5f, 5.0f, 1.0f);
+	triV_Collection[0].position = DirectX::XMFLOAT4(-2.0f, -2.0f, -2.0f, 1.0f);
 	triV_Collection[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	triV_Collection[1].position = DirectX::XMFLOAT4(0.5f, 0.5f, 5.0f, 1.0f);
+	triV_Collection[1].position = DirectX::XMFLOAT4(-2.0f, 2.0f, -2.0f, 1.0f);
 	triV_Collection[1].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	triV_Collection[2].position = DirectX::XMFLOAT4(-0.5f, 0.5f, 5.0f, 1.0f);
+	triV_Collection[2].position = DirectX::XMFLOAT4(2.0f, 2.0f, -2.0f, 1.0f);
 	triV_Collection[2].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	triV_Collection[3].position = DirectX::XMFLOAT4(2.0f, -2.0f, -2.0f, 1.0f);
+	triV_Collection[3].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	triV_Collection[4].position = DirectX::XMFLOAT4(-2.0f, -2.0f, 2.0f, 1.0f);
+	triV_Collection[4].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	triV_Collection[5].position = DirectX::XMFLOAT4(-2.0f, 2.0f, 2.0f, 1.0f);
+	triV_Collection[5].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	triV_Collection[6].position = DirectX::XMFLOAT4(2.0f, 2.0f, 2.0f, 1.0f);
+	triV_Collection[6].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	triV_Collection[7].position = DirectX::XMFLOAT4(2.0f, -2.0f, 2.0f, 1.0f);
+	triV_Collection[7].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
 
 	unsigned int* triI_Collection = new unsigned int[ENTITY0_INDEX_COUNT];
 	triI_Collection[0] = 0;
 	triI_Collection[1] = 1;
 	triI_Collection[2] = 2;
+	triI_Collection[3] = 3;
+	triI_Collection[4] = 6;
+	triI_Collection[5] = 5;
+	triI_Collection[6] = 4;
+	triI_Collection[7] = 7;
+	triI_Collection[8] = 8;
+	triI_Collection[9] = 9;
+
+	//TRANSFORM_DESC triT_desc;
+	//triT_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 3.0f, 1.0f);
+	//entityCollection[1].SetTransform(triT_desc);
 
 	MESH_DESC triM_desc;
 	triM_desc.vertexType = VertexType::ColorShaderVertex;
