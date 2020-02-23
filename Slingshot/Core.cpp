@@ -52,9 +52,16 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	break;
 	case WM_MOUSEMOVE:
 	{
-		int xPos = GET_X_LPARAM(lParam);
-		int yPos = GET_Y_LPARAM(lParam);
-		m_pStage->GetMainCamera()->GetTransform()->Rotate(static_cast<float>(xPos), static_cast<float>(yPos), 0.0f);
+		float xCoord = static_cast<float>(GET_X_LPARAM(lParam));
+		float yCoord = static_cast<float>(GET_Y_LPARAM(lParam));
+		float lastMouseX, lastMouseY;
+		m_pStage->GetMainCamera()->GetCamera()->GetMouseCoord(lastMouseX, lastMouseY);
+		m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(xCoord, yCoord);
+		float offsetX = xCoord - lastMouseX;
+		float offsetY = yCoord - lastMouseY;
+		float pitch = offsetX * m_pStage->GetMainCamera()->GetCamera()->GetRotationSensitivity();
+		float head = offsetY * m_pStage->GetMainCamera()->GetCamera()->GetRotationSensitivity();
+		//m_pStage->GetMainCamera()->GetTransform()->Rotate(pitch, head, 0.0f);
 	}
 	break;
 	case WM_KEYDOWN:
@@ -114,8 +121,9 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 void Core::LoadStage(Stage& stage)
 {
 	m_pStage = new Stage(stage);
-	m_pStageEntities = new Entity(*m_pStage->GetEntityCollection());
 	m_stageEntityCount = m_pStage->GetEntityCount();
+	m_pStageEntities = new Entity[m_stageEntityCount];
+	memcpy(m_pStageEntities, stage.GetEntityCollection(), sizeof(Entity) * m_stageEntityCount);
 }
 
 bool Core::OnUpdate(Renderer& renderer)
@@ -126,7 +134,7 @@ bool Core::OnUpdate(Renderer& renderer)
 
 void Core::Shutdown(void)
 {
-
+	SAFE_SHUTDOWN(m_pStage);
 }
 
 Stage* Core::GetStage()
