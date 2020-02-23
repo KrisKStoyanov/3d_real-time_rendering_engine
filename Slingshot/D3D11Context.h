@@ -7,6 +7,8 @@
 #include "d3d11_1.h"
 #include <dxgi1_6.h>
 
+#include "nvapi.h"
+
 class D3D11Context
 {
 public:
@@ -15,6 +17,9 @@ public:
 	void StartFrameRender();
 	void EndFrameRender();
 	void Shutdown();
+
+	void SetVRS(bool enable);
+	bool GetVRS();
 
 	ID3D11Device* GetDevice();
 	ID3D11DeviceContext* GetDeviceContext();
@@ -59,4 +64,12 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_pDepthStencilBuffer;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_pDepthStencilView;
+
+	void InitializeNvAPI();
+	void ShutdownNvAPI();
+	NV_D3D1x_GRAPHICS_CAPS QueryGraphicsCapabilities();
+
+	NV_D3D1x_GRAPHICS_CAPS m_gfxCaps;
+	bool m_enableNvAPI;
+	bool m_enableVRS;
 };
