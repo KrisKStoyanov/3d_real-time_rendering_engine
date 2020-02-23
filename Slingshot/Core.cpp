@@ -48,20 +48,27 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		SetRect(&rcClip, pt.x, pt.y, pt2.x, pt2.y);
 		ClipCursor(&rcClip);
 		ShowCursor(false);
+		float xCoord = static_cast<float>(rcClip.right - rcClip.left) / 2.0f;
+		float yCoord = static_cast<float>(rcClip.bottom - rcClip.top) / 2.0f;
+		SetCursorPos(xCoord, yCoord);
+		m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(0.0f, 0.0f);
+		m_pStage->GetMainCamera()->GetCamera()->SetRotateStatus(true);
 	}
 	break;
 	case WM_MOUSEMOVE:
 	{
-		float xCoord = static_cast<float>(GET_X_LPARAM(lParam));
-		float yCoord = static_cast<float>(GET_Y_LPARAM(lParam));
-		float lastMouseX, lastMouseY;
-		m_pStage->GetMainCamera()->GetCamera()->GetMouseCoord(lastMouseX, lastMouseY);
-		m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(xCoord, yCoord);
-		float offsetX = xCoord - lastMouseX;
-		float offsetY = yCoord - lastMouseY;
-		float pitch = offsetX * m_pStage->GetMainCamera()->GetCamera()->GetRotationSensitivity();
-		float head = offsetY * m_pStage->GetMainCamera()->GetCamera()->GetRotationSensitivity();
-		//m_pStage->GetMainCamera()->GetTransform()->Rotate(pitch, head, 0.0f);
+		if (m_pStage->GetMainCamera()->GetCamera()->GetRotateStatus()) {
+			float xCoord = static_cast<float>(GET_X_LPARAM(lParam));
+			float yCoord = static_cast<float>(GET_Y_LPARAM(lParam));
+			float lastMouseX, lastMouseY;
+			m_pStage->GetMainCamera()->GetCamera()->GetMouseCoord(lastMouseX, lastMouseY);
+			m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(xCoord, yCoord);
+			float offsetX = xCoord - lastMouseX;
+			float offsetY = yCoord - lastMouseY;
+			float pitch = offsetX * m_pStage->GetMainCamera()->GetCamera()->GetRotationSensitivity();
+			float head = offsetY * m_pStage->GetMainCamera()->GetCamera()->GetRotationSensitivity();
+			m_pStage->GetMainCamera()->GetTransform()->Rotate(-head, pitch, 0.0f);
+		}
 	}
 	break;
 	case WM_KEYDOWN:
@@ -69,22 +76,24 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (wParam) {
 		case 0x57: //W 
 		{
-			m_pStage->GetMainCamera()->GetTransform()->Translate(DirectX::XMVectorSet(0.0f, 0.0, 1.0, 0.0f));
+			m_pStage->GetMainCamera()->GetTransform()->Translate(m_pStage->GetMainCamera()->GetTransform()->GetForwardDir());
 		}
 		break;
 		case 0x41: //A
 		{
-			m_pStage->GetMainCamera()->GetTransform()->Translate(DirectX::XMVectorSet(-1.0f, 0.0, 0.0, 0.0f));
+			m_pStage->GetMainCamera()->GetTransform()->Translate(m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
 		}
 		break;
 		case 0x53: //S
 		{
-			m_pStage->GetMainCamera()->GetTransform()->Translate(DirectX::XMVectorSet(0.0f, 0.0, -1.0, 0.0f));
+			using namespace DirectX;
+			m_pStage->GetMainCamera()->GetTransform()->Translate(-1.0f * m_pStage->GetMainCamera()->GetTransform()->GetForwardDir());
 		}
 		break;
-		case 0x44: //D
+		case 0x44: //D - Currently incorrect X-Axis movement due to misalignment post-mouse rotation (Correct: -1.0f * [A] translation)
 		{
-			m_pStage->GetMainCamera()->GetTransform()->Translate(DirectX::XMVectorSet(1.0f, 0.0, 0.0, 0.0f));
+			using namespace DirectX;
+			m_pStage->GetMainCamera()->GetTransform()->Translate(-1.0f * m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
 		}
 		break;
 		case VK_ESCAPE:
@@ -99,6 +108,7 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		ReleaseCapture();
 		ShowCursor(true);
+		m_pStage->GetMainCamera()->GetCamera()->SetRotateStatus(false);
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 	break;
@@ -128,7 +138,7 @@ void Core::LoadStage(Stage& stage)
 
 bool Core::OnUpdate(Renderer& renderer)
 {
-	renderer.OnFrameRender(m_pStage);
+	renderer.OnFrameRender(*m_pStage);
 	return m_isActive;
 }
 

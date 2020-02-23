@@ -10,7 +10,7 @@ class Renderer {
 public:
 	static Renderer* Create(HWND hWnd, RENDERER_DESC& renderer_desc);
 	bool Initialize();
-	void OnFrameRender(Stage* stage);
+	void OnFrameRender(Stage& stage);
 	void Shutdown();
 
 	D3D11Context* GetGraphicsContext();

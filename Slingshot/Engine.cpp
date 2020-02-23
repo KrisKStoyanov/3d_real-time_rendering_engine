@@ -105,7 +105,7 @@ bool Engine::EditStage(Stage* stage)
 	//Ground Object
 	//------------------------------
 	const int ENTITY1_VERTEX_COUNT = 4;
-	const int ENTITY1_INDEX_COUNT = 5;
+	const int ENTITY1_INDEX_COUNT = 4;
 
 	ColorShaderVertex* groundV_Collection = new ColorShaderVertex[ENTITY1_VERTEX_COUNT];
 	groundV_Collection[0].position = DirectX::XMFLOAT4(-20.0f, -3.0f, 40.0f, 1.0f);
@@ -118,11 +118,10 @@ bool Engine::EditStage(Stage* stage)
 	groundV_Collection[3].color = DirectX::XMFLOAT4(0.0f, 0.4f, 0.3f, 1.0f);
 
 	unsigned int* groundI_Collection = new unsigned int[ENTITY1_INDEX_COUNT];
-	groundI_Collection[0] = 0;
-	groundI_Collection[1] = 3;
+	groundI_Collection[0] = 2;
+	groundI_Collection[1] = 0;
 	groundI_Collection[2] = 1;
-	groundI_Collection[3] = 2;
-	groundI_Collection[4] = 0;
+	groundI_Collection[3] = 3;
 
 	MESH_DESC groundM_desc;
 	groundM_desc.vertexType = VertexType::ColorShaderVertex;

@@ -23,6 +23,9 @@ public:
 
 	float GetRotationSensitivity();
 
+	bool GetRotateStatus();
+	void SetRotateStatus(bool rotate);
+
 	void OnFrameRender(Transform& transform);
 private:
 	Camera(CAMERA_DESC& camera_desc, Transform& transform);
@@ -33,6 +36,7 @@ private:
 	float m_lastMouseX;
 	float m_lastMouseY;
 
+	bool m_rotate;
 	float m_rotationSensitivity;
 };
 

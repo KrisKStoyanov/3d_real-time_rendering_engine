@@ -127,11 +127,13 @@ void Transform::Rotate(float pitch, float head, float roll)
 			DirectX::XMConvertToDegrees(roll), 
 			0.0f));
 	m_rotationMatrix = DirectX::XMMatrixRotationRollPitchYawFromVector(m_rotation);
-	
-	m_forwardDir = DirectX::XMVector4Normalize(DirectX::XMVector4Transform(m_defaultForwardDir, m_rotationMatrix));
-	DirectX::XMMATRIX rotateYMatrix = DirectX::XMMatrixRotationY(head);
-	m_rightDir = DirectX::XMVector3TransformCoord(m_rightDir, rotateYMatrix);
-	m_upDir = DirectX::XMVector3TransformCoord(m_upDir, rotateYMatrix);
+
+	m_forwardDir = DirectX::XMVector3Normalize(DirectX::XMVector3Transform(m_defaultForwardDir, m_rotationMatrix));	
+	m_rightDir = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(m_forwardDir, m_defaultUpDir));
+	m_upDir = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(m_rightDir, m_forwardDir));
+	//DirectX::XMMATRIX rotateYMatrix = DirectX::XMMatrixRotationY(head);
+	//DirectX::XMVector3TransformCoord(m_rightDir, rotateYMatrix);
+	//m_upDir = DirectX::XMVector3TransformCoord(m_upDir, rotateYMatrix);
 }
 
 void Transform::Scale(DirectX::XMVECTOR scale)

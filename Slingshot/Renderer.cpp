@@ -31,20 +31,20 @@ bool Renderer::Initialize()
 	return (m_pGraphicsContext->Initialize());
 }
 
-void Renderer::OnFrameRender(Stage* stage)
+void Renderer::OnFrameRender(Stage& stage)
 {
 	m_pGraphicsContext->StartFrameRender();
-	stage->GetMainCamera()->GetTransform()->OnFrameRender();
-	stage->GetMainCamera()->GetCamera()->OnFrameRender(*stage->GetMainCamera()->GetTransform());
-	for (unsigned int i = 0; i < stage->GetEntityCount(); ++i) {
-		(stage->GetEntityCollection() + i)->GetTransform()->OnFrameRender();
-		Model* model = (stage->GetEntityCollection() + i)->GetModel();
+	stage.GetMainCamera()->GetTransform()->OnFrameRender();
+	stage.GetMainCamera()->GetCamera()->OnFrameRender(*stage.GetMainCamera()->GetTransform());
+	for (unsigned int i = 0; i < stage.GetEntityCount(); ++i) {
+		(stage.GetEntityCollection() + i)->GetTransform()->OnFrameRender();
+		Model* model = (stage.GetEntityCollection() + i)->GetModel();
 		if (model != nullptr) {
 			model->OnFrameRender(*m_pGraphicsContext, 
 				DirectX::XMMatrixTranspose(
-					(stage->GetEntityCollection() + i)->GetTransform()->GetWorldMatrix() *
-					stage->GetMainCamera()->GetCamera()->GetViewMatrix() *
-					stage->GetMainCamera()->GetCamera()->GetProjectionMatrix()));
+					(stage.GetEntityCollection() + i)->GetTransform()->GetWorldMatrix() *
+					stage.GetMainCamera()->GetCamera()->GetViewMatrix() *
+					stage.GetMainCamera()->GetCamera()->GetProjectionMatrix()));
 		}
 	}
 	m_pGraphicsContext->EndFrameRender();
