@@ -81,7 +81,8 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		break;
 		case 0x41: //A
 		{
-			m_pStage->GetMainCamera()->GetTransform()->Translate(m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
+			using namespace DirectX;
+			m_pStage->GetMainCamera()->GetTransform()->Translate(-1.0f * m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
 		}
 		break;
 		case 0x53: //S
@@ -90,10 +91,9 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			m_pStage->GetMainCamera()->GetTransform()->Translate(-1.0f * m_pStage->GetMainCamera()->GetTransform()->GetForwardDir());
 		}
 		break;
-		case 0x44: //D - Currently incorrect X-Axis movement due to misalignment post-mouse rotation (Correct: -1.0f * [A] translation)
+		case 0x44: //D
 		{
-			using namespace DirectX;
-			m_pStage->GetMainCamera()->GetTransform()->Translate(-1.0f * m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
+			m_pStage->GetMainCamera()->GetTransform()->Translate(m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
 		}
 		break;
 		case VK_ESCAPE:

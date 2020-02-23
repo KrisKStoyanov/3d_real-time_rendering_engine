@@ -131,6 +131,10 @@ void Transform::Rotate(float pitch, float head, float roll)
 	m_forwardDir = DirectX::XMVector3Normalize(DirectX::XMVector3Transform(m_defaultForwardDir, m_rotationMatrix));	
 	m_rightDir = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(m_forwardDir, m_defaultUpDir));
 	m_upDir = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(m_rightDir, m_forwardDir));
+	
+	//Currently incorrect X-Axis alignment after rotation
+	using namespace DirectX;
+	m_rightDir *= -1.0f;
 	//DirectX::XMMATRIX rotateYMatrix = DirectX::XMMatrixRotationY(head);
 	//DirectX::XMVector3TransformCoord(m_rightDir, rotateYMatrix);
 	//m_upDir = DirectX::XMVector3TransformCoord(m_upDir, rotateYMatrix);
