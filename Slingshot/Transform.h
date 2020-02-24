@@ -30,7 +30,7 @@ public:
 	void OnFrameRender();
 
 	void Translate(DirectX::XMVECTOR translation);
-	void Rotate(float eulerX, float eulerY, float eulerZ);
+	void RotateEulerAngles(float eulerX, float eulerY, float eulerZ);
 	void Scale(DirectX::XMVECTOR scale);
 private:
 	Transform(TRANSFORM_DESC& transform_desc);

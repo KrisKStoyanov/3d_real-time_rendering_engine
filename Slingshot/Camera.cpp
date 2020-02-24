@@ -33,13 +33,13 @@ DirectX::XMMATRIX Camera::GetProjectionMatrix()
 	return m_projectionMatrix;
 }
 
-void Camera::GetMouseCoord(float& mouseX, float& mouseY)
+void Camera::GetMouseCoord(int& mouseX, int& mouseY)
 {
 	mouseX = m_lastMouseX;
 	mouseY = m_lastMouseY;
 }
 
-void Camera::SetMouseCoord(float mouseX, float mouseY)
+void Camera::SetMouseCoord(int mouseX, int mouseY)
 {
 	m_lastMouseX = mouseX;
 	m_lastMouseY = mouseY;

@@ -18,8 +18,8 @@ public:
 	DirectX::XMMATRIX GetViewMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix();
 
-	void GetMouseCoord(float& mouseX, float& mouseY);
-	void SetMouseCoord(float mouseX, float mouseY);
+	void GetMouseCoord(int& mouseX, int& mouseY);
+	void SetMouseCoord(int mouseX, int mouseY);
 
 	float GetRotationSensitivity();
 

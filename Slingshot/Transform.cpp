@@ -119,7 +119,7 @@ void Transform::Translate(DirectX::XMVECTOR translation)
 	m_position = DirectX::XMVectorSetW(DirectX::XMVectorAdd(m_position, translation), 1.0f);
 }
 
-void Transform::Rotate(float pitch, float head, float roll)
+void Transform::RotateEulerAngles(float pitch, float head, float roll)
 {	
 	m_rotation = DirectX::XMVectorAdd(
 		m_rotation, 
@@ -136,13 +136,9 @@ void Transform::Rotate(float pitch, float head, float roll)
 	//Currently incorrect X-Axis alignment after rotation
 	using namespace DirectX;
 	m_rightDir *= -1.0f;
-	//DirectX::XMMATRIX rotateYMatrix = DirectX::XMMatrixRotationY(head);
-	//DirectX::XMVector3TransformCoord(m_rightDir, rotateYMatrix);
-	//m_upDir = DirectX::XMVector3TransformCoord(m_upDir, rotateYMatrix);
 }
 
 void Transform::Scale(DirectX::XMVECTOR scale)
 {
 	m_scale = scale;
-	m_scalingMatrix = DirectX::XMMatrixScalingFromVector(m_scale);
 }

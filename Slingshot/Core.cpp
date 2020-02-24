@@ -25,6 +25,13 @@ Core::Core(HWND hWnd) :
 	m_hWnd(hWnd), m_pStage(nullptr), 
 	m_pStageEntities(nullptr), m_stageEntityCount(0), m_isActive(true)
 {
+	//RECT rc;
+	//GetWindowRect(hWnd, &rc);
+	//int screenResX = (GetSystemMetrics(SM_CXSCREEN) - rc.right)/2;
+	//int screenResY = (GetSystemMetrics(SM_CYSCREEN) - rc.bottom)/2;
+
+	//SetWindowPos(hWnd, 0, screenResX, screenResY, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+
 	SetWindowLongPtr(
 		hWnd, GWLP_USERDATA,
 		reinterpret_cast<LONG_PTR>(this));
@@ -41,33 +48,35 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		SetCapture(hWnd);
 		RECT rcClip;		
 		GetClientRect(hWnd, &rcClip);
-		POINT pt = { rcClip.left, rcClip.top };
-		POINT pt2 = { rcClip.right, rcClip.bottom };
-		ClientToScreen(hWnd, &pt);
-		ClientToScreen(hWnd, &pt2);
-		SetRect(&rcClip, pt.x, pt.y, pt2.x, pt2.y);
+		POINT ptMin = { rcClip.left, rcClip.top };
+		POINT ptMax = { rcClip.right, rcClip.bottom };
+		ClientToScreen(hWnd, &ptMin);
+		ClientToScreen(hWnd, &ptMax);
+		SetRect(&rcClip, ptMin.x, ptMin.y, ptMax.x, ptMax.y);
 		ClipCursor(&rcClip);
-		ShowCursor(false);
-		float xCoord = static_cast<float>(rcClip.right - rcClip.left) / 2.0f;
-		float yCoord = static_cast<float>(rcClip.bottom - rcClip.top) / 2.0f;
+		//ShowCursor(false);
+		int xOffset = (ptMax.x - ptMin.x);
+		int yOffset = (ptMax.y - ptMin.y);
+		int xCoord = ptMax.x - xOffset / 2;
+		int yCoord = ptMax.y - yOffset / 2;
 		SetCursorPos(xCoord, yCoord);
-		m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(0.0f, 0.0f);
+		m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(xCoord, yCoord);
 		m_pStage->GetMainCamera()->GetCamera()->SetRotateStatus(true);
 	}
 	break;
 	case WM_MOUSEMOVE:
 	{
 		if (m_pStage->GetMainCamera()->GetCamera()->GetRotateStatus()) {
-			float xCoord = static_cast<float>(GET_X_LPARAM(lParam));
-			float yCoord = static_cast<float>(GET_Y_LPARAM(lParam));
-			float lastMouseX, lastMouseY;
+			int xCoord = GET_X_LPARAM(lParam);
+			int yCoord = GET_Y_LPARAM(lParam);
+			int lastMouseX, lastMouseY;
 			m_pStage->GetMainCamera()->GetCamera()->GetMouseCoord(lastMouseX, lastMouseY);
 			m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(xCoord, yCoord);
 			float offsetX = xCoord - lastMouseX;
 			float offsetY = yCoord - lastMouseY;
 			float pitch = offsetX * m_pStage->GetMainCamera()->GetCamera()->GetRotationSensitivity();
 			float head = offsetY * m_pStage->GetMainCamera()->GetCamera()->GetRotationSensitivity();
-			m_pStage->GetMainCamera()->GetTransform()->Rotate(-head, pitch, 0.0f);
+			m_pStage->GetMainCamera()->GetTransform()->RotateEulerAngles(head, pitch, 0.0f);
 		}
 	}
 	break;
