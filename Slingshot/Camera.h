@@ -7,6 +7,7 @@ struct CAMERA_DESC {
 	float lenseHeight = 720;
 	float nearClipDist = 1.0f;
 	float farClipDist = 1000.0f;
+	float translationSpeed = 1.0f;
 	float rotationSensitivity = 0.0001f;
 };
 
@@ -26,6 +27,8 @@ public:
 	bool GetRotateStatus();
 	void SetRotateStatus(bool rotate);
 
+	float GetTranslationSpeed();
+
 	void OnFrameRender(Transform& transform);
 private:
 	Camera(CAMERA_DESC& camera_desc, Transform& transform);
@@ -38,5 +41,6 @@ private:
 
 	bool m_rotate;
 	float m_rotationSensitivity;
+	float m_translationSpeed;
 };
 

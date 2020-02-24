@@ -84,32 +84,39 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	break;
 	case WM_KEYDOWN:
 	{
+		using namespace DirectX;
 		switch (wParam) {
 		case 0x57: //W 
 		{
-			m_pStage->GetMainCamera()->GetTransform()->Translate(m_pStage->GetMainCamera()->GetTransform()->GetForwardDir());
+			m_pStage->GetMainCamera()->GetTransform()->Translate(
+				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * m_pStage->GetMainCamera()->GetTransform()->GetForwardDir());
 		}
 		break;
 		case 0x41: //A
 		{
-			using namespace DirectX;
-			m_pStage->GetMainCamera()->GetTransform()->Translate(-1.0f * m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
+			m_pStage->GetMainCamera()->GetTransform()->Translate(
+				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
 		}
 		break;
 		case 0x53: //S
 		{
-			using namespace DirectX;
-			m_pStage->GetMainCamera()->GetTransform()->Translate(-1.0f * m_pStage->GetMainCamera()->GetTransform()->GetForwardDir());
+			m_pStage->GetMainCamera()->GetTransform()->Translate(
+				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * m_pStage->GetMainCamera()->GetTransform()->GetForwardDir());
 		}
 		break;
 		case 0x44: //D
 		{
-			m_pStage->GetMainCamera()->GetTransform()->Translate(m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
+			m_pStage->GetMainCamera()->GetTransform()->Translate(
+				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
 		}
 		break;
 		case VK_ESCAPE:
 		{
-			DestroyWindow(hWnd);
+			ReleaseCapture();
+			ClipCursor(nullptr);
+			ShowCursor(true);
+			m_pStage->GetMainCamera()->GetCamera()->SetRotateStatus(false);
+			return DefWindowProc(hWnd, uMsg, wParam, lParam);
 		}
 		break;
 		}
@@ -124,6 +131,7 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 	case WM_QUIT:
+		DestroyWindow(hWnd);
 	case WM_DESTROY:
 	{
 		m_isActive = false;

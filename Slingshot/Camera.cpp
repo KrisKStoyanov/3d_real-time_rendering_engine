@@ -9,7 +9,7 @@ Camera::Camera(CAMERA_DESC& camera_desc, Transform& transform) :
 	m_viewMatrix(), m_projectionMatrix(),
 	m_lastMouseX(0.0f), m_lastMouseY(0.0f),
 	m_rotationSensitivity(camera_desc.rotationSensitivity),
-	m_rotate(false)
+	m_rotate(false), m_translationSpeed(camera_desc.translationSpeed)
 {
 	m_viewMatrix = DirectX::XMMatrixLookAtLH(
 		transform.GetPosition(),
@@ -58,6 +58,11 @@ bool Camera::GetRotateStatus()
 void Camera::SetRotateStatus(bool rotate)
 {
 	m_rotate = rotate;
+}
+
+float Camera::GetTranslationSpeed()
+{
+	return m_translationSpeed;
 }
 
 void Camera::OnFrameRender(Transform& transform)
