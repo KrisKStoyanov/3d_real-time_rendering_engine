@@ -53,7 +53,7 @@ void Engine::EditStage(Stage& stage)
 	m_pRenderer->SetPipelineState(pipeline_desc, VertexType::ColorShaderVertex);
 	//------------------------------
 
-	const int ENTITY_COUNT = 4;
+	const int ENTITY_COUNT = 6;
 	Entity* entityCollection = new Entity[ENTITY_COUNT];
 
 	//Main Camera
@@ -74,20 +74,32 @@ void Engine::EditStage(Stage& stage)
 	entityCollection[0].SetTransform(mc_transform_desc);
 	//------------------------------
 
-	TRANSFORM_DESC cubeT_desc;
-	cubeT_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
-	entityCollection[1].SetTransform(cubeT_desc);
-	CreateCube(*(entityCollection+1));
-
 	TRANSFORM_DESC planeT_desc;
 	planeT_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
-	entityCollection[2].SetTransform(planeT_desc);
+	entityCollection[1].SetTransform(planeT_desc);
+	CreatePlane(*(entityCollection + 1));
+
+	TRANSFORM_DESC planeT1_desc;
+	planeT1_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
+	//planeT1_desc.rotation = DirectX::XMFLOAT4(0.0f, 0.0f, -90.0f, 1.0f);
+	entityCollection[2].SetTransform(planeT1_desc);
 	CreatePlane(*(entityCollection + 2));
+
+	TRANSFORM_DESC planeT2_desc;
+	planeT2_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
+	//planeT2_desc.rotation = DirectX::XMFLOAT4(45.0f, 0.0f, 0.0f, 1.0f);
+	entityCollection[3].SetTransform(planeT2_desc);
+	CreatePlane(*(entityCollection + 3));
+
+	TRANSFORM_DESC cubeT_desc;
+	cubeT_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
+	entityCollection[4].SetTransform(cubeT_desc);
+	CreateCube(*(entityCollection + 4));
 
 	TRANSFORM_DESC sphereT_desc;
 	sphereT_desc.position = DirectX::XMFLOAT4(-7.5f, 2.0f, 10.0f, 1.0f);
-	entityCollection[3].SetTransform(sphereT_desc);
-	CreateSphere(*(entityCollection + 3), 30, 30, 2);
+	entityCollection[5].SetTransform(sphereT_desc);
+	CreateSphere(*(entityCollection + 5), 30, 30, 2.0f);
 
 	STAGE_DESC stage_desc;
 	stage_desc.entityCollection = new Entity[ENTITY_COUNT];
@@ -110,9 +122,11 @@ int Engine::Run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		m_pStage->GetEntity(1)->GetTransform()->RotateEulerAngles(0.0f, 
+		m_pStage->GetEntity(4)->GetTransform()->RotateEulerAngles(
+			0.0f, 
 			0.01f * m_pTimer->m_smoothstepF, 
 			0.02f * m_pTimer->m_smoothstepF);
+
 		m_pRenderer->OnFrameRender(*m_pStage);
 	}
 	return (int)msg.wParam;
@@ -229,66 +243,69 @@ void Engine::CreateCube(Entity& entity)
 	SAFE_DELETE_ARRAY(cubeI_collection);
 }
 
-void Engine::CreateSphere(Entity& entity, int slices, int stacks, int radius)
+void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stacks, float radius)
 {
-#include <vector>
-	std::vector<ColorShaderVertex> vertices;
-	std::vector<unsigned int> indices;
+	const int VERTEX_COUNT = (stacks + 1) * (slices + 1);
+	const int INDEX_COUNT = (slices * stacks + slices) * 6;
 
-	for (int i = 0; i <= stacks; ++i) {
+	ColorShaderVertex* sphereV_collection = new ColorShaderVertex[VERTEX_COUNT];
+	unsigned int* sphereI_collection = new unsigned int[INDEX_COUNT];
+	
+	float slicesF = static_cast<float>(slices);
+	float stacksF = static_cast<float>(stacks);
 
-		float V = i / (float)stacks;
+	for (unsigned int i = 0; i < stacks + 1; ++i) 
+	{
+		float V = i / stacksF;
 		float phi = V * 3.14f;
 
-		for (int j = 0; j <= slices; ++j) {
+		for (unsigned int j = 0; j < slices + 1; ++j) {
 
-			float U = j / (float)slices;
+			float U = j / slicesF;
 			float theta = U * 6.28f;
 
-			float x = cosf(theta) * sinf(phi);
-			float y = cosf(phi);
-			float z = sinf(theta) * sinf(phi);
+			float sinPhi = sinf(phi);
 
-			ColorShaderVertex vert;
-			vert.position = DirectX::XMFLOAT4(x * radius, y * radius, z * radius, 1.0);
+			float x = cosf(theta) * sinPhi;
+			float y = cosf(phi);
+			float z = sinf(theta) * sinPhi;
+
+			int index = j + i * (slices + 1);
+			sphereV_collection[index].position = DirectX::XMFLOAT4(x * radius, y * radius, z * radius, 1.0f);
+			sphereV_collection[index].color = DirectX::XMFLOAT4(0.4f, 0.7f, 1.0f, 1.0f);
+
 			//vert.normal = glm::vec3(x, y, z);
 			//vert.uv = glm::vec2((glm::asin(vert.normal.x) / piVal + 0.5f), (glm::asin(vert.normal.y) / piVal + 0.5f));
-			vert.color = DirectX::XMFLOAT4(0.4, 0.7, 1.0, 1.0);
-
-			vertices.push_back(vert);
 		}
 	}
-	for (int i = 0; i < slices * stacks + slices; ++i) {
 
-		indices.push_back(i);
-		indices.push_back(i + slices + 1);
-		indices.push_back(i + slices);
+	int index = 0;
+	for (unsigned int i = 0; i < slices * stacks + slices; ++i) 
+	{
+		sphereI_collection[index] = i;
+		sphereI_collection[index + 1] = i + slices + 1;
+		sphereI_collection[index + 2] = i + slices;
+		sphereI_collection[index + 3] = i + slices + 1;
+		sphereI_collection[index + 4] = i;
+		sphereI_collection[index + 5] = i + 1;
 
-		indices.push_back(i + slices + 1);
-		indices.push_back(i);
-		indices.push_back(i + 1);
+		index += 6;
 	}
-
-	const size_t VERTEX_COUNT = vertices.size();
-	const size_t INDEX_COUNT = indices.size();
-
-	//ColorShaderVertex* sphereV_collection = new ColorShaderVertex[VERTEX_COUNT];
-	//unsigned int* sphereI_collection = new unsigned int[INDEX_COUNT];
 
 	MESH_DESC sphereM_desc;
 	sphereM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 	sphereM_desc.vertexCollection = new ColorShaderVertex[VERTEX_COUNT];
-	memcpy(sphereM_desc.vertexCollection, vertices.data(), sizeof(ColorShaderVertex) * VERTEX_COUNT);
+	memcpy(sphereM_desc.vertexCollection, sphereV_collection, sizeof(ColorShaderVertex) * VERTEX_COUNT);
 	sphereM_desc.vertexCount = VERTEX_COUNT;
 	sphereM_desc.indexCollection = new unsigned int[INDEX_COUNT];
-	memcpy(sphereM_desc.indexCollection, indices.data(), sizeof(unsigned int) * INDEX_COUNT);
+	memcpy(sphereM_desc.indexCollection, sphereI_collection, sizeof(unsigned int) * INDEX_COUNT);
 	sphereM_desc.indexCount = INDEX_COUNT;
 
 	entity.SetModel(
 		*m_pRenderer->GetGraphicsContext(), sphereM_desc, VertexType::ColorShaderVertex);
 
-	//SAFE_DELETE_ARRAY(sphereV_collection);
-	//SAFE_DELETE_ARRAY(sphereI_collection);
+	SAFE_DELETE_ARRAY(sphereV_collection);
+	SAFE_DELETE_ARRAY(sphereI_collection);
 }
 
 LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

@@ -112,8 +112,8 @@ DirectX::XMVECTOR Transform::GetUpDir()
 void Transform::OnFrameRender()
 {
 	m_worldMatrix = DirectX::XMMatrixIdentity();
-	m_scalingMatrix = DirectX::XMMatrixScalingFromVector(m_scale);
-	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_scalingMatrix);
+	//m_scalingMatrix = DirectX::XMMatrixScalingFromVector(m_scale);
+	//m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_scalingMatrix);
 	m_rotationMatrix = DirectX::XMMatrixRotationRollPitchYawFromVector(m_rotation);
 	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_rotationMatrix);
 	m_translatioMatrix = DirectX::XMMatrixTranslationFromVector(m_position);
