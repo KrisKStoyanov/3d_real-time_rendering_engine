@@ -32,6 +32,7 @@ public:
 	void Translate(DirectX::XMVECTOR translation);
 	void RotateEulerAngles(float eulerX, float eulerY, float eulerZ);
 	void Scale(DirectX::XMVECTOR scale);
+
 private:
 	Transform(TRANSFORM_DESC& transform_desc);
 
@@ -40,6 +41,8 @@ private:
 	DirectX::XMMATRIX m_translatioMatrix;
 	DirectX::XMMATRIX m_rotationMatrix;
 	DirectX::XMMATRIX m_scalingMatrix;
+
+	DirectX::XMFLOAT4 m_rotationDynamic;
 
 	DirectX::XMVECTOR m_position;
 	DirectX::XMVECTOR m_rotation;

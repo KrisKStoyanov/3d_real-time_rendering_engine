@@ -8,7 +8,7 @@ struct CAMERA_DESC {
 	float nearClipDist = 1.0f;
 	float farClipDist = 1000.0f;
 	float translationSpeed = 1.0f;
-	float rotationSensitivity = 0.0001f;
+	float rotationSpeed = 0.0001f;
 };
 
 class Camera
@@ -22,7 +22,7 @@ public:
 	void GetMouseCoord(int& mouseX, int& mouseY);
 	void SetMouseCoord(int mouseX, int mouseY);
 
-	float GetRotationSensitivity();
+	float GetRotationSpeed();
 
 	bool GetRotateStatus();
 	void SetRotateStatus(bool rotate);
@@ -40,7 +40,7 @@ private:
 	float m_lastMouseY;
 
 	bool m_rotate;
-	float m_rotationSensitivity;
+	float m_rotationSpeed;
 	float m_translationSpeed;
 };
 

@@ -66,6 +66,8 @@ Transform::Transform(TRANSFORM_DESC& transform_desc) :
 		1.0f,
 		0.0f,
 		0.0f);
+
+	m_rotationDynamic = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 DirectX::XMMATRIX Transform::GetWorldMatrix()
@@ -121,13 +123,17 @@ void Transform::Translate(DirectX::XMVECTOR translation)
 
 void Transform::RotateEulerAngles(float pitch, float head, float roll)
 {	
-	m_rotation = DirectX::XMVectorAdd(
-		m_rotation, 
-		DirectX::XMVectorSet(
-			DirectX::XMConvertToDegrees(pitch),
-			DirectX::XMConvertToDegrees(head), 
-			DirectX::XMConvertToDegrees(roll), 
-			0.0f));
+	m_rotationDynamic = DirectX::XMFLOAT4(
+		DirectX::XMConvertToDegrees(pitch) + m_rotationDynamic.x,
+		DirectX::XMConvertToDegrees(head) + m_rotationDynamic.y,
+		DirectX::XMConvertToDegrees(roll) + m_rotationDynamic.z,
+		1.0f);
+
+	m_rotation = DirectX::XMVectorSet(
+			m_rotationDynamic.x,
+			m_rotationDynamic.y,
+			m_rotationDynamic.z,
+			m_rotationDynamic.w);
 
 	m_forwardDir = DirectX::XMVector3Normalize(DirectX::XMVector3Transform(m_defaultForwardDir, m_rotationMatrix));	
 	m_rightDir = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(m_forwardDir, m_defaultUpDir));

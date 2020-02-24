@@ -181,7 +181,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Core.cpp" />
     <ClCompile Include="D3D11Context.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Entity.cpp" />
@@ -198,7 +197,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Core.h" />
     <ClInclude Include="CUDAContextScheduler.cuh" />
     <ClInclude Include="D3D11Context.h" />
     <ClInclude Include="Engine.h" />

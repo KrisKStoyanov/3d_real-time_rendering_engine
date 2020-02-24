@@ -1,5 +1,5 @@
 #pragma once
-#include "Core.h"
+#include "Renderer.h"
 #include "FileParsing.h"
 
 class Engine {
@@ -16,17 +16,16 @@ public:
 	bool EditStage(Stage* stage);
 	void Shutdown();
 
+	LRESULT CALLBACK HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	Renderer* GetRenderer();
 private:
 	Engine() :
 		m_pWindow(nullptr),
-		m_pCore(nullptr),
 		m_pRenderer(nullptr),
 		m_pStage(nullptr),
 		m_isRunning(false)
 	{}
 	Window* m_pWindow;
-	Core* m_pCore;
 	
 	Renderer* m_pRenderer;
 	Stage* m_pStage;

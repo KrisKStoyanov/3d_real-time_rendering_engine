@@ -8,7 +8,7 @@ Camera* Camera::Create(CAMERA_DESC& camera_desc, Transform& transform)
 Camera::Camera(CAMERA_DESC& camera_desc, Transform& transform) :
 	m_viewMatrix(), m_projectionMatrix(),
 	m_lastMouseX(0.0f), m_lastMouseY(0.0f),
-	m_rotationSensitivity(camera_desc.rotationSensitivity),
+	m_rotationSpeed(camera_desc.rotationSpeed),
 	m_rotate(false), m_translationSpeed(camera_desc.translationSpeed)
 {
 	m_viewMatrix = DirectX::XMMatrixLookAtLH(
@@ -45,9 +45,9 @@ void Camera::SetMouseCoord(int mouseX, int mouseY)
 	m_lastMouseY = mouseY;
 }
 
-float Camera::GetRotationSensitivity()
+float Camera::GetRotationSpeed()
 {
-	return m_rotationSensitivity;
+	return m_rotationSpeed;
 }
 
 bool Camera::GetRotateStatus()

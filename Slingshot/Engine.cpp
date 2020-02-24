@@ -1,10 +1,34 @@
 #include "Engine.h"
 
+LRESULT CALLBACK EngineProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	Engine* pEngine =
+		reinterpret_cast<Engine*>
+		(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+
+	if (pEngine) {
+		return pEngine->HandleWindowMessage(hwnd, uMsg, wParam, lParam);
+	}
+	else {
+		DestroyWindow(hwnd);
+		PostQuitMessage(0);
+	}
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
 bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 {
 	if ((m_pWindow = Window::Create(window_desc)) != nullptr) {
+
 		HWND hWnd = m_pWindow->GetHandle();
-		m_isRunning = (m_pCore = Core::Create(hWnd)) != nullptr;
+
+		SetWindowLongPtr(
+			hWnd, GWLP_USERDATA,
+			reinterpret_cast<LONG_PTR>(this));
+		SetWindowLongPtr(
+			hWnd, GWLP_WNDPROC,
+			reinterpret_cast<LONG_PTR>(EngineProc));
+
 		m_isRunning = (m_pRenderer = Renderer::Create(hWnd, renderer_desc)) != nullptr;
 	}
 
@@ -16,10 +40,6 @@ bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 	if (m_isRunning) 
 	{
 		m_isRunning = EditStage(m_pStage);
-		if (m_isRunning)
-		{
-			m_pCore->LoadStage(*m_pStage);
-		}
 	}
 
 	return m_isRunning;
@@ -218,7 +238,7 @@ int Engine::Run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		m_isRunning = m_pCore->OnUpdate(*m_pRenderer);
+		m_pRenderer->OnFrameRender(*m_pStage);
 	}
 	return (int)msg.wParam;
 }
@@ -226,9 +246,115 @@ int Engine::Run()
 void Engine::Shutdown()
 {
 	SAFE_SHUTDOWN(m_pStage);
-	SAFE_SHUTDOWN(m_pCore);
 	SAFE_SHUTDOWN(m_pRenderer);
 	SAFE_SHUTDOWN(m_pWindow);
+}
+
+LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg) {
+	case WM_LBUTTONDOWN:
+	{
+		SetCapture(hWnd);
+		RECT rcClip;
+		GetClientRect(hWnd, &rcClip);
+		POINT ptMin = { rcClip.left, rcClip.top };
+		POINT ptMax = { rcClip.right, rcClip.bottom };
+		ClientToScreen(hWnd, &ptMin);
+		ClientToScreen(hWnd, &ptMax);
+		SetRect(&rcClip, ptMin.x, ptMin.y, ptMax.x, ptMax.y);
+		ClipCursor(&rcClip);
+		ShowCursor(false);
+		int xOffset = (ptMax.x - ptMin.x);
+		int yOffset = (ptMax.y - ptMin.y);
+		int xCoord = ptMax.x - xOffset / 2;
+		int yCoord = ptMax.y - yOffset / 2;
+		SetCursorPos(xCoord, yCoord);
+		m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(xCoord, yCoord);
+		m_pStage->GetMainCamera()->GetCamera()->SetRotateStatus(true);
+	}
+	break;
+	case WM_MOUSEMOVE:
+	{
+		if (m_pStage->GetMainCamera()->GetCamera()->GetRotateStatus()) {
+			int xCoord = GET_X_LPARAM(lParam);
+			int yCoord = GET_Y_LPARAM(lParam);
+			POINT pt = { xCoord, yCoord };
+			ClientToScreen(hWnd, &pt);
+			int lastMouseX, lastMouseY;
+			m_pStage->GetMainCamera()->GetCamera()->GetMouseCoord(lastMouseX, lastMouseY);
+			m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(pt.x, pt.y);
+			float offsetX = pt.x - lastMouseX;
+			float offsetY = pt.y - lastMouseY;
+			float pitch = offsetX * m_pStage->GetMainCamera()->GetCamera()->GetRotationSpeed();
+			float head = offsetY * m_pStage->GetMainCamera()->GetCamera()->GetRotationSpeed();
+			m_pStage->GetMainCamera()->GetTransform()->RotateEulerAngles(head, pitch, 0.0f);
+		}
+	}
+	break;
+	case WM_KEYDOWN:
+	{
+		using namespace DirectX;
+		switch (wParam) {
+		case 0x57: //W 
+		{
+			m_pStage->GetMainCamera()->GetTransform()->Translate(
+				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * m_pStage->GetMainCamera()->GetTransform()->GetForwardDir());
+		}
+		break;
+		case 0x41: //A
+		{
+			m_pStage->GetMainCamera()->GetTransform()->Translate(
+				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
+		}
+		break;
+		case 0x53: //S
+		{
+			m_pStage->GetMainCamera()->GetTransform()->Translate(
+				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * m_pStage->GetMainCamera()->GetTransform()->GetForwardDir());
+		}
+		break;
+		case 0x44: //D
+		{
+			m_pStage->GetMainCamera()->GetTransform()->Translate(
+				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
+		}
+		break;
+		case VK_ESCAPE:
+		{
+			ReleaseCapture();
+			ClipCursor(nullptr);
+			ShowCursor(true);
+			m_pStage->GetMainCamera()->GetCamera()->SetRotateStatus(false);
+			return DefWindowProc(hWnd, uMsg, wParam, lParam);
+		}
+		break;
+		}
+	}
+	break;
+	case WM_KILLFOCUS:
+	{
+		ReleaseCapture();
+		ShowCursor(true);
+		m_pStage->GetMainCamera()->GetCamera()->SetRotateStatus(false);
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
+	break;
+	case WM_QUIT:
+		DestroyWindow(hWnd);
+	case WM_DESTROY:
+	{
+		m_isRunning = false;
+		PostQuitMessage(0);
+	}
+	break;
+	default:
+	{
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
+	break;
+	}
+	return 0;
 }
 
 Renderer* Engine::GetRenderer()
