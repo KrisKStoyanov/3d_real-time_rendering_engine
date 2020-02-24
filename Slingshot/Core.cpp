@@ -54,7 +54,7 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		ClientToScreen(hWnd, &ptMax);
 		SetRect(&rcClip, ptMin.x, ptMin.y, ptMax.x, ptMax.y);
 		ClipCursor(&rcClip);
-		//ShowCursor(false);
+		ShowCursor(false);
 		int xOffset = (ptMax.x - ptMin.x);
 		int yOffset = (ptMax.y - ptMin.y);
 		int xCoord = ptMax.x - xOffset / 2;
@@ -69,11 +69,13 @@ LRESULT Core::HandleMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (m_pStage->GetMainCamera()->GetCamera()->GetRotateStatus()) {
 			int xCoord = GET_X_LPARAM(lParam);
 			int yCoord = GET_Y_LPARAM(lParam);
+			POINT pt = { xCoord, yCoord };
+			ClientToScreen(hWnd, &pt);
 			int lastMouseX, lastMouseY;
 			m_pStage->GetMainCamera()->GetCamera()->GetMouseCoord(lastMouseX, lastMouseY);
-			m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(xCoord, yCoord);
-			float offsetX = xCoord - lastMouseX;
-			float offsetY = yCoord - lastMouseY;
+			m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(pt.x, pt.y);
+			float offsetX = pt.x - lastMouseX;
+			float offsetY = pt.y - lastMouseY;
 			float pitch = offsetX * m_pStage->GetMainCamera()->GetCamera()->GetRotationSensitivity();
 			float head = offsetY * m_pStage->GetMainCamera()->GetCamera()->GetRotationSensitivity();
 			m_pStage->GetMainCamera()->GetTransform()->RotateEulerAngles(head, pitch, 0.0f);
