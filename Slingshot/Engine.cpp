@@ -124,34 +124,34 @@ bool Engine::EditStage(Stage* stage)
 	cubeI_collection[12] = 4;
 	cubeI_collection[13] = 5;
 
-	MESH_DESC triM_desc;
-	triM_desc.vertexType = VertexType::ColorShaderVertex;
-	triM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-	triM_desc.vertexCollection = new ColorShaderVertex[ENTITY0_VERTEX_COUNT];
-	memcpy(triM_desc.vertexCollection, cubeV_collection, sizeof(ColorShaderVertex) * ENTITY0_VERTEX_COUNT);
-	triM_desc.vertexCount = ENTITY0_VERTEX_COUNT;
-	triM_desc.indexCollection = new unsigned int[ENTITY0_INDEX_COUNT];
-	memcpy(triM_desc.indexCollection, cubeI_collection, sizeof(unsigned int) * ENTITY0_INDEX_COUNT);
-	triM_desc.indexCount = ENTITY0_INDEX_COUNT;
+	MESH_DESC cubeM_desc;
+	cubeM_desc.vertexType = VertexType::ColorShaderVertex;
+	cubeM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+	cubeM_desc.vertexCollection = new ColorShaderVertex[ENTITY0_VERTEX_COUNT];
+	memcpy(cubeM_desc.vertexCollection, cubeV_collection, sizeof(ColorShaderVertex) * ENTITY0_VERTEX_COUNT);
+	cubeM_desc.vertexCount = ENTITY0_VERTEX_COUNT;
+	cubeM_desc.indexCollection = new unsigned int[ENTITY0_INDEX_COUNT];
+	memcpy(cubeM_desc.indexCollection, cubeI_collection, sizeof(unsigned int) * ENTITY0_INDEX_COUNT);
+	cubeM_desc.indexCount = ENTITY0_INDEX_COUNT;
 
-	SHADER_DESC triS_desc;
-	triS_desc.VS_bytecode = new char[ColorVS_size];
-	memcpy(triS_desc.VS_bytecode, ColorVS_bytecode, ColorVS_size);
-	triS_desc.VS_size = ColorVS_size;
-	triS_desc.PS_bytecode = new char[ColorPS_size];
-	memcpy(triS_desc.PS_bytecode, ColorPS_bytecode, ColorPS_size);
-	triS_desc.PS_size = ColorPS_size;
+	SHADER_DESC cubeS_desc;
+	cubeS_desc.VS_bytecode = new char[ColorVS_size];
+	memcpy(cubeS_desc.VS_bytecode, ColorVS_bytecode, ColorVS_size);
+	cubeS_desc.VS_size = ColorVS_size;
+	cubeS_desc.PS_bytecode = new char[ColorPS_size];
+	memcpy(cubeS_desc.PS_bytecode, ColorPS_bytecode, ColorPS_size);
+	cubeS_desc.PS_size = ColorPS_size;
 
-	MODEL_DESC triModel_desc;
-	triModel_desc.mesh_desc = triM_desc;
-	triModel_desc.shader_desc = triS_desc;
+	MODEL_DESC cubeModel_desc;
+	cubeModel_desc.mesh_desc = cubeM_desc;
+	cubeModel_desc.shader_desc = cubeS_desc;
 
-	TRANSFORM_DESC triT_desc;
-	triT_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 20.0f, 1.0f);
-	entityCollection[1].SetTransform(triT_desc);
+	TRANSFORM_DESC cubeT_desc;
+	cubeT_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 20.0f, 1.0f);
+	entityCollection[1].SetTransform(cubeT_desc);
 
 	success = entityCollection[1].SetModel(
-		*m_pRenderer->GetGraphicsContext(), triModel_desc);
+		*m_pRenderer->GetGraphicsContext(), cubeModel_desc);
 	//------------------------------
 
 	//Ground Object
@@ -229,6 +229,7 @@ int Engine::Run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+		m_pStage->GetEntity(1)->GetTransform()->RotateEulerAngles(0.0f, 0.0001f, 0.0002f);
 		m_pRenderer->OnFrameRender(*m_pStage);
 	}
 	return (int)msg.wParam;

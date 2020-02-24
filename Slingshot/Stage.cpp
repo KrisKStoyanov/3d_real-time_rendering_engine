@@ -22,6 +22,11 @@ Entity* Stage::GetMainCamera()
 	return (m_pEntityCollection+m_mainCameraId);
 }
 
+Entity* Stage::GetEntity(int arrayIndex)
+{
+	return m_pEntityCollection+arrayIndex;
+}
+
 Entity* Stage::GetEntityCollection()
 {
 	return m_pEntityCollection;

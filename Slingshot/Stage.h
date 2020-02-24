@@ -15,6 +15,8 @@ public:
 
 	Entity* GetMainCamera();
 
+	Entity* GetEntity(int arrayIndex);
+
 	Entity* GetEntityCollection();
 	unsigned int GetEntityCount();
 private:

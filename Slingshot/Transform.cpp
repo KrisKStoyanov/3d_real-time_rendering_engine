@@ -67,7 +67,11 @@ Transform::Transform(TRANSFORM_DESC& transform_desc) :
 		0.0f,
 		0.0f);
 
-	m_rotationDynamic = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	m_rotationDynamic = DirectX::XMFLOAT4(
+		transform_desc.rotation.x,
+		transform_desc.rotation.y,
+		transform_desc.rotation.z,
+		transform_desc.rotation.w);
 }
 
 DirectX::XMMATRIX Transform::GetWorldMatrix()
