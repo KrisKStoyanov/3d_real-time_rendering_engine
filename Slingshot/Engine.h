@@ -13,8 +13,12 @@ public:
 		WINDOW_DESC& window_desc,
 		RENDERER_DESC& renderer_desc);
 	int Run();
-	bool EditStage(Stage* stage);
+	void EditStage(Stage& stage);
 	void Shutdown();
+
+	void CreatePlane(Entity& entity);
+	void CreateCube(Entity& entity);
+	void CreateSphere(Entity& entity);
 
 	LRESULT CALLBACK HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	Renderer* GetRenderer();

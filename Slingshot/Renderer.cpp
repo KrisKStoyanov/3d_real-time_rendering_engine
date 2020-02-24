@@ -37,7 +37,8 @@ void Renderer::OnFrameRender(Stage& stage)
 	m_pGraphicsContext->StartFrameRender();
 	stage.GetMainCamera()->GetTransform()->OnFrameRender();
 	stage.GetMainCamera()->GetCamera()->OnFrameRender(*stage.GetMainCamera()->GetTransform());
-	for (unsigned int i = 1; i < stage.GetEntityCount(); ++i) //Begin from 1 to exclude camera entity
+	unsigned int startEntityId = stage.GetMainCameraID() + 1;
+	for (unsigned int i = startEntityId; i < stage.GetEntityCount(); ++i)
 	{
 		Render(
 			*stage.GetMainCamera()->GetCamera(), 

@@ -19,6 +19,7 @@ public:
 
 	Entity* GetEntityCollection();
 	unsigned int GetEntityCount();
+	unsigned int GetMainCameraID();
 private:
 	Stage(unsigned int id, STAGE_DESC& stage_desc);
 

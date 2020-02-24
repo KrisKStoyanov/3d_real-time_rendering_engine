@@ -37,6 +37,11 @@ unsigned int Stage::GetEntityCount()
 	return m_entityCount;
 }
 
+unsigned int Stage::GetMainCameraID()
+{
+	return m_mainCameraId;
+}
+
 Stage::Stage(unsigned int id, STAGE_DESC& stage_desc)
 	: m_id(id), m_entityCount(stage_desc.entityCount), m_mainCameraId(stage_desc.mainCameraId)
 {
