@@ -12,19 +12,19 @@ void Entity::Shutdown()
 	SAFE_DELETE(m_pTransform);
 }
 
-bool Entity::SetTransform(TRANSFORM_DESC& transform_desc)
+void Entity::SetTransform(TRANSFORM_DESC& transform_desc)
 {
-	return ((m_pTransform = Transform::Create(transform_desc)) != nullptr);
+	m_pTransform = Transform::Create(transform_desc);
 }
 
-bool Entity::SetModel(D3D11Context& graphicsContext, MODEL_DESC& model_desc)
+void Entity::SetModel(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType)
 {
-	return ((m_pModel = Model::Create(graphicsContext, model_desc)) != nullptr);
+	m_pModel = Model::Create(graphicsContext, mesh_desc, vertexType);
 }
 
-bool Entity::SetCamera(CAMERA_DESC& camera_desc)
+void Entity::SetCamera(CAMERA_DESC& camera_desc)
 {
-	return ((m_pCamera = Camera::Create(camera_desc, *m_pTransform)) != nullptr);
+	m_pCamera = Camera::Create(camera_desc, *m_pTransform);
 }
 
 Transform* Entity::GetTransform()

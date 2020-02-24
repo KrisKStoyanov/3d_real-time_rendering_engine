@@ -1,9 +1,8 @@
 #pragma once
-#include "GraphicsProps.h"
-#include <vector>
+#include "D3D11Context.h"
+#include "Vertex.h"
 
 struct MESH_DESC {
-	VertexType vertexType = VertexType::ColorShaderVertex;
 	Vertex* vertexCollection;
 	unsigned int vertexCount;
 	unsigned int* indexCollection;
@@ -13,7 +12,7 @@ struct MESH_DESC {
 
 class Mesh {
 public:
-	static Mesh* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc);
+	static Mesh* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType);
 	void Shutdown();
 
 	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetVSCB();
@@ -28,7 +27,7 @@ public:
 
 	D3D11_PRIMITIVE_TOPOLOGY GetTopology();
 private:
-	Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc);
+	Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType);
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pVSCB;
 

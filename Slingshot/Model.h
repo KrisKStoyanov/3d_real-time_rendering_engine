@@ -1,21 +1,16 @@
 #pragma once
 #include "Mesh.h"
 
-struct MODEL_DESC {
-	MESH_DESC mesh_desc;
-	SHADER_DESC shader_desc;
-};
-
 class Model {
 public:
-	static Model* Create(D3D11Context& graphicsContext, MODEL_DESC& model_desc);
+	static Model* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType);
 	void Shutdown();
 
 	Mesh* GetMesh();
-	GraphicsProps* GetGraphicsProps();
+	VertexType GetVertexType();
 private:
-	Model(D3D11Context& graphicsContext, MODEL_DESC& model_desc);
+	Model(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType);
 	Mesh* m_pMesh;
-	GraphicsProps* m_pGraphicsProps;
+	VertexType m_vertexType;
 };
 

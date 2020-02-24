@@ -1,8 +1,8 @@
 #include "Mesh.h"
 
-Mesh* Mesh::Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc)
+Mesh* Mesh::Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType)
 {
-	return new Mesh(graphicsContext, mesh_desc);
+	return new Mesh(graphicsContext, mesh_desc, vertexType);
 }
 
 void Mesh::Shutdown()
@@ -15,12 +15,12 @@ void Mesh::Shutdown()
 	//SAFE_RELEASE(m_pVSCB);
 }
 
-Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc) :
+Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType) :
 	m_pVSCB(nullptr), m_pVBuffer(nullptr), m_pIBuffer(nullptr),
 	m_vertexCount(mesh_desc.vertexCount), m_indexCount(mesh_desc.indexCount),
 	m_VBufferStride(0), m_VBufferOffset(0), m_topology(mesh_desc.topology)
 {
-	switch (mesh_desc.vertexType)
+	switch (vertexType)
 	{
 	case VertexType::ColorShaderVertex:
 	{

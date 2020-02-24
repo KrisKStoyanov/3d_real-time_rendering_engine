@@ -185,11 +185,11 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="FileParsing.cpp" />
-    <ClCompile Include="GraphicsProps.cpp" />
     <ClCompile Include="GUIConsole.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="PipelineState.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="Timer.cpp" />
@@ -204,12 +204,12 @@
     <ClInclude Include="Entity.h" />
     <ClInclude Include="FileParsing.h" />
     <ClInclude Include="GraphicsContext.h" />
-    <ClInclude Include="GraphicsProps.h" />
     <ClInclude Include="GUIConsole.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="Macros.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="PipelineState.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="Timer.h" />

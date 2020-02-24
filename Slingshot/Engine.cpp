@@ -46,10 +46,19 @@ bool Engine::EditStage(Stage* stage)
 {
 	bool success;
 
+	//Pipeline State
+	//------------------------------
+	PIPELINE_DESC pipeline_desc;
+	pipeline_desc.VS_filename = "ColorVertexShader.cso";
+	pipeline_desc.PS_filename = "ColorPixelShader.cso";
+
+	m_pRenderer->SetPipelineState(pipeline_desc, VertexType::ColorShaderVertex);
+	//------------------------------
+
 	const int ENTITY_COUNT = 3;
 	Entity* entityCollection = new Entity[ENTITY_COUNT];
 
-	//Main Camera
+	//Main Camera - ALWAYS SETUP WITH INDEX 0
 	//------------------------------
 	RECT winRect;
 	GetWindowRect(m_pWindow->GetHandle(), &winRect);
@@ -65,14 +74,6 @@ bool Engine::EditStage(Stage* stage)
 
 	entityCollection[0].SetCamera(camera_desc);
 	entityCollection[0].SetTransform(mc_transform_desc);
-	//------------------------------
-
-	//Color Shader
-	//------------------------------
-	char* ColorVS_bytecode = nullptr, * ColorPS_bytecode = nullptr;
-	size_t ColorVS_size, ColorPS_size;
-	ColorVS_bytecode = GetFileBytecode("ColorVertexShader.cso", ColorVS_size);
-	ColorPS_bytecode = GetFileBytecode("ColorPixelShader.cso", ColorPS_size);
 	//------------------------------
 
 	//Cube Object
@@ -122,7 +123,6 @@ bool Engine::EditStage(Stage* stage)
 	cubeI_collection[13] = 5;
 
 	MESH_DESC cubeM_desc;
-	cubeM_desc.vertexType = VertexType::ColorShaderVertex;
 	cubeM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 	cubeM_desc.vertexCollection = new ColorShaderVertex[ENTITY0_VERTEX_COUNT];
 	memcpy(cubeM_desc.vertexCollection, cubeV_collection, sizeof(ColorShaderVertex) * ENTITY0_VERTEX_COUNT);
@@ -131,24 +131,12 @@ bool Engine::EditStage(Stage* stage)
 	memcpy(cubeM_desc.indexCollection, cubeI_collection, sizeof(unsigned int) * ENTITY0_INDEX_COUNT);
 	cubeM_desc.indexCount = ENTITY0_INDEX_COUNT;
 
-	SHADER_DESC cubeS_desc;
-	cubeS_desc.VS_bytecode = new char[ColorVS_size];
-	memcpy(cubeS_desc.VS_bytecode, ColorVS_bytecode, ColorVS_size);
-	cubeS_desc.VS_size = ColorVS_size;
-	cubeS_desc.PS_bytecode = new char[ColorPS_size];
-	memcpy(cubeS_desc.PS_bytecode, ColorPS_bytecode, ColorPS_size);
-	cubeS_desc.PS_size = ColorPS_size;
-
-	MODEL_DESC cubeModel_desc;
-	cubeModel_desc.mesh_desc = cubeM_desc;
-	cubeModel_desc.shader_desc = cubeS_desc;
-
 	TRANSFORM_DESC cubeT_desc;
 	cubeT_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 20.0f, 1.0f);
 	entityCollection[1].SetTransform(cubeT_desc);
 
-	success = entityCollection[1].SetModel(
-		*m_pRenderer->GetGraphicsContext(), cubeModel_desc);
+	entityCollection[1].SetModel(
+		*m_pRenderer->GetGraphicsContext(), cubeM_desc, VertexType::ColorShaderVertex);
 	//------------------------------
 
 	//Ground Object
@@ -173,7 +161,6 @@ bool Engine::EditStage(Stage* stage)
 	groundI_Collection[3] = 3;
 
 	MESH_DESC groundM_desc;
-	groundM_desc.vertexType = VertexType::ColorShaderVertex;
 	groundM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 	groundM_desc.vertexCollection = new ColorShaderVertex[ENTITY1_VERTEX_COUNT];
 	memcpy(groundM_desc.vertexCollection, groundV_Collection, sizeof(ColorShaderVertex) * ENTITY1_VERTEX_COUNT);
@@ -182,20 +169,8 @@ bool Engine::EditStage(Stage* stage)
 	memcpy(groundM_desc.indexCollection, groundI_Collection, sizeof(unsigned int) * ENTITY1_INDEX_COUNT);
 	groundM_desc.indexCount = ENTITY1_INDEX_COUNT;
 
-	SHADER_DESC groundS_desc;
-	groundS_desc.VS_bytecode = new char[ColorVS_size];
-	memcpy(groundS_desc.VS_bytecode, ColorVS_bytecode, ColorVS_size);
-	groundS_desc.VS_size = ColorVS_size;
-	groundS_desc.PS_bytecode = new char[ColorPS_size];
-	memcpy(groundS_desc.PS_bytecode, ColorPS_bytecode, ColorPS_size);
-	groundS_desc.PS_size = ColorPS_size;
-
-	MODEL_DESC groundModel_desc;
-	groundModel_desc.mesh_desc = groundM_desc;
-	groundModel_desc.shader_desc = groundS_desc;
-
-	success = entityCollection[2].SetModel(
-		*m_pRenderer->GetGraphicsContext(), groundModel_desc);
+	entityCollection[2].SetModel(
+		*m_pRenderer->GetGraphicsContext(), groundM_desc, VertexType::ColorShaderVertex);
 	//------------------------------
 
 	STAGE_DESC stage_desc;
@@ -209,8 +184,6 @@ bool Engine::EditStage(Stage* stage)
 	SAFE_DELETE_ARRAY(cubeI_collection);
 	SAFE_DELETE_ARRAY(groundV_Collection);
 	SAFE_DELETE_ARRAY(groundI_Collection);
-	SAFE_DELETE_ARRAY(ColorVS_bytecode);
-	SAFE_DELETE_ARRAY(ColorPS_bytecode);
 	SAFE_DELETE_ARRAY(entityCollection);
 
 	return success;

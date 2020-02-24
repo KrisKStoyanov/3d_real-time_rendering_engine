@@ -63,3 +63,8 @@ ID3D11InputLayout* GraphicsProps::GetInputLayout()
 	return m_pIL;
 }
 
+VertexType GraphicsProps::GetVertexType()
+{
+	return m_vertexType;
+}
+

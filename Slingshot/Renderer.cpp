@@ -5,7 +5,8 @@ Renderer* Renderer::Create(HWND hWnd, RENDERER_DESC& renderer_desc)
 	return new Renderer(hWnd, renderer_desc);
 }
 
-Renderer::Renderer(HWND hWnd, RENDERER_DESC& renderer_desc) : m_pGraphicsContext(nullptr)
+Renderer::Renderer(HWND hWnd, RENDERER_DESC& renderer_desc) : 
+	m_pGraphicsContext(nullptr), m_pPipelineState(nullptr)
 {
 	switch (renderer_desc.graphicsContextType)
 	{
@@ -42,12 +43,12 @@ void Renderer::OnFrameRender(Stage& stage)
 			*stage.GetMainCamera()->GetCamera(), 
 			*(stage.GetEntityCollection() + i)->GetTransform(), 
 			*(stage.GetEntityCollection() + i)->GetModel()->GetMesh(),
-			*(stage.GetEntityCollection() + i)->GetModel()->GetGraphicsProps());
+			*GetPipelineState((stage.GetEntityCollection() + i)->GetModel()->GetVertexType()));
 	}
 	m_pGraphicsContext->EndFrameRender();
 }
 
-void Renderer::Render(Camera& camera, Transform& transform, Mesh& mesh, GraphicsProps& props)
+void Renderer::Render(Camera& camera, Transform& transform, Mesh& mesh, PipelineState& pipelineState)
 {
 	transform.OnFrameRender();
 
@@ -61,9 +62,9 @@ void Renderer::Render(Camera& camera, Transform& transform, Mesh& mesh, Graphics
 	deviceContext->IASetIndexBuffer(mesh.GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
 	deviceContext->IASetPrimitiveTopology(mesh.GetTopology());
 
-	deviceContext->IASetInputLayout(props.GetInputLayout());
-	deviceContext->VSSetShader(props.GetVertexShader(), nullptr, 0);
-	deviceContext->PSSetShader(props.GetPixelShader(), nullptr, 0);
+	deviceContext->IASetInputLayout(pipelineState.GetInputLayout());
+	deviceContext->VSSetShader(pipelineState.GetVertexShader(), nullptr, 0);
+	deviceContext->PSSetShader(pipelineState.GetPixelShader(), nullptr, 0);
 
 	VS_CONSTANT_BUFFER vs_cb;
 	vs_cb.wvpMatrix = wvpMatrix;
@@ -82,4 +83,17 @@ void Renderer::Shutdown()
 D3D11Context* Renderer::GetGraphicsContext()
 {
 	return m_pGraphicsContext;
+}
+
+PipelineState* Renderer::GetPipelineState(VertexType vertexType)
+{
+	//have a switch statement that returns corresponding pipeline state
+	//or loop through an array of pipeline states and match the vertex type with the queried argument
+
+	return m_pPipelineState;
+}
+
+void Renderer::SetPipelineState(PIPELINE_DESC pipeline_desc, VertexType vertexType)
+{
+	m_pPipelineState = PipelineState::Create(*m_pGraphicsContext, pipeline_desc, vertexType);
 }
