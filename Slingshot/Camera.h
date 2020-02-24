@@ -7,7 +7,7 @@ struct CAMERA_DESC {
 	float lenseHeight = 720;
 	float nearClipDist = 1.0f;
 	float farClipDist = 1000.0f;
-	float translationSpeed = 40.0f;
+	float translationSpeed = 30.0f;
 	float rotationSpeed = 0.0001f;
 };
 

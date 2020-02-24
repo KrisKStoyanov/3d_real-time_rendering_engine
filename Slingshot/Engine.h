@@ -1,7 +1,7 @@
 #pragma once
 #include "Renderer.h"
 #include "FileParsing.h"
-#include <chrono>
+#include "Timer.h"
 
 class Engine {
 public:
@@ -23,15 +23,15 @@ private:
 	Engine() :
 		m_pWindow(nullptr),
 		m_pRenderer(nullptr),
+		m_pTimer(nullptr),
 		m_pStage(nullptr),
-		m_isRunning(false),
-		m_lastFrameTime(0.0f)
+		m_isRunning(false)
 	{}
-	Window* m_pWindow;
-	
+	Window* m_pWindow;	
 	Renderer* m_pRenderer;
+	Timer* m_pTimer;
 	Stage* m_pStage;
 
 	bool m_isRunning;
-	float m_lastFrameTime;
+
 };

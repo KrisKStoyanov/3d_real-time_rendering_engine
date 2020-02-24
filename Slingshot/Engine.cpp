@@ -35,11 +35,8 @@ bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 	if (m_isRunning) 
 	{
 		m_isRunning = m_pRenderer->Initialize();
-	}
-	
-	if (m_isRunning) 
-	{
 		m_isRunning = EditStage(m_pStage);
+		m_pTimer = new Timer();
 	}
 
 	return m_isRunning;
@@ -224,18 +221,15 @@ int Engine::Run()
 	MSG msg = {};
 	while (m_isRunning) 
 	{
-		std::chrono::high_resolution_clock::time_point startFrameTime = std::chrono::high_resolution_clock::now();
+		m_pTimer->OnFrameStart();
 		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) 
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
 		m_pStage->GetEntity(1)->GetTransform()->RotateEulerAngles(
-			0.0f, 0.01f * m_lastFrameTime, 0.02f * m_lastFrameTime);
+			0.0f, 0.01f * m_pTimer->m_smoothstep, 0.02f * m_pTimer->m_smoothstep);	
 		m_pRenderer->OnFrameRender(*m_pStage);
-		std::chrono::high_resolution_clock::time_point endFrameTime = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<float> frameTime = std::chrono::duration_cast<std::chrono::duration<float>>(endFrameTime - startFrameTime);
-		m_lastFrameTime = frameTime.count();
 	}
 	return (int)msg.wParam;
 }
@@ -245,6 +239,7 @@ void Engine::Shutdown()
 	SAFE_SHUTDOWN(m_pStage);
 	SAFE_SHUTDOWN(m_pRenderer);
 	SAFE_SHUTDOWN(m_pWindow);
+	SAFE_DELETE(m_pTimer);
 }
 
 LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -298,7 +293,7 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			m_pStage->GetMainCamera()->GetTransform()->Translate(
 				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * 
 				m_pStage->GetMainCamera()->GetTransform()->GetForwardDir() * 
-				m_lastFrameTime);
+				m_pTimer->m_smoothstep);
 		}
 		break;
 		case 0x41: //A
@@ -306,7 +301,7 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			m_pStage->GetMainCamera()->GetTransform()->Translate(
 				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * 
 				m_pStage->GetMainCamera()->GetTransform()->GetRightDir() * 
-				m_lastFrameTime);
+				m_pTimer->m_smoothstep);
 		}
 		break;
 		case 0x53: //S
@@ -314,7 +309,7 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			m_pStage->GetMainCamera()->GetTransform()->Translate(
 				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * 
 				m_pStage->GetMainCamera()->GetTransform()->GetForwardDir() * 
-				m_lastFrameTime);
+				m_pTimer->m_smoothstep);
 		}
 		break;
 		case 0x44: //D
@@ -322,7 +317,7 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			m_pStage->GetMainCamera()->GetTransform()->Translate(
 				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * 
 				m_pStage->GetMainCamera()->GetTransform()->GetRightDir() * 
-				m_lastFrameTime);
+				m_pTimer->m_smoothstep);
 		}
 		break;
 		case VK_ESCAPE:

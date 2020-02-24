@@ -122,7 +122,7 @@ void Transform::OnFrameRender()
 
 void Transform::Translate(DirectX::XMVECTOR translation)
 {
-	m_position = DirectX::XMVectorSetW(DirectX::XMVectorAdd(m_position, translation), 1.0f);
+	m_position = DirectX::XMVectorAdd(m_position, translation);
 }
 
 void Transform::RotateEulerAngles(float pitch, float head, float roll)
