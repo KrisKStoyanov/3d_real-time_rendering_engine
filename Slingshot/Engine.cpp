@@ -91,15 +91,15 @@ bool Engine::EditStage(Stage* stage)
 	cubeV_collection[2].position = DirectX::XMFLOAT4(2.0f, -2.0f, -2.0f, 1.0f);
 	cubeV_collection[2].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
 	cubeV_collection[3].position = DirectX::XMFLOAT4(2.0f, 2.0f, -2.0f, 1.0f);
-	cubeV_collection[3].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	cubeV_collection[3].color = DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
 	cubeV_collection[4].position = DirectX::XMFLOAT4(-2.0f, -2.0f, 2.0f, 1.0f);
-	cubeV_collection[4].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	cubeV_collection[4].color = DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
 	cubeV_collection[5].position = DirectX::XMFLOAT4(-2.0f, 2.0f, 2.0f, 1.0f);
-	cubeV_collection[5].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	cubeV_collection[5].color = DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
 	cubeV_collection[6].position = DirectX::XMFLOAT4(2.0f, -2.0f, 2.0f, 1.0f);
-	cubeV_collection[6].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	cubeV_collection[6].color = DirectX::XMFLOAT4(0.5f, 1.0f, 0.0f, 1.0f);
 	cubeV_collection[7].position = DirectX::XMFLOAT4(2.0f, 2.0f, 2.0f, 1.0f);
-	cubeV_collection[7].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	cubeV_collection[7].color = DirectX::XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f);
 
 	unsigned int* cubeI_collection = new unsigned int[ENTITY0_INDEX_COUNT];
 
@@ -224,13 +224,18 @@ int Engine::Run()
 	MSG msg = {};
 	while (m_isRunning) 
 	{
+		std::chrono::high_resolution_clock::time_point startFrameTime = std::chrono::high_resolution_clock::now();
 		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) 
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		m_pStage->GetEntity(1)->GetTransform()->RotateEulerAngles(0.0f, 0.0001f, 0.0002f);
+		m_pStage->GetEntity(1)->GetTransform()->RotateEulerAngles(
+			0.0f, 0.01f * m_lastFrameTime, 0.02f * m_lastFrameTime);
 		m_pRenderer->OnFrameRender(*m_pStage);
+		std::chrono::high_resolution_clock::time_point endFrameTime = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<float> frameTime = std::chrono::duration_cast<std::chrono::duration<float>>(endFrameTime - startFrameTime);
+		m_lastFrameTime = frameTime.count();
 	}
 	return (int)msg.wParam;
 }
@@ -291,25 +296,33 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		case 0x57: //W 
 		{
 			m_pStage->GetMainCamera()->GetTransform()->Translate(
-				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * m_pStage->GetMainCamera()->GetTransform()->GetForwardDir());
+				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * 
+				m_pStage->GetMainCamera()->GetTransform()->GetForwardDir() * 
+				m_lastFrameTime);
 		}
 		break;
 		case 0x41: //A
 		{
 			m_pStage->GetMainCamera()->GetTransform()->Translate(
-				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
+				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * 
+				m_pStage->GetMainCamera()->GetTransform()->GetRightDir() * 
+				m_lastFrameTime);
 		}
 		break;
 		case 0x53: //S
 		{
 			m_pStage->GetMainCamera()->GetTransform()->Translate(
-				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * m_pStage->GetMainCamera()->GetTransform()->GetForwardDir());
+				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * 
+				m_pStage->GetMainCamera()->GetTransform()->GetForwardDir() * 
+				m_lastFrameTime);
 		}
 		break;
 		case 0x44: //D
 		{
 			m_pStage->GetMainCamera()->GetTransform()->Translate(
-				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * m_pStage->GetMainCamera()->GetTransform()->GetRightDir());
+				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * 
+				m_pStage->GetMainCamera()->GetTransform()->GetRightDir() * 
+				m_lastFrameTime);
 		}
 		break;
 		case VK_ESCAPE:
