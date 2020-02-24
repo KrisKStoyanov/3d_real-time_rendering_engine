@@ -81,7 +81,7 @@ bool Engine::EditStage(Stage* stage)
 	//Cube Object
 	//------------------------------
 	const int ENTITY0_VERTEX_COUNT = 8;
-	const int ENTITY0_INDEX_COUNT = 18;
+	const int ENTITY0_INDEX_COUNT = 14;
 
 	ColorShaderVertex* cubeV_collection = new ColorShaderVertex[ENTITY0_VERTEX_COUNT];
 	cubeV_collection[0].position = DirectX::XMFLOAT4(-2.0f, -2.0f, -2.0f, 1.0f);
@@ -109,29 +109,20 @@ bool Engine::EditStage(Stage* stage)
 	cubeI_collection[2] = 2;
 	cubeI_collection[3] = 3;
 
-	//Right
-	cubeI_collection[4] = 6;
-	cubeI_collection[5] = 7;
+	cubeI_collection[4] = 7;
+	cubeI_collection[5] = 1;
 
-	//Back
-	cubeI_collection[6] = 4;
-	cubeI_collection[7] = 5;
+	cubeI_collection[6] = 5;
+	cubeI_collection[7] = 0;
 
-	//Left
-	cubeI_collection[8] = 0;
-	cubeI_collection[9] = 1;
+	cubeI_collection[8] = 4;
+	cubeI_collection[9] = 2;
 
-	//Top
-	cubeI_collection[10] = 1; //Degenerate: switches winding order
-	cubeI_collection[11] = 5;
-	cubeI_collection[12] = 3;
-	cubeI_collection[13] = 7;
+	cubeI_collection[10] = 6;
+	cubeI_collection[11] = 7;
 
-	//Bottom
-	cubeI_collection[14] = 2; //Degenerate: switches winding order
-	cubeI_collection[15] = 6; //Degenerate: switches winding order
-	cubeI_collection[16] = 0;
-	cubeI_collection[17] = 4;
+	cubeI_collection[12] = 4;
+	cubeI_collection[13] = 5;
 
 	MESH_DESC triM_desc;
 	triM_desc.vertexType = VertexType::ColorShaderVertex;
