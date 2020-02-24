@@ -18,7 +18,7 @@ public:
 
 	void CreatePlane(Entity& entity);
 	void CreateCube(Entity& entity);
-	void CreateSphere(Entity& entity);
+	void CreateSphere(Entity& entity, int slices, int stacks, int radius);
 
 	LRESULT CALLBACK HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	Renderer* GetRenderer();

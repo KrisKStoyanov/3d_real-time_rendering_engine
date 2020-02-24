@@ -53,7 +53,7 @@ void Engine::EditStage(Stage& stage)
 	m_pRenderer->SetPipelineState(pipeline_desc, VertexType::ColorShaderVertex);
 	//------------------------------
 
-	const int ENTITY_COUNT = 3;
+	const int ENTITY_COUNT = 4;
 	Entity* entityCollection = new Entity[ENTITY_COUNT];
 
 	//Main Camera
@@ -83,6 +83,11 @@ void Engine::EditStage(Stage& stage)
 	planeT_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
 	entityCollection[2].SetTransform(planeT_desc);
 	CreatePlane(*(entityCollection + 2));
+
+	TRANSFORM_DESC sphereT_desc;
+	sphereT_desc.position = DirectX::XMFLOAT4(-7.5f, 2.0f, 10.0f, 1.0f);
+	entityCollection[3].SetTransform(sphereT_desc);
+	CreateSphere(*(entityCollection + 3), 30, 30, 2);
 
 	STAGE_DESC stage_desc;
 	stage_desc.entityCollection = new Entity[ENTITY_COUNT];
@@ -224,8 +229,66 @@ void Engine::CreateCube(Entity& entity)
 	SAFE_DELETE_ARRAY(cubeI_collection);
 }
 
-void Engine::CreateSphere(Entity& entity)
+void Engine::CreateSphere(Entity& entity, int slices, int stacks, int radius)
 {
+#include <vector>
+	std::vector<ColorShaderVertex> vertices;
+	std::vector<unsigned int> indices;
+
+	for (int i = 0; i <= stacks; ++i) {
+
+		float V = i / (float)stacks;
+		float phi = V * 3.14f;
+
+		for (int j = 0; j <= slices; ++j) {
+
+			float U = j / (float)slices;
+			float theta = U * 6.28f;
+
+			float x = cosf(theta) * sinf(phi);
+			float y = cosf(phi);
+			float z = sinf(theta) * sinf(phi);
+
+			ColorShaderVertex vert;
+			vert.position = DirectX::XMFLOAT4(x * radius, y * radius, z * radius, 1.0);
+			//vert.normal = glm::vec3(x, y, z);
+			//vert.uv = glm::vec2((glm::asin(vert.normal.x) / piVal + 0.5f), (glm::asin(vert.normal.y) / piVal + 0.5f));
+			vert.color = DirectX::XMFLOAT4(0.4, 0.7, 1.0, 1.0);
+
+			vertices.push_back(vert);
+		}
+	}
+	for (int i = 0; i < slices * stacks + slices; ++i) {
+
+		indices.push_back(i);
+		indices.push_back(i + slices + 1);
+		indices.push_back(i + slices);
+
+		indices.push_back(i + slices + 1);
+		indices.push_back(i);
+		indices.push_back(i + 1);
+	}
+
+	const size_t VERTEX_COUNT = vertices.size();
+	const size_t INDEX_COUNT = indices.size();
+
+	//ColorShaderVertex* sphereV_collection = new ColorShaderVertex[VERTEX_COUNT];
+	//unsigned int* sphereI_collection = new unsigned int[INDEX_COUNT];
+
+	MESH_DESC sphereM_desc;
+	sphereM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+	sphereM_desc.vertexCollection = new ColorShaderVertex[VERTEX_COUNT];
+	memcpy(sphereM_desc.vertexCollection, vertices.data(), sizeof(ColorShaderVertex) * VERTEX_COUNT);
+	sphereM_desc.vertexCount = VERTEX_COUNT;
+	sphereM_desc.indexCollection = new unsigned int[INDEX_COUNT];
+	memcpy(sphereM_desc.indexCollection, indices.data(), sizeof(unsigned int) * INDEX_COUNT);
+	sphereM_desc.indexCount = INDEX_COUNT;
+
+	entity.SetModel(
+		*m_pRenderer->GetGraphicsContext(), sphereM_desc, VertexType::ColorShaderVertex);
+
+	//SAFE_DELETE_ARRAY(sphereV_collection);
+	//SAFE_DELETE_ARRAY(sphereI_collection);
 }
 
 LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
