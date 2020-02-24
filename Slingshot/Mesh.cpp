@@ -7,14 +7,15 @@ Mesh* Mesh::Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc)
 
 void Mesh::Shutdown()
 {
-	m_pGraphicsProps->Shutdown();
-	SAFE_RELEASE(m_pVBuffer);
-	SAFE_RELEASE(m_pIBuffer);
-	SAFE_RELEASE(m_pVSCB);
+	//m_pVBuffer->Release();
+	//m_pIBuffer->Release();
+	//m_pVSCB->Release();
+	//SAFE_RELEASE(m_pVBuffer);
+	//SAFE_RELEASE(m_pIBuffer);
+	//SAFE_RELEASE(m_pVSCB);
 }
 
 Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc) :
-	m_pGraphicsProps(nullptr),
 	m_pVSCB(nullptr), m_pVBuffer(nullptr), m_pIBuffer(nullptr),
 	m_vertexCount(mesh_desc.vertexCount), m_indexCount(mesh_desc.indexCount),
 	m_VBufferStride(0), m_VBufferOffset(0), m_topology(mesh_desc.topology)
@@ -53,7 +54,7 @@ Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc) :
 	vertexData.SysMemSlicePitch = 0;
 
 	DX::ThrowIfFailed(graphicsContext.GetDevice()->CreateBuffer(
-		&vertexBufferDesc, &vertexData, &m_pVBuffer));
+		&vertexBufferDesc, &vertexData, m_pVBuffer.GetAddressOf()));
 
 	//----------------------------------
 
@@ -73,7 +74,7 @@ Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc) :
 	indexData.SysMemSlicePitch = 0;
 
 	DX::ThrowIfFailed(graphicsContext.GetDevice()->CreateBuffer(
-		&indexBufferDesc, &indexData, &m_pIBuffer));
+		&indexBufferDesc, &indexData, m_pIBuffer.GetAddressOf()));
 
 	//----------------------------------
 
@@ -93,7 +94,8 @@ Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc) :
 	vs_cb_data.SysMemPitch = 0;
 	vs_cb_data.SysMemSlicePitch = 0;
 
-	DX::ThrowIfFailed(graphicsContext.GetDevice()->CreateBuffer(&vs_cb_desc, &vs_cb_data, &m_pVSCB));
+	DX::ThrowIfFailed(graphicsContext.GetDevice()->CreateBuffer(
+		&vs_cb_desc, &vs_cb_data, m_pVSCB.GetAddressOf()));
 
 	//----------------------------------
 
@@ -101,35 +103,42 @@ Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc) :
 	SAFE_DELETE_ARRAY(mesh_desc.indexCollection);
 }
 
-void Mesh::SetGraphicsProps(D3D11Context& renderer, SHADER_DESC& shader_desc, VertexType vertexType)
+const Microsoft::WRL::ComPtr<ID3D11Buffer> Mesh::GetVSCB()
 {
-	m_pGraphicsProps = GraphicsProps::Create(renderer, shader_desc, vertexType);
+	return m_pVSCB;
 }
 
-void Mesh::OnFrameRender(D3D11Context& graphicsContext, DirectX::XMMATRIX wvp)
+const Microsoft::WRL::ComPtr<ID3D11Buffer> Mesh::GetVertexBuffer()
 {
-	ID3D11DeviceContext* deviceContext = graphicsContext.GetDeviceContext();
-	deviceContext->IASetVertexBuffers(0, 1, &m_pVBuffer, &m_VBufferStride, &m_VBufferOffset);
-	deviceContext->IASetIndexBuffer(m_pIBuffer, DXGI_FORMAT_R32_UINT, 0);
-	deviceContext->IASetPrimitiveTopology(m_topology);
-
-	deviceContext->IASetInputLayout(m_pGraphicsProps->GetInputLayout());
-	deviceContext->VSSetShader(m_pGraphicsProps->GetVertexShader(), nullptr, 0);
-	deviceContext->PSSetShader(m_pGraphicsProps->GetPixelShader(), nullptr, 0);
-
-	VS_CONSTANT_BUFFER vs_cb(wvp);
-	deviceContext->UpdateSubresource(m_pVSCB, 0, nullptr, &vs_cb, 0, 0);
-	deviceContext->VSSetConstantBuffers(0, 1, &m_pVSCB);
-
-	deviceContext->DrawIndexed(m_indexCount, 0, 0);
+	return m_pVBuffer;
 }
 
-int Mesh::GetVertexCount()
+const Microsoft::WRL::ComPtr<ID3D11Buffer> Mesh::GetIndexBuffer()
+{
+	return m_pIBuffer;
+}
+
+unsigned int Mesh::GetVertexCount()
 {
 	return m_vertexCount;
 }
 
-int Mesh::GetIndexCount()
+unsigned int Mesh::GetIndexCount()
 {
 	return m_indexCount;
+}
+
+unsigned int* Mesh::GetVertexBufferStride()
+{
+	return &m_VBufferStride;
+}
+
+unsigned int* Mesh::GetVertexBufferOffset()
+{
+	return &m_VBufferOffset;
+}
+
+D3D11_PRIMITIVE_TOPOLOGY Mesh::GetTopology()
+{
+	return m_topology;
 }

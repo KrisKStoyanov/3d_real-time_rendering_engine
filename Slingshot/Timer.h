@@ -9,6 +9,7 @@ public:
 
 	double m_timestep;
 	double m_smoothstep;
+	float m_smoothstepF;
 	double m_time;
 	int m_frameCount;
 

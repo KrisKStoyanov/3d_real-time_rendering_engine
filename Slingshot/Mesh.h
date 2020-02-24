@@ -9,16 +9,6 @@ struct MESH_DESC {
 	unsigned int* indexCollection;
 	unsigned int indexCount;
 	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-
-	//MESH_DESC(const MESH_DESC& other)
-	//	: vertexCount(other.vertexCount), indexCount(other.indexCount) 
-	//{
-	//	vertexCollection = new Vertex[vertexCount];
-	//	memcpy(vertexCollection, other.vertexCollection, vertexCount);
-
-	//	indexCollection = new unsigned int[indexCount];
-	//	memcpy(indexCollection, other.indexCollection, indexCount);
-	//}
 };
 
 class Mesh {
@@ -26,19 +16,24 @@ public:
 	static Mesh* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc);
 	void Shutdown();
 
-	void SetGraphicsProps(D3D11Context& graphicsContext, SHADER_DESC& shader_desc, VertexType vertexType);
-	void OnFrameRender(D3D11Context& graphicsContext, DirectX::XMMATRIX wvp = DirectX::XMMatrixIdentity());
+	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetVSCB();
+	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();
+	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 
-	int GetVertexCount();
-	int GetIndexCount();
+	unsigned int GetVertexCount();
+	unsigned int GetIndexCount();
+
+	unsigned int* GetVertexBufferStride();
+	unsigned int* GetVertexBufferOffset();
+
+	D3D11_PRIMITIVE_TOPOLOGY GetTopology();
 private:
 	Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc);
-	GraphicsProps* m_pGraphicsProps;
 
-	ID3D11Buffer* m_pVSCB;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pVSCB;
 
-	ID3D11Buffer* m_pVBuffer;
-	ID3D11Buffer* m_pIBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pVBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIBuffer;
 
 	unsigned int m_vertexCount;
 	unsigned int m_indexCount;

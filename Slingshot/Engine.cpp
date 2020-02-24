@@ -227,8 +227,9 @@ int Engine::Run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		m_pStage->GetEntity(1)->GetTransform()->RotateEulerAngles(
-			0.0f, 0.01f * m_pTimer->m_smoothstep, 0.02f * m_pTimer->m_smoothstep);	
+		m_pStage->GetEntity(1)->GetTransform()->RotateEulerAngles(0.0f, 
+			0.01f * m_pTimer->m_smoothstepF, 
+			0.02f * m_pTimer->m_smoothstepF);
 		m_pRenderer->OnFrameRender(*m_pStage);
 	}
 	return (int)msg.wParam;
@@ -276,8 +277,8 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			int lastMouseX, lastMouseY;
 			m_pStage->GetMainCamera()->GetCamera()->GetMouseCoord(lastMouseX, lastMouseY);
 			m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(pt.x, pt.y);
-			float offsetX = pt.x - lastMouseX;
-			float offsetY = pt.y - lastMouseY;
+			float offsetX = static_cast<float>(pt.x) - lastMouseX;
+			float offsetY = static_cast<float>(pt.y) - lastMouseY;
 			float pitch = offsetX * m_pStage->GetMainCamera()->GetCamera()->GetRotationSpeed();
 			float head = offsetY * m_pStage->GetMainCamera()->GetCamera()->GetRotationSpeed();
 			m_pStage->GetMainCamera()->GetTransform()->RotateEulerAngles(head, pitch, 0.0f);
@@ -293,7 +294,7 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			m_pStage->GetMainCamera()->GetTransform()->Translate(
 				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * 
 				m_pStage->GetMainCamera()->GetTransform()->GetForwardDir() * 
-				m_pTimer->m_smoothstep);
+				m_pTimer->m_smoothstepF);
 		}
 		break;
 		case 0x41: //A
@@ -301,7 +302,7 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			m_pStage->GetMainCamera()->GetTransform()->Translate(
 				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * 
 				m_pStage->GetMainCamera()->GetTransform()->GetRightDir() * 
-				m_pTimer->m_smoothstep);
+				m_pTimer->m_smoothstepF);
 		}
 		break;
 		case 0x53: //S
@@ -309,7 +310,7 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			m_pStage->GetMainCamera()->GetTransform()->Translate(
 				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * 
 				m_pStage->GetMainCamera()->GetTransform()->GetForwardDir() * 
-				m_pTimer->m_smoothstep);
+				m_pTimer->m_smoothstepF);
 		}
 		break;
 		case 0x44: //D
@@ -317,7 +318,7 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			m_pStage->GetMainCamera()->GetTransform()->Translate(
 				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * 
 				m_pStage->GetMainCamera()->GetTransform()->GetRightDir() * 
-				m_pTimer->m_smoothstep);
+				m_pTimer->m_smoothstepF);
 		}
 		break;
 		case VK_ESCAPE:

@@ -4,6 +4,7 @@ Timer::Timer() :
 	m_timestep(0.0),
 	m_time(0.0),
 	m_smoothstep(0.0),
+	m_smoothstepF(0.0f),
 	m_frameCount(0)
 {
 	long long frequency;
@@ -27,4 +28,5 @@ void Timer::OnFrameStart()
 	m_previousFrameTimestamp = timestamp;
 
 	m_smoothstep = m_smoothstep * 0.9 + m_timestep * 0.1;
+	m_smoothstepF = static_cast<float>(m_smoothstep);
 }

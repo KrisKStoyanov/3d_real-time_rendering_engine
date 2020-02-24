@@ -36,8 +36,8 @@ private:
 	DirectX::XMMATRIX m_viewMatrix;
 	DirectX::XMMATRIX m_projectionMatrix;
 
-	float m_lastMouseX;
-	float m_lastMouseY;
+	int m_lastMouseX;
+	int m_lastMouseY;
 
 	bool m_rotate;
 	float m_rotationSpeed;
