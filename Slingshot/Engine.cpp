@@ -78,7 +78,7 @@ void Engine::EditStage(Stage& stage)
 	LIGHT_DESC entity8_light_desc;
 	entityCollection[1].SetLight(entity8_light_desc);
 	TRANSFORM_DESC entity8_transform_desc;
-	entity8_transform_desc.position = DirectX::XMFLOAT4(5.0f, 12.5f, 5.0f, 1.0f);
+	entity8_transform_desc.position = DirectX::XMFLOAT4(5.0f, 12.5f, 2.5f, 1.0f);
 	entityCollection[1].SetTransform(entity8_transform_desc);
 	//------------------------------
 
@@ -325,7 +325,7 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 
 			int index = j + i * (slices + 1);
 			entityV_collection[index].position = DirectX::XMFLOAT4(x * radius, y * radius, z * radius, 1.0f);
-			entityV_collection[index].normal = DirectX::XMFLOAT4(x, y, z, 1.0f);
+			entityV_collection[index].normal = DirectX::XMFLOAT4(x, y, z, 0.0f);
 			entityV_collection[index].color = color;
 
 			//vert.uv = glm::vec2((glm::asin(vert.normal.x) / piVal + 0.5f), (glm::asin(vert.normal.y) / piVal + 0.5f));

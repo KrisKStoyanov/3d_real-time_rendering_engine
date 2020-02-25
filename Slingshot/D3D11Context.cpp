@@ -184,7 +184,7 @@ void D3D11Context::CreateRasterizerState()
 {
 	D3D11_RASTERIZER_DESC rasterizer_desc;
 	rasterizer_desc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
-	rasterizer_desc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
+	rasterizer_desc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE; //overhaul sphere engine creation method and switch to backface culling
 	rasterizer_desc.FrontCounterClockwise = false;
 	rasterizer_desc.DepthBias = false;
 	rasterizer_desc.DepthBiasClamp = 0;
