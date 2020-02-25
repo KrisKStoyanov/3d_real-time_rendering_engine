@@ -11,19 +11,43 @@ Transform::Transform(TRANSFORM_DESC& transform_desc) :
 	m_rotationMatrix(DirectX::XMMatrixIdentity()), 
 	m_scalingMatrix(DirectX::XMMatrixIdentity()),
 	m_position(), m_rotation(), m_scale(),
-	m_forwardDir(), m_rightDir(), m_upDir()
+	m_forwardDir(), m_rightDir(), m_upDir(),
+	m_positionDynamic(),
+	m_rotationDynamic(),
+	m_scaleDynamic()
 {
+
 	m_position = DirectX::XMVectorSet(
 		transform_desc.position.x,
 		transform_desc.position.y,
 		transform_desc.position.z,
 		transform_desc.position.w);
 
+	//Used in Radians
 	m_rotation = DirectX::XMVectorSet(
+		DirectX::XMConvertToRadians(transform_desc.rotation.x),
+		DirectX::XMConvertToRadians(transform_desc.rotation.y),
+		DirectX::XMConvertToRadians(transform_desc.rotation.z),
+		0.0f);
+
+	m_positionDynamic = DirectX::XMFLOAT4(
+		transform_desc.position.x,
+		transform_desc.position.y,
+		transform_desc.position.z,
+		transform_desc.position.w);
+
+	//Used in Degrees
+	m_rotationDynamic = DirectX::XMFLOAT4(
 		transform_desc.rotation.x,
 		transform_desc.rotation.y,
 		transform_desc.rotation.z,
-		transform_desc.rotation.w);
+		0.0f);
+
+	m_scaleDynamic = DirectX::XMFLOAT4(
+		transform_desc.scale.x,
+		transform_desc.scale.y,
+		transform_desc.scale.z,
+		transform_desc.scale.w);
 
 	m_scale = DirectX::XMVectorSet(
 		transform_desc.scale.x,
@@ -66,12 +90,6 @@ Transform::Transform(TRANSFORM_DESC& transform_desc) :
 		1.0f,
 		0.0f,
 		0.0f);
-
-	m_rotationDynamic = DirectX::XMFLOAT4(
-		transform_desc.rotation.x,
-		transform_desc.rotation.y,
-		transform_desc.rotation.z,
-		transform_desc.rotation.w);
 }
 
 DirectX::XMMATRIX Transform::GetWorldMatrix()
@@ -112,8 +130,8 @@ DirectX::XMVECTOR Transform::GetUpDir()
 void Transform::OnFrameRender()
 {
 	m_worldMatrix = DirectX::XMMatrixIdentity();
-	//m_scalingMatrix = DirectX::XMMatrixScalingFromVector(m_scale);
-	//m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_scalingMatrix);
+	m_scalingMatrix = DirectX::XMMatrixScalingFromVector(m_scale);
+	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_scalingMatrix);
 	m_rotationMatrix = DirectX::XMMatrixRotationRollPitchYawFromVector(m_rotation);
 	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_rotationMatrix);
 	m_translatioMatrix = DirectX::XMMatrixTranslationFromVector(m_position);
@@ -125,19 +143,44 @@ void Transform::Translate(DirectX::XMVECTOR translation)
 	m_position = DirectX::XMVectorAdd(m_position, translation);
 }
 
+//Arguments passed in degrees
 void Transform::RotateEulerAngles(float pitch, float head, float roll)
 {	
 	m_rotationDynamic = DirectX::XMFLOAT4(
-		DirectX::XMConvertToDegrees(pitch) + m_rotationDynamic.x,
-		DirectX::XMConvertToDegrees(head) + m_rotationDynamic.y,
-		DirectX::XMConvertToDegrees(roll) + m_rotationDynamic.z,
-		1.0f);
+		pitch + m_rotationDynamic.x,
+		head + m_rotationDynamic.y,
+		roll + m_rotationDynamic.z,
+		0.0f);
+
+	if (m_rotationDynamic.x > 360.0f) {
+		m_rotationDynamic.x -= 360;
+	}
+
+	if (m_rotationDynamic.x < -360.0f) {
+		m_rotationDynamic.x += 360;
+	}
+
+	if (m_rotationDynamic.y > 360.0f) {
+		m_rotationDynamic.y -= 360;
+	}
+
+	if (m_rotationDynamic.y < -360.0f) {
+		m_rotationDynamic.y += 360;
+	}
+
+	if (m_rotationDynamic.z > 360.0f) {
+		m_rotationDynamic.z -= 360;
+	}
+
+	if (m_rotationDynamic.z < -360.0f) {
+		m_rotationDynamic.z += 360;
+	}
 
 	m_rotation = DirectX::XMVectorSet(
-			m_rotationDynamic.x,
-			m_rotationDynamic.y,
-			m_rotationDynamic.z,
-			m_rotationDynamic.w);
+		DirectX::XMConvertToRadians(m_rotationDynamic.x),
+		DirectX::XMConvertToRadians(m_rotationDynamic.y),
+		DirectX::XMConvertToRadians(m_rotationDynamic.z),
+			0.0f);
 
 	m_forwardDir = DirectX::XMVector3Normalize(DirectX::XMVector3Transform(m_defaultForwardDir, m_rotationMatrix));	
 	m_rightDir = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(m_forwardDir, m_defaultUpDir));

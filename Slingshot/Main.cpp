@@ -13,8 +13,8 @@ int CALLBACK wWinMain(
 	WINDOW_DESC window_desc;
 	window_desc.hInstance = hInstance;
 	window_desc.nCmdShow = nCmdShow;
-	window_desc.nWidth = 1280;
-	window_desc.nHeight = 720;
+	window_desc.nWidth = 1600;
+	window_desc.nHeight = 900;
 
 	RENDERER_DESC renderer_desc;
 

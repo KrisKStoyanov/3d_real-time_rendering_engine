@@ -53,7 +53,7 @@ void Engine::EditStage(Stage& stage)
 	m_pRenderer->SetPipelineState(pipeline_desc, VertexType::ColorShaderVertex);
 	//------------------------------
 
-	const int ENTITY_COUNT = 6;
+	const int ENTITY_COUNT = 8;
 	Entity* entityCollection = new Entity[ENTITY_COUNT];
 
 	//Main Camera
@@ -66,40 +66,61 @@ void Engine::EditStage(Stage& stage)
 	CAMERA_DESC camera_desc;
 	camera_desc.lenseWidth = winWidth;
 	camera_desc.lenseHeight = winHeight;
-
-	TRANSFORM_DESC mc_transform_desc;
-	mc_transform_desc.position = DirectX::XMFLOAT4(0.0f, 1.0f, -5.0f, 1.0f);
-
 	entityCollection[0].SetCamera(camera_desc);
-	entityCollection[0].SetTransform(mc_transform_desc);
+
+	TRANSFORM_DESC entity0_transform_desc;
+	entity0_transform_desc.position = DirectX::XMFLOAT4(0.0f, 5.0f, -15.0f, 1.0f);
+	entityCollection[0].SetTransform(entity0_transform_desc);
+	
+	// CORNEL BOX
+	//------------------------------
+	//Bottom
+	TRANSFORM_DESC entity1_transform_desc;
+	entity1_transform_desc.position = DirectX::XMFLOAT4(0.0f, -5.0f, 10.0f, 1.0f);
+	entityCollection[1].SetTransform(entity1_transform_desc);
+	CreatePlane(*(entityCollection + 1), DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	//Front
+	TRANSFORM_DESC entity2_transform_desc;
+	entity2_transform_desc.position = DirectX::XMFLOAT4(0.0f, 5.0f, 20.0f, 1.0f);
+	entity2_transform_desc.rotation = DirectX::XMFLOAT4(-90.0f, 0.0f, 0.0f, 0.0f);
+	entityCollection[2].SetTransform(entity2_transform_desc);
+	CreatePlane(*(entityCollection + 2), DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	//Left
+	TRANSFORM_DESC entity3_transform_desc;
+	entity3_transform_desc.position = DirectX::XMFLOAT4(-10.0f, 5.0f, 10.0f, 1.0f);
+	entity3_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 0.0f, -90.0f, 0.0f);
+	entityCollection[3].SetTransform(entity3_transform_desc);
+	CreatePlane(*(entityCollection + 3), DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+
+	//Right
+	TRANSFORM_DESC entity4_transform_desc;
+	entity4_transform_desc.position = DirectX::XMFLOAT4(10.0f, 5.0f, 10.0f, 1.0f);
+	entity4_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 0.0f, 90.0f, 0.0f);
+	entityCollection[4].SetTransform(entity4_transform_desc);
+	CreatePlane(*(entityCollection + 4), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
+
+	//Top
+	TRANSFORM_DESC entity5_transform_desc;
+	entity5_transform_desc.position = DirectX::XMFLOAT4(0.0f, 15.0f, 10.0f, 1.0f);
+	entity5_transform_desc.rotation = DirectX::XMFLOAT4(-180.0f, 0.0f, 0.0f, 0.0f);
+	entityCollection[5].SetTransform(entity5_transform_desc);
+	CreatePlane(*(entityCollection + 5), DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 	//------------------------------
 
-	TRANSFORM_DESC planeT_desc;
-	planeT_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
-	entityCollection[1].SetTransform(planeT_desc);
-	CreatePlane(*(entityCollection + 1));
+	// DECOR
+	//------------------------------
+	TRANSFORM_DESC entity6_transform_desc;
+	entity6_transform_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
+	entityCollection[6].SetTransform(entity6_transform_desc);
+	CreateCube(*(entityCollection + 6), DirectX::XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f));
 
-	TRANSFORM_DESC planeT1_desc;
-	planeT1_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
-	//planeT1_desc.rotation = DirectX::XMFLOAT4(0.0f, 0.0f, -90.0f, 1.0f);
-	entityCollection[2].SetTransform(planeT1_desc);
-	CreatePlane(*(entityCollection + 2));
-
-	TRANSFORM_DESC planeT2_desc;
-	planeT2_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
-	//planeT2_desc.rotation = DirectX::XMFLOAT4(45.0f, 0.0f, 0.0f, 1.0f);
-	entityCollection[3].SetTransform(planeT2_desc);
-	CreatePlane(*(entityCollection + 3));
-
-	TRANSFORM_DESC cubeT_desc;
-	cubeT_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
-	entityCollection[4].SetTransform(cubeT_desc);
-	CreateCube(*(entityCollection + 4));
-
-	TRANSFORM_DESC sphereT_desc;
-	sphereT_desc.position = DirectX::XMFLOAT4(-7.5f, 2.0f, 10.0f, 1.0f);
-	entityCollection[5].SetTransform(sphereT_desc);
-	CreateSphere(*(entityCollection + 5), 30, 30, 2.0f);
+	TRANSFORM_DESC entity7_transform_desc;
+	entity7_transform_desc.position = DirectX::XMFLOAT4(-7.5f, 2.0f, 10.0f, 1.0f);
+	entityCollection[7].SetTransform(entity7_transform_desc);
+	CreateSphere(*(entityCollection + 7), 30, 30, 2, DirectX::XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f));
+	//------------------------------
 
 	STAGE_DESC stage_desc;
 	stage_desc.entityCollection = new Entity[ENTITY_COUNT];
@@ -122,10 +143,10 @@ int Engine::Run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		m_pStage->GetEntity(4)->GetTransform()->RotateEulerAngles(
-			0.0f, 
-			0.01f * m_pTimer->m_smoothstepF, 
-			0.02f * m_pTimer->m_smoothstepF);
+		//m_pStage->GetEntity(4)->GetTransform()->RotateEulerAngles(
+		//	0.0f, 
+		//	1.0f * m_pTimer->m_smoothstepF, 
+		//	2.0f * m_pTimer->m_smoothstepF);
 
 		m_pRenderer->OnFrameRender(*m_pStage);
 	}
@@ -140,7 +161,7 @@ void Engine::Shutdown()
 	SAFE_DELETE(m_pTimer);
 }
 
-void Engine::CreatePlane(Entity& entity)
+void Engine::CreatePlane(Entity& entity, DirectX::XMFLOAT4 color)
 {
 	//Plane Object
 	//------------------------------
@@ -148,14 +169,14 @@ void Engine::CreatePlane(Entity& entity)
 	const int INDEX_COUNT = 4;
 
 	ColorShaderVertex* groundV_Collection = new ColorShaderVertex[VERTEX_COUNT];
-	groundV_Collection[0].position = DirectX::XMFLOAT4(-10.0f, -3.0f, -10.0f, 1.0f);
-	groundV_Collection[0].color = DirectX::XMFLOAT4(0.0f, 0.4f, 0.3f, 1.0f);
-	groundV_Collection[1].position = DirectX::XMFLOAT4(-10.0f, -3.0f, 10.0f, 1.0f);
-	groundV_Collection[1].color = DirectX::XMFLOAT4(0.0f, 0.4f, 0.3f, 1.0f);
-	groundV_Collection[2].position = DirectX::XMFLOAT4(10.0f, -3.0f, -10.0f, 1.0f);
-	groundV_Collection[2].color = DirectX::XMFLOAT4(0.0f, 0.4f, 0.3f, 1.0f);
-	groundV_Collection[3].position = DirectX::XMFLOAT4(10.0f, -3.0f, 10.0f, 1.0f);
-	groundV_Collection[3].color = DirectX::XMFLOAT4(0.0f, 0.4f, 0.3f, 1.0f);
+	groundV_Collection[0].position = DirectX::XMFLOAT4(-10.0f, 0.0f, -10.0f, 1.0f);
+	groundV_Collection[0].color = color;
+	groundV_Collection[1].position = DirectX::XMFLOAT4(-10.0f, 0.0f, 10.0f, 1.0f);
+	groundV_Collection[1].color = color;
+	groundV_Collection[2].position = DirectX::XMFLOAT4(10.0f, 0.0f, -10.0f, 1.0f);
+	groundV_Collection[2].color = color;
+	groundV_Collection[3].position = DirectX::XMFLOAT4(10.0f, 0.0f, 10.0f, 1.0f);
+	groundV_Collection[3].color = color;
 
 	unsigned int* groundI_Collection = new unsigned int[INDEX_COUNT];
 	groundI_Collection[0] = 0;
@@ -179,7 +200,7 @@ void Engine::CreatePlane(Entity& entity)
 	SAFE_DELETE_ARRAY(groundI_Collection);
 }
 
-void Engine::CreateCube(Entity& entity)
+void Engine::CreateCube(Entity& entity, DirectX::XMFLOAT4 color)
 {
 	//Cube Object
 	//------------------------------
@@ -188,21 +209,21 @@ void Engine::CreateCube(Entity& entity)
 
 	ColorShaderVertex* cubeV_collection = new ColorShaderVertex[VERTEX_COUNT];
 	cubeV_collection[0].position = DirectX::XMFLOAT4(-2.0f, -2.0f, -2.0f, 1.0f);
-	cubeV_collection[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	cubeV_collection[0].color = color;
 	cubeV_collection[1].position = DirectX::XMFLOAT4(-2.0f, 2.0f, -2.0f, 1.0f);
-	cubeV_collection[1].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	cubeV_collection[1].color = color;
 	cubeV_collection[2].position = DirectX::XMFLOAT4(2.0f, -2.0f, -2.0f, 1.0f);
-	cubeV_collection[2].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	cubeV_collection[2].color = color;
 	cubeV_collection[3].position = DirectX::XMFLOAT4(2.0f, 2.0f, -2.0f, 1.0f);
-	cubeV_collection[3].color = DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+	cubeV_collection[3].color = color;
 	cubeV_collection[4].position = DirectX::XMFLOAT4(-2.0f, -2.0f, 2.0f, 1.0f);
-	cubeV_collection[4].color = DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
+	cubeV_collection[4].color = color;
 	cubeV_collection[5].position = DirectX::XMFLOAT4(-2.0f, 2.0f, 2.0f, 1.0f);
-	cubeV_collection[5].color = DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
+	cubeV_collection[5].color = color;
 	cubeV_collection[6].position = DirectX::XMFLOAT4(2.0f, -2.0f, 2.0f, 1.0f);
-	cubeV_collection[6].color = DirectX::XMFLOAT4(0.5f, 1.0f, 0.0f, 1.0f);
+	cubeV_collection[6].color = color;
 	cubeV_collection[7].position = DirectX::XMFLOAT4(2.0f, 2.0f, 2.0f, 1.0f);
-	cubeV_collection[7].color = DirectX::XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f);
+	cubeV_collection[7].color = color;
 
 	unsigned int* cubeI_collection = new unsigned int[INDEX_COUNT];
 
@@ -243,7 +264,7 @@ void Engine::CreateCube(Entity& entity)
 	SAFE_DELETE_ARRAY(cubeI_collection);
 }
 
-void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stacks, float radius)
+void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stacks, float radius, DirectX::XMFLOAT4 color)
 {
 	const int VERTEX_COUNT = (stacks + 1) * (slices + 1);
 	const int INDEX_COUNT = (slices * stacks + slices) * 6;
@@ -272,7 +293,7 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 
 			int index = j + i * (slices + 1);
 			sphereV_collection[index].position = DirectX::XMFLOAT4(x * radius, y * radius, z * radius, 1.0f);
-			sphereV_collection[index].color = DirectX::XMFLOAT4(0.4f, 0.7f, 1.0f, 1.0f);
+			sphereV_collection[index].color = color;
 
 			//vert.normal = glm::vec3(x, y, z);
 			//vert.uv = glm::vec2((glm::asin(vert.normal.x) / piVal + 0.5f), (glm::asin(vert.normal.y) / piVal + 0.5f));

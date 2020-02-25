@@ -4,7 +4,7 @@
 struct TRANSFORM_DESC 
 {
 	DirectX::XMFLOAT4 position = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	DirectX::XMFLOAT4 rotation = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	DirectX::XMFLOAT4 rotation = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 	DirectX::XMFLOAT4 scale = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	DirectX::XMFLOAT4 forwardDir = DirectX::XMFLOAT4(0.0f, 0.0f ,1.0f, 0.0f);
@@ -43,6 +43,8 @@ private:
 	DirectX::XMMATRIX m_scalingMatrix;
 
 	DirectX::XMFLOAT4 m_rotationDynamic;
+	DirectX::XMFLOAT4 m_positionDynamic;
+	DirectX::XMFLOAT4 m_scaleDynamic;
 
 	DirectX::XMVECTOR m_position;
 	DirectX::XMVECTOR m_rotation;
