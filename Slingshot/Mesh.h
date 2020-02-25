@@ -12,7 +12,7 @@ struct MESH_DESC {
 
 class Mesh {
 public:
-	static Mesh* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType);
+	static Mesh* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel);
 	void Shutdown();
 
 	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetVSCB();
@@ -27,7 +27,7 @@ public:
 
 	D3D11_PRIMITIVE_TOPOLOGY GetTopology();
 private:
-	Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType);
+	Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel);
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pVSCB;
 

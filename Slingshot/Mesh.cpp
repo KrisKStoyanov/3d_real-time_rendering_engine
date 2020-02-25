@@ -1,8 +1,8 @@
 #include "Mesh.h"
 
-Mesh* Mesh::Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType)
+Mesh* Mesh::Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel)
 {
-	return new Mesh(graphicsContext, mesh_desc, vertexType);
+	return new Mesh(graphicsContext, mesh_desc, shadingModel);
 }
 
 void Mesh::Shutdown()
@@ -15,22 +15,22 @@ void Mesh::Shutdown()
 	//SAFE_RELEASE(m_pVSCB);
 }
 
-Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType) :
+Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel) :
 	m_pVSCB(nullptr), m_pVBuffer(nullptr), m_pIBuffer(nullptr),
 	m_vertexCount(mesh_desc.vertexCount), m_indexCount(mesh_desc.indexCount),
 	m_VBufferStride(0), m_VBufferOffset(0), m_topology(mesh_desc.topology)
 {
-	switch (vertexType)
+	switch (shadingModel)
 	{
-	case VertexType::ColorShaderVertex:
+	case ShadingModel::GoochShading:
 	{
-		m_VBufferStride = sizeof(ColorShaderVertex);
+		m_VBufferStride = sizeof(GoochShadingVertex);
 		m_VBufferOffset = 0;
 	}
 	break;
 	default:
 	{
-		m_VBufferStride = sizeof(ColorShaderVertex);
+		m_VBufferStride = sizeof(GoochShadingVertex);
 		m_VBufferOffset = 0;
 	}
 	break;
@@ -83,7 +83,7 @@ Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType verte
 	D3D11_BUFFER_DESC vs_cb_desc;
 	ZeroMemory(&vs_cb_desc, sizeof(vs_cb_desc));
 	vs_cb_desc.Usage = D3D11_USAGE_DEFAULT;
-	vs_cb_desc.ByteWidth = 64; // sizeof(VS_CONSTANT_BUFFER) = 64 <- constant buffer size must be a multiple of 16 bytes;
+	vs_cb_desc.ByteWidth = 128; // sizeof(VS_CONSTANT_BUFFER) = 128 <- constant buffer size must be a multiple of 16 bytes;
 	vs_cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	vs_cb_desc.CPUAccessFlags = 0;
 	vs_cb_desc.MiscFlags = 0;

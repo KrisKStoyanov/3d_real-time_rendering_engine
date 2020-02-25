@@ -17,14 +17,19 @@ void Entity::SetTransform(TRANSFORM_DESC& transform_desc)
 	m_pTransform = Transform::Create(transform_desc);
 }
 
-void Entity::SetModel(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType)
+void Entity::SetModel(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel)
 {
-	m_pModel = Model::Create(graphicsContext, mesh_desc, vertexType);
+	m_pModel = Model::Create(graphicsContext, mesh_desc, shadingModel);
 }
 
 void Entity::SetCamera(CAMERA_DESC& camera_desc)
 {
 	m_pCamera = Camera::Create(camera_desc, *m_pTransform);
+}
+
+void Entity::SetLight(LIGHT_DESC& light_desc)
+{
+	m_pLight = Light::Create(light_desc);
 }
 
 Transform* Entity::GetTransform()
@@ -40,4 +45,9 @@ Model* Entity::GetModel()
 Camera* Entity::GetCamera() 
 {
 	return m_pCamera;
+}
+
+Light* Entity::GetLight()
+{
+	return m_pLight;
 }

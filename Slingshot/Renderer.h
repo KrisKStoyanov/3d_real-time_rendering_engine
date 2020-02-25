@@ -12,12 +12,12 @@ public:
 	static Renderer* Create(HWND hWnd, RENDERER_DESC& renderer_desc);
 	bool Initialize();
 	void OnFrameRender(Stage& stage);
-	void Render(Camera& camera, Transform& transform, Mesh& mesh, PipelineState& props);
+	void Render(Entity& camera, Entity& renderable, Entity& light, PipelineState& pipelineState);
 	void Shutdown();
 
 	D3D11Context* GetGraphicsContext();
-	PipelineState* GetPipelineState(VertexType vertexType); //pass enum with vertex type to get interpreting pipeline state
-	void SetPipelineState(PIPELINE_DESC pipeline_desc, VertexType vertexType);
+	PipelineState* GetPipelineState(ShadingModel shadingModel); //pass enum with vertex type to get interpreting pipeline state
+	void SetPipelineState(PIPELINE_DESC pipeline_desc, ShadingModel shadingModel);
 private:
 	Renderer(HWND hWnd, RENDERER_DESC& renderer_desc);
 	

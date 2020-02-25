@@ -18,8 +18,8 @@ LRESULT CALLBACK EngineProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 {
-	if ((m_pWindow = Window::Create(window_desc)) != nullptr) {
-
+	if ((m_pWindow = Window::Create(window_desc)) != nullptr) 
+	{
 		HWND hWnd = m_pWindow->GetHandle();
 
 		SetWindowLongPtr(
@@ -44,82 +44,94 @@ bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 
 void Engine::EditStage(Stage& stage)
 {
-	//Pipeline State
-	//------------------------------
-	PIPELINE_DESC pipeline_desc;
-	pipeline_desc.VS_filename = "ColorVertexShader.cso";
-	pipeline_desc.PS_filename = "ColorPixelShader.cso";
-
-	m_pRenderer->SetPipelineState(pipeline_desc, VertexType::ColorShaderVertex);
-	//------------------------------
-
-	const int ENTITY_COUNT = 8;
-	Entity* entityCollection = new Entity[ENTITY_COUNT];
-
-	//Main Camera
-	//------------------------------
+	//	RESOLUTION
 	RECT winRect;
 	GetWindowRect(m_pWindow->GetHandle(), &winRect);
-	float winWidth = static_cast<float>(winRect.right - winRect.left);
-	float winHeight = static_cast<float>(winRect.bottom - winRect.top);
+	float resX = static_cast<float>(winRect.right - winRect.left);
+	float resY = static_cast<float>(winRect.bottom - winRect.top);
 
-	CAMERA_DESC camera_desc;
-	camera_desc.lenseWidth = winWidth;
-	camera_desc.lenseHeight = winHeight;
-	entityCollection[0].SetCamera(camera_desc);
+	//	PIPELINE STATE
+	//------------------------------
+	PIPELINE_DESC pipeline_desc;
+	pipeline_desc.VS_filename = "GoochShadingVS.cso";
+	pipeline_desc.PS_filename = "GoochShadingPS.cso";
+	m_pRenderer->SetPipelineState(pipeline_desc, ShadingModel::GoochShading);
+	//------------------------------
+
+	const int ENTITY_COUNT = 9;
+	Entity* entityCollection = new Entity[ENTITY_COUNT];
+
+	//	MAIN CAMERA
+	//------------------------------
+	CAMERA_DESC entity0_camera_desc;
+	entity0_camera_desc.lenseWidth = resX;
+	entity0_camera_desc.lenseHeight = resY;
+	entityCollection[0].SetCamera(entity0_camera_desc);
 
 	TRANSFORM_DESC entity0_transform_desc;
 	entity0_transform_desc.position = DirectX::XMFLOAT4(0.0f, 5.0f, -15.0f, 1.0f);
 	entityCollection[0].SetTransform(entity0_transform_desc);
-	
-	// CORNEL BOX
+	//------------------------------
+
+	//	LIGHTING
+	//------------------------------
+	LIGHT_DESC entity8_light_desc;
+	entityCollection[1].SetLight(entity8_light_desc);
+	TRANSFORM_DESC entity8_transform_desc;
+	entity8_transform_desc.position = DirectX::XMFLOAT4(5.0f, 12.5f, 10.0f, 1.0f);
+	entityCollection[1].SetTransform(entity8_transform_desc);
+	//------------------------------
+
+	//	CORNEL BOX
 	//------------------------------
 	//Bottom
 	TRANSFORM_DESC entity1_transform_desc;
 	entity1_transform_desc.position = DirectX::XMFLOAT4(0.0f, -5.0f, 10.0f, 1.0f);
-	entityCollection[1].SetTransform(entity1_transform_desc);
-	CreatePlane(*(entityCollection + 1), 10.0f, 10.0f, DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	entityCollection[2].SetTransform(entity1_transform_desc);
+	CreatePlane(*(entityCollection + 2), 10.0f, 10.0f, DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	//Front
 	TRANSFORM_DESC entity2_transform_desc;
 	entity2_transform_desc.position = DirectX::XMFLOAT4(0.0f, 5.0f, 20.0f, 1.0f);
 	entity2_transform_desc.rotation = DirectX::XMFLOAT4(-90.0f, 0.0f, 0.0f, 0.0f);
-	entityCollection[2].SetTransform(entity2_transform_desc);
-	CreatePlane(*(entityCollection + 2), 10.0f, 10.0f, DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	entityCollection[3].SetTransform(entity2_transform_desc);
+	CreatePlane(*(entityCollection + 3), 10.0f, 10.0f, DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	//Left
 	TRANSFORM_DESC entity3_transform_desc;
 	entity3_transform_desc.position = DirectX::XMFLOAT4(-10.0f, 5.0f, 10.0f, 1.0f);
 	entity3_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 0.0f, -90.0f, 0.0f);
-	entityCollection[3].SetTransform(entity3_transform_desc);
-	CreatePlane(*(entityCollection + 3), 10.0f, 10.0f, DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	entityCollection[4].SetTransform(entity3_transform_desc);
+	CreatePlane(*(entityCollection + 4), 10.0f, 10.0f, DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
 
 	//Right
 	TRANSFORM_DESC entity4_transform_desc;
 	entity4_transform_desc.position = DirectX::XMFLOAT4(10.0f, 5.0f, 10.0f, 1.0f);
 	entity4_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 0.0f, 90.0f, 0.0f);
-	entityCollection[4].SetTransform(entity4_transform_desc);
-	CreatePlane(*(entityCollection + 4), 10.0f, 10.0f, DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
+	entityCollection[5].SetTransform(entity4_transform_desc);
+	CreatePlane(*(entityCollection + 5), 10.0f, 10.0f, DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
 
 	//Top
 	TRANSFORM_DESC entity5_transform_desc;
 	entity5_transform_desc.position = DirectX::XMFLOAT4(0.0f, 15.0f, 10.0f, 1.0f);
 	entity5_transform_desc.rotation = DirectX::XMFLOAT4(-180.0f, 0.0f, 0.0f, 0.0f);
-	entityCollection[5].SetTransform(entity5_transform_desc);
-	CreatePlane(*(entityCollection + 5), 10.0f, 10.0f, DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	entityCollection[6].SetTransform(entity5_transform_desc);
+	CreatePlane(*(entityCollection + 6), 10.0f, 10.0f, DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 	//------------------------------
 
-	// DECOR
+	//	DECOR
 	//------------------------------
+	//Yellow ball
 	TRANSFORM_DESC entity6_transform_desc;
 	entity6_transform_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
-	entityCollection[6].SetTransform(entity6_transform_desc);
-	CreateCube(*(entityCollection + 6), 2.0f, 2.0f, 2.0f, DirectX::XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f));
+	entityCollection[7].SetTransform(entity6_transform_desc);
+	CreateSphere(*(entityCollection + 7), 30, 30, 4, DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
+	//Teal ball
 	TRANSFORM_DESC entity7_transform_desc;
 	entity7_transform_desc.position = DirectX::XMFLOAT4(-7.5f, 2.0f, 10.0f, 1.0f);
-	entityCollection[7].SetTransform(entity7_transform_desc);
-	CreateSphere(*(entityCollection + 7), 30, 30, 2, DirectX::XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f));
+	entityCollection[8].SetTransform(entity7_transform_desc);
+	CreateSphere(*(entityCollection + 8), 30, 30, 2, DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
 	//------------------------------
 
 	STAGE_DESC stage_desc;
@@ -127,6 +139,7 @@ void Engine::EditStage(Stage& stage)
 	memcpy(stage_desc.entityCollection, entityCollection, sizeof(Entity) * ENTITY_COUNT);
 	stage_desc.entityCount = ENTITY_COUNT;
 	stage_desc.mainCameraId = 0;
+	stage_desc.startRenderId = 2;
 	m_pStage = Stage::Create(0, stage_desc);
 
 	SAFE_DELETE_ARRAY(entityCollection);
@@ -164,36 +177,44 @@ void Engine::CreatePlane(Entity& entity, float width, float length, DirectX::XMF
 	const int VERTEX_COUNT = 4;
 	const int INDEX_COUNT = 4;
 
-	ColorShaderVertex* groundV_Collection = new ColorShaderVertex[VERTEX_COUNT];
-	groundV_Collection[0].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, -1.0f * length, 1.0f);
-	groundV_Collection[0].color = color;
-	groundV_Collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, 1.0f * length, 1.0f);
-	groundV_Collection[1].color = color;
-	groundV_Collection[2].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, -1.0f * length, 1.0f);
-	groundV_Collection[2].color = color;
-	groundV_Collection[3].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, 1.0f * length, 1.0f);
-	groundV_Collection[3].color = color;
+	GoochShadingVertex* entityV_collection = new GoochShadingVertex[VERTEX_COUNT];
 
-	unsigned int* groundI_Collection = new unsigned int[INDEX_COUNT];
-	groundI_Collection[0] = 0;
-	groundI_Collection[1] = 1;
-	groundI_Collection[2] = 2;
-	groundI_Collection[3] = 3;
+	entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, -1.0f * length, 1.0f);
+	entityV_collection[0].color = color;
+	entityV_collection[0].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+
+	entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, 1.0f * length, 1.0f);
+	entityV_collection[1].color = color;
+	entityV_collection[1].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+
+	entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, -1.0f * length, 1.0f);
+	entityV_collection[2].color = color;
+	entityV_collection[2].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+
+	entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, 1.0f * length, 1.0f);
+	entityV_collection[3].color = color;
+	entityV_collection[3].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+
+	unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
+	entityI_collection[0] = 0;
+	entityI_collection[1] = 1;
+	entityI_collection[2] = 2;
+	entityI_collection[3] = 3;
 
 	MESH_DESC groundM_desc;
 	groundM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-	groundM_desc.vertexCollection = new ColorShaderVertex[VERTEX_COUNT];
-	memcpy(groundM_desc.vertexCollection, groundV_Collection, sizeof(ColorShaderVertex) * VERTEX_COUNT);
+	groundM_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
+	memcpy(groundM_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
 	groundM_desc.vertexCount = VERTEX_COUNT;
 	groundM_desc.indexCollection = new unsigned int[INDEX_COUNT];
-	memcpy(groundM_desc.indexCollection, groundI_Collection, sizeof(unsigned int) * INDEX_COUNT);
+	memcpy(groundM_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
 	groundM_desc.indexCount = INDEX_COUNT;
 
 	entity.SetModel(
-		*m_pRenderer->GetGraphicsContext(), groundM_desc, VertexType::ColorShaderVertex);
+		*m_pRenderer->GetGraphicsContext(), groundM_desc, ShadingModel::GoochShading);
 
-	SAFE_DELETE_ARRAY(groundV_Collection);
-	SAFE_DELETE_ARRAY(groundI_Collection);
+	SAFE_DELETE_ARRAY(entityV_collection);
+	SAFE_DELETE_ARRAY(entityI_collection);
 }
 
 void Engine::CreateCube(Entity& entity, float width, float height, float length, DirectX::XMFLOAT4 color)
@@ -203,61 +224,76 @@ void Engine::CreateCube(Entity& entity, float width, float height, float length,
 	const int VERTEX_COUNT = 8;
 	const int INDEX_COUNT = 14;
 
-	ColorShaderVertex* cubeV_collection = new ColorShaderVertex[VERTEX_COUNT];
-	cubeV_collection[0].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
-	cubeV_collection[0].color = color;
-	cubeV_collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
-	cubeV_collection[1].color = color;
-	cubeV_collection[2].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
-	cubeV_collection[2].color = color;
-	cubeV_collection[3].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
-	cubeV_collection[3].color = color;
-	cubeV_collection[4].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
-	cubeV_collection[4].color = color;
-	cubeV_collection[5].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
-	cubeV_collection[5].color = color;
-	cubeV_collection[6].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
-	cubeV_collection[6].color = color;
-	cubeV_collection[7].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
-	cubeV_collection[7].color = color;
+	GoochShadingVertex* entityV_collection = new GoochShadingVertex[VERTEX_COUNT];
+	entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
+	entityV_collection[0].color = color;
+	entityV_collection[0].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, -1.0f, 1.0f);
 
-	unsigned int* cubeI_collection = new unsigned int[INDEX_COUNT];
+	entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
+	entityV_collection[1].color = color;
+	entityV_collection[1].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, -1.0f, 1.0f);
+
+	entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
+	entityV_collection[2].color = color;
+	entityV_collection[2].normal = DirectX::XMFLOAT4(1.0f, -1.0f, -1.0f, 1.0f);
+
+	entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
+	entityV_collection[3].color = color;
+	entityV_collection[3].normal = DirectX::XMFLOAT4(1.0f, 1.0f, -1.0f, 1.0f);
+
+	entityV_collection[4].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
+	entityV_collection[4].color = color;
+	entityV_collection[4].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, 1.0f, 1.0f);
+
+	entityV_collection[5].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
+	entityV_collection[5].color = color;
+	entityV_collection[5].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, 1.0f, 1.0f);
+
+	entityV_collection[6].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
+	entityV_collection[6].color = color;
+	entityV_collection[6].normal = DirectX::XMFLOAT4(1.0f, -1.0f, 1.0f, 1.0f);
+	
+	entityV_collection[7].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
+	entityV_collection[7].color = color;
+	entityV_collection[7].normal = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
 
 	//Front
-	cubeI_collection[0] = 0;
-	cubeI_collection[1] = 1;
-	cubeI_collection[2] = 2;
-	cubeI_collection[3] = 3;
+	entityI_collection[0] = 0;
+	entityI_collection[1] = 1;
+	entityI_collection[2] = 2;
+	entityI_collection[3] = 3;
 
-	cubeI_collection[4] = 7;
-	cubeI_collection[5] = 1;
+	entityI_collection[4] = 7;
+	entityI_collection[5] = 1;
 
-	cubeI_collection[6] = 5;
-	cubeI_collection[7] = 0;
+	entityI_collection[6] = 5;
+	entityI_collection[7] = 0;
 
-	cubeI_collection[8] = 4;
-	cubeI_collection[9] = 2;
+	entityI_collection[8] = 4;
+	entityI_collection[9] = 2;
 
-	cubeI_collection[10] = 6;
-	cubeI_collection[11] = 7;
+	entityI_collection[10] = 6;
+	entityI_collection[11] = 7;
 
-	cubeI_collection[12] = 4;
-	cubeI_collection[13] = 5;
+	entityI_collection[12] = 4;
+	entityI_collection[13] = 5;
 
 	MESH_DESC cubeM_desc;
 	cubeM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-	cubeM_desc.vertexCollection = new ColorShaderVertex[VERTEX_COUNT];
-	memcpy(cubeM_desc.vertexCollection, cubeV_collection, sizeof(ColorShaderVertex) * VERTEX_COUNT);
+	cubeM_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
+	memcpy(cubeM_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
 	cubeM_desc.vertexCount = VERTEX_COUNT;
 	cubeM_desc.indexCollection = new unsigned int[INDEX_COUNT];
-	memcpy(cubeM_desc.indexCollection, cubeI_collection, sizeof(unsigned int) * INDEX_COUNT);
+	memcpy(cubeM_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
 	cubeM_desc.indexCount = INDEX_COUNT;
 
 	entity.SetModel(
-		*m_pRenderer->GetGraphicsContext(), cubeM_desc, VertexType::ColorShaderVertex);
+		*m_pRenderer->GetGraphicsContext(), cubeM_desc, ShadingModel::GoochShading);
 
-	SAFE_DELETE_ARRAY(cubeV_collection);
-	SAFE_DELETE_ARRAY(cubeI_collection);
+	SAFE_DELETE_ARRAY(entityV_collection);
+	SAFE_DELETE_ARRAY(entityI_collection);
 }
 
 void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stacks, float radius, DirectX::XMFLOAT4 color)
@@ -265,8 +301,8 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 	const int VERTEX_COUNT = (stacks + 1) * (slices + 1);
 	const int INDEX_COUNT = (slices * stacks + slices) * 6;
 
-	ColorShaderVertex* sphereV_collection = new ColorShaderVertex[VERTEX_COUNT];
-	unsigned int* sphereI_collection = new unsigned int[INDEX_COUNT];
+	GoochShadingVertex* entityV_collection = new GoochShadingVertex[VERTEX_COUNT];
+	unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
 	
 	float slicesF = static_cast<float>(slices);
 	float stacksF = static_cast<float>(stacks);
@@ -288,10 +324,10 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 			float z = sinf(theta) * sinPhi;
 
 			int index = j + i * (slices + 1);
-			sphereV_collection[index].position = DirectX::XMFLOAT4(x * radius, y * radius, z * radius, 1.0f);
-			sphereV_collection[index].color = color;
+			entityV_collection[index].position = DirectX::XMFLOAT4(x * radius, y * radius, z * radius, 1.0f);
+			entityV_collection[index].normal = DirectX::XMFLOAT4(x, y, z, 1.0f);
+			entityV_collection[index].color = color;
 
-			//vert.normal = glm::vec3(x, y, z);
 			//vert.uv = glm::vec2((glm::asin(vert.normal.x) / piVal + 0.5f), (glm::asin(vert.normal.y) / piVal + 0.5f));
 		}
 	}
@@ -299,30 +335,30 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 	int index = 0;
 	for (unsigned int i = 0; i < slices * stacks + slices; ++i) 
 	{
-		sphereI_collection[index] = i;
-		sphereI_collection[index + 1] = i + slices + 1;
-		sphereI_collection[index + 2] = i + slices;
-		sphereI_collection[index + 3] = i + slices + 1;
-		sphereI_collection[index + 4] = i;
-		sphereI_collection[index + 5] = i + 1;
+		entityI_collection[index] = i;
+		entityI_collection[index + 1] = i + slices + 1;
+		entityI_collection[index + 2] = i + slices;
+		entityI_collection[index + 3] = i + slices + 1;
+		entityI_collection[index + 4] = i;
+		entityI_collection[index + 5] = i + 1;
 
 		index += 6;
 	}
 
 	MESH_DESC sphereM_desc;
 	sphereM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-	sphereM_desc.vertexCollection = new ColorShaderVertex[VERTEX_COUNT];
-	memcpy(sphereM_desc.vertexCollection, sphereV_collection, sizeof(ColorShaderVertex) * VERTEX_COUNT);
+	sphereM_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
+	memcpy(sphereM_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
 	sphereM_desc.vertexCount = VERTEX_COUNT;
 	sphereM_desc.indexCollection = new unsigned int[INDEX_COUNT];
-	memcpy(sphereM_desc.indexCollection, sphereI_collection, sizeof(unsigned int) * INDEX_COUNT);
+	memcpy(sphereM_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
 	sphereM_desc.indexCount = INDEX_COUNT;
 
 	entity.SetModel(
-		*m_pRenderer->GetGraphicsContext(), sphereM_desc, VertexType::ColorShaderVertex);
+		*m_pRenderer->GetGraphicsContext(), sphereM_desc, ShadingModel::GoochShading);
 
-	SAFE_DELETE_ARRAY(sphereV_collection);
-	SAFE_DELETE_ARRAY(sphereI_collection);
+	SAFE_DELETE_ARRAY(entityV_collection);
+	SAFE_DELETE_ARRAY(entityI_collection);
 }
 
 LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

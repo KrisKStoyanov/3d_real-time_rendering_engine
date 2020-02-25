@@ -3,14 +3,14 @@
 
 class Model {
 public:
-	static Model* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType);
+	static Model* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel);
 	void Shutdown();
 
 	Mesh* GetMesh();
-	VertexType GetVertexType();
+	ShadingModel GetShadingModel();
 private:
-	Model(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType);
+	Model(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel);
 	Mesh* m_pMesh;
-	VertexType m_vertexType;
+	ShadingModel m_shadingModel;
 };
 

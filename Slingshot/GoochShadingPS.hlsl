@@ -1,4 +1,4 @@
-#include "ColorShader.hlsli"
+#include "GoochShading.hlsli"
 
 PS_OUTPUT main(PS_INPUT ps_input)
 {

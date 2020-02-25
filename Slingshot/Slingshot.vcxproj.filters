@@ -60,6 +60,9 @@
     <ClCompile Include="PipelineState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -119,6 +122,9 @@
     <ClInclude Include="PipelineState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="CUDAContextScheduler.cu">
@@ -127,15 +133,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
-    <None Include="ColorShader.hlsli">
+    <None Include="GoochShading.hlsli">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="ColorVertexShader.hlsl">
+    <FxCompile Include="GoochShadingPS.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="ColorPixelShader.hlsl">
+    <FxCompile Include="GoochShadingVS.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>

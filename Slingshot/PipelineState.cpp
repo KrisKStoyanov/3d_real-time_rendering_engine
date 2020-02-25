@@ -1,26 +1,26 @@
 #include "PipelineState.h"
 
-PipelineState* PipelineState::Create(D3D11Context& graphicsContext, PIPELINE_DESC& shader_desc, VertexType vertexType)
+PipelineState* PipelineState::Create(D3D11Context& graphicsContext, PIPELINE_DESC& shader_desc, ShadingModel shadingModel)
 {
-	return new PipelineState(graphicsContext, shader_desc, vertexType);;
+	return new PipelineState(graphicsContext, shader_desc, shadingModel);
 }
 
-PipelineState::PipelineState(D3D11Context& graphicsContext, PIPELINE_DESC& pipeline_desc, VertexType vertexType) :
-	m_pVS(nullptr), m_pPS(nullptr), m_pIL(nullptr), m_vertexType(vertexType)
+PipelineState::PipelineState(D3D11Context& graphicsContext, PIPELINE_DESC& pipeline_desc, ShadingModel shadingModel) :
+	m_pVS(nullptr), m_pPS(nullptr), m_pIL(nullptr), m_shadingModel(shadingModel)
 {
 	char* ColorVS_bytecode = nullptr, * ColorPS_bytecode = nullptr;
 	size_t ColorVS_size, ColorPS_size;
-	ColorVS_bytecode = GetFileBytecode("ColorVertexShader.cso", ColorVS_size);
-	ColorPS_bytecode = GetFileBytecode("ColorPixelShader.cso", ColorPS_size);
+	ColorVS_bytecode = GetFileBytecode(pipeline_desc.VS_filename, ColorVS_size);
+	ColorPS_bytecode = GetFileBytecode(pipeline_desc.PS_filename, ColorPS_size);
 
 	graphicsContext.GetDevice()->CreateVertexShader(ColorVS_bytecode, ColorVS_size, nullptr, &m_pVS);
 	graphicsContext.GetDevice()->CreatePixelShader(ColorPS_bytecode, ColorPS_size, nullptr, &m_pPS);
 
-	switch (vertexType)
+	switch (shadingModel)
 	{
-	case VertexType::ColorShaderVertex:
+	case ShadingModel::GoochShading:
 	{
-		D3D11_INPUT_ELEMENT_DESC VS_inputLayout[2];
+		D3D11_INPUT_ELEMENT_DESC VS_inputLayout[3];
 
 		VS_inputLayout[0].SemanticName = "POSITION";
 		VS_inputLayout[0].SemanticIndex = 0;
@@ -34,10 +34,19 @@ PipelineState::PipelineState(D3D11Context& graphicsContext, PIPELINE_DESC& pipel
 		VS_inputLayout[1].SemanticIndex = 0;
 		VS_inputLayout[1].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
 		VS_inputLayout[1].InputSlot = 0;
-		VS_inputLayout[1].AlignedByteOffset = sizeof(float) * 4;
+		VS_inputLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 		VS_inputLayout[1].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
 		VS_inputLayout[1].InstanceDataStepRate = 0;
-		graphicsContext.GetDevice()->CreateInputLayout(VS_inputLayout, 2, ColorVS_bytecode, ColorVS_size, &m_pIL);
+
+		VS_inputLayout[2].SemanticName = "NORMAL";
+		VS_inputLayout[2].SemanticIndex = 0;
+		VS_inputLayout[2].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+		VS_inputLayout[2].InputSlot = 0;
+		VS_inputLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+		VS_inputLayout[2].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+		VS_inputLayout[2].InstanceDataStepRate = 0;
+
+		graphicsContext.GetDevice()->CreateInputLayout(VS_inputLayout, 3, ColorVS_bytecode, ColorVS_size, &m_pIL);
 	}
 	break;
 	}
@@ -68,7 +77,7 @@ ID3D11InputLayout* PipelineState::GetInputLayout()
 	return m_pIL;
 }
 
-VertexType PipelineState::GetVertexType()
+ShadingModel PipelineState::GetShadingModel()
 {
-	return m_vertexType;
+	return m_shadingModel;
 }

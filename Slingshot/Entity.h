@@ -1,6 +1,7 @@
 #pragma once
 #include "Model.h"
 #include "Camera.h"
+#include "Light.h"
 
 class Entity {
 
@@ -10,14 +11,18 @@ public:
 	void Shutdown();
 
 	void SetTransform(TRANSFORM_DESC& transform_desc);
-	void SetModel(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType);
+	void SetModel(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel);
 	void SetCamera(CAMERA_DESC& camera_desc);
+	void SetLight(LIGHT_DESC& light_desc);
 
 	Transform* GetTransform();
 	Model* GetModel();
 	Camera* GetCamera();
+	Light* GetLight();
+
 private:
 	Transform* m_pTransform;
 	Model* m_pModel;
 	Camera* m_pCamera;
+	Light* m_pLight;
 };

@@ -42,8 +42,15 @@ unsigned int Stage::GetMainCameraID()
 	return m_mainCameraId;
 }
 
-Stage::Stage(unsigned int id, STAGE_DESC& stage_desc)
-	: m_id(id), m_entityCount(stage_desc.entityCount), m_mainCameraId(stage_desc.mainCameraId)
+unsigned int Stage::GetStartRenderID()
+{
+	return m_startRenderId;
+}
+
+Stage::Stage(unsigned int id, STAGE_DESC& stage_desc) :
+	m_id(id), m_entityCount(stage_desc.entityCount), 
+	m_startRenderId(stage_desc.startRenderId), 
+	m_mainCameraId(stage_desc.mainCameraId)
 {
 	m_pEntityCollection = new Entity[m_entityCount];
 	memcpy(m_pEntityCollection, stage_desc.entityCollection, sizeof(Entity) * m_entityCount);

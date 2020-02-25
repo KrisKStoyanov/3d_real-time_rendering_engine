@@ -11,20 +11,20 @@ struct PIPELINE_DESC
 
 class PipelineState {
 public:
-	static PipelineState* Create(D3D11Context& graphicsContext, PIPELINE_DESC& shader_desc, VertexType vertexType);
+	static PipelineState* Create(D3D11Context& graphicsContext, PIPELINE_DESC& shader_desc, ShadingModel shadingModel);
 	void Shutdown();
 
 	ID3D11VertexShader* GetVertexShader();
 	ID3D11PixelShader* GetPixelShader();
 	ID3D11InputLayout* GetInputLayout();
 
-	VertexType GetVertexType();
+	ShadingModel GetShadingModel();
 private:
-	PipelineState(D3D11Context& graphicsContext, PIPELINE_DESC& shader_desc, VertexType vertexType);
+	PipelineState(D3D11Context& graphicsContext, PIPELINE_DESC& shader_desc, ShadingModel shadingModel);
 
 	ID3D11VertexShader* m_pVS;
 	ID3D11PixelShader* m_pPS;
 	ID3D11InputLayout* m_pIL;
 
-	VertexType m_vertexType;
+	ShadingModel m_shadingModel;
 };

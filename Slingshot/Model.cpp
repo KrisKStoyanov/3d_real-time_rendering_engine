@@ -1,14 +1,14 @@
 #include "Model.h"
 
-Model* Model::Create(D3D11Context& context, MESH_DESC& mesh_desc, VertexType vertexType)
+Model* Model::Create(D3D11Context& context, MESH_DESC& mesh_desc, ShadingModel shadingModel)
 {
-	return new Model(context, mesh_desc, vertexType);
+	return new Model(context, mesh_desc, shadingModel);
 }
 
-Model::Model(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, VertexType vertexType) :
-	m_pMesh(nullptr), m_vertexType(vertexType)
+Model::Model(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel) :
+	m_pMesh(nullptr), m_shadingModel(shadingModel)
 {
-	m_pMesh = Mesh::Create(graphicsContext, mesh_desc, vertexType);
+	m_pMesh = Mesh::Create(graphicsContext, mesh_desc, shadingModel);
 }
 
 void Model::Shutdown()
@@ -21,7 +21,7 @@ Mesh* Model::GetMesh()
 	return m_pMesh;
 }
 
-VertexType Model::GetVertexType()
+ShadingModel Model::GetShadingModel()
 {
-	return m_vertexType;
+	return m_shadingModel;
 }
