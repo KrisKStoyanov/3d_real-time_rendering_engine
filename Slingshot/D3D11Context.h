@@ -29,31 +29,19 @@ private:
 	std::vector<IDXGIAdapter*> QueryAdapters();
 	IDXGIAdapter* GetLatestDiscreteAdapter();
 
-	void CreateDeviceAndContext(
-		IDXGIAdapter* adapter,
-		ID3D11Device** device,
-		ID3D11DeviceContext** immediateContext);
+	void CreateDeviceAndContext();
 
 	void CreateSwapChain(
-		IDXGIAdapter* adapter,
-		IDXGISwapChain1** swapChain,
 		HWND hWnd, UINT winWidth, UINT winHeight);
 
-	void CreateRenderTargetView(
-		ID3D11Device* device,
-		IDXGISwapChain1* swapChain,
-		ID3D11RenderTargetView** rtv);
+	void CreateRenderTargetView();
 
 	void CreateDepthStencilBuffer(
-		ID3D11Device* device,
-		ID3D11Texture2D** depthStencilBuffer,
 		UINT winWidth, UINT winHeight);
 
-	void CreateDepthStencilView(
-		ID3D11Device* device,
-		ID3D11Texture2D* depthStencilBuffer,
-		ID3D11DepthStencilView** depthStencilView);
+	void CreateDepthStencilView();
 
+	void CreateRasterizerState();
 	void SetupViewport(UINT winWidth, UINT winHeight);
 
 	float m_clearColor[4];
@@ -64,6 +52,9 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_pDepthStencilBuffer;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_pDepthStencilView;
+
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_pRasterizerState;
+	D3D11_VIEWPORT m_viewport;
 
 	void InitializeNvAPI();
 	void ShutdownNvAPI();

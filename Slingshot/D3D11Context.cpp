@@ -16,38 +16,22 @@ D3D11Context::D3D11Context(HWND hWnd)
 	m_clearColor[1] = 0.8f;
 	m_clearColor[2] = 1.0f;
 	m_clearColor[3] = 1.0f;
-
-	IDXGIAdapter* pAdapter = GetLatestDiscreteAdapter();
 	
-	CreateDeviceAndContext(
-		pAdapter, 
-		m_pDevice.GetAddressOf(), 
-		m_pImmediateContext.GetAddressOf());
+	CreateDeviceAndContext();
 
 	CreateSwapChain(
-		pAdapter,
-		m_pSwapChain.GetAddressOf(), 
 		hWnd, winWidth, winHeight);
 
-	CreateRenderTargetView(
-		m_pDevice.Get(),
-		m_pSwapChain.Get(),
-		m_pRenderTargetView.GetAddressOf());
+	CreateRenderTargetView();
 
 	CreateDepthStencilBuffer(
-		m_pDevice.Get(),
-		m_pDepthStencilBuffer.GetAddressOf(), 
 		winWidth, 
 		winHeight);
 
-	CreateDepthStencilView(
-		m_pDevice.Get(),
-		m_pDepthStencilBuffer.Get(),
-		m_pDepthStencilView.GetAddressOf());
+	CreateDepthStencilView();
 
 	SetupViewport(winWidth, winHeight);
-
-	pAdapter->Release();
+	CreateRasterizerState();
 }
 
 std::vector<IDXGIAdapter*> D3D11Context::QueryAdapters()
@@ -85,10 +69,7 @@ IDXGIAdapter* D3D11Context::GetLatestDiscreteAdapter()
 	return adapter;
 }
 
-void D3D11Context::CreateDeviceAndContext(
-	IDXGIAdapter* adapter,
-	ID3D11Device** device, 
-	ID3D11DeviceContext** immediateContext)
+void D3D11Context::CreateDeviceAndContext()
 {
 	UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #if defined(_DEBUG)
@@ -107,21 +88,19 @@ void D3D11Context::CreateDeviceAndContext(
 	};
 
 	DX::ThrowIfFailed(D3D11CreateDevice(
-		adapter,
+		GetLatestDiscreteAdapter(),
 		D3D_DRIVER_TYPE_UNKNOWN,
 		nullptr,
 		creationFlags,
 		featureLevels,
 		ARRAYSIZE(featureLevels),
 		D3D11_SDK_VERSION,
-		device,
+		m_pDevice.GetAddressOf(),
 		&maxSupportedFeatureLevel,
-		immediateContext));
+		m_pImmediateContext.GetAddressOf()));
 }
 
 void D3D11Context::CreateSwapChain(
-	IDXGIAdapter* adapter, 
-	IDXGISwapChain1** swapChain, 
 	HWND hWnd, UINT winWidth, UINT winHeight)
 {
 	DXGI_SWAP_CHAIN_DESC1 sd;
@@ -139,39 +118,34 @@ void D3D11Context::CreateSwapChain(
 	sd.Flags = 0;
 
 	IDXGIOutput* pOutput;
-	adapter->EnumOutputs(0, &pOutput);
+	GetLatestDiscreteAdapter()->EnumOutputs(0, &pOutput);
 
 	IDXGIFactory2* pFactory;
-	DX::ThrowIfFailed(adapter->GetParent(IID_PPV_ARGS(&pFactory)));
+	DX::ThrowIfFailed(GetLatestDiscreteAdapter()->GetParent(IID_PPV_ARGS(&pFactory)));
 	DX::ThrowIfFailed(pFactory->CreateSwapChainForHwnd(
 		m_pDevice.Get(),
 		hWnd,
 		&sd,
 		NULL,
 		pOutput,
-		swapChain
+		m_pSwapChain.GetAddressOf()
 	));
 
 	pOutput->Release();
 	pFactory->Release();
 }
 
-void D3D11Context::CreateRenderTargetView(
-	ID3D11Device* device,
-	IDXGISwapChain1* swapChain, 
-	ID3D11RenderTargetView** rtv)
+void D3D11Context::CreateRenderTargetView()
 {
 	ID3D11Texture2D* pBackBuffer;
-	DX::ThrowIfFailed(swapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
+	DX::ThrowIfFailed(m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
 	if (pBackBuffer != nullptr) {
-		DX::ThrowIfFailed(device->CreateRenderTargetView(pBackBuffer, nullptr, rtv));
+		DX::ThrowIfFailed(m_pDevice->CreateRenderTargetView(pBackBuffer, nullptr, m_pRenderTargetView.GetAddressOf()));
 		pBackBuffer->Release();
 	}
 }
 
 void D3D11Context::CreateDepthStencilBuffer(
-	ID3D11Device* device,
-	ID3D11Texture2D** depthStencilBuffer,
 	UINT winWidth, UINT winHeight)
 {
 	D3D11_TEXTURE2D_DESC depthBufferDesc;
@@ -188,13 +162,10 @@ void D3D11Context::CreateDepthStencilBuffer(
 	depthBufferDesc.CPUAccessFlags = 0;
 	depthBufferDesc.MiscFlags = 0;
 
-	DX::ThrowIfFailed(device->CreateTexture2D(&depthBufferDesc, nullptr, depthStencilBuffer));
+	DX::ThrowIfFailed(m_pDevice->CreateTexture2D(&depthBufferDesc, nullptr, m_pDepthStencilBuffer.GetAddressOf()));
 }
 
-void D3D11Context::CreateDepthStencilView(
-	ID3D11Device* device,
-	ID3D11Texture2D* depthStencilBuffer, 
-	ID3D11DepthStencilView** depthStencilView)
+void D3D11Context::CreateDepthStencilView()
 {
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
@@ -203,27 +174,44 @@ void D3D11Context::CreateDepthStencilView(
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 
 	DX::ThrowIfFailed(
-		device->CreateDepthStencilView(
-			depthStencilBuffer, 
+		m_pDevice->CreateDepthStencilView(
+			m_pDepthStencilBuffer.Get(), 
 			&depthStencilViewDesc, 
-			depthStencilView));
+			m_pDepthStencilView.GetAddressOf()));
+}
+
+void D3D11Context::CreateRasterizerState()
+{
+	D3D11_RASTERIZER_DESC rasterizer_desc;
+	rasterizer_desc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
+	rasterizer_desc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
+	rasterizer_desc.FrontCounterClockwise = false;
+	rasterizer_desc.DepthBias = false;
+	rasterizer_desc.DepthBiasClamp = 0;
+	rasterizer_desc.SlopeScaledDepthBias = 0;
+	rasterizer_desc.DepthClipEnable = true;
+	rasterizer_desc.ScissorEnable = false;
+	rasterizer_desc.MultisampleEnable = false;
+	rasterizer_desc.AntialiasedLineEnable = false;
+	//rasterizer_desc.ForcedSampleCount = 0; <-featured in D3D11_RASTERIZER_DESC1 (requires device1), future update consideration
+	m_pDevice->CreateRasterizerState(&rasterizer_desc, m_pRasterizerState.GetAddressOf());
 }
 
 void D3D11Context::SetupViewport(UINT winWidth, UINT winHeight)
 {
-	D3D11_VIEWPORT viewport;
-	ZeroMemory(&viewport, sizeof(viewport));
-	viewport.Width = static_cast<float>(winWidth);
-	viewport.Height = static_cast<float>(winHeight);
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	viewport.TopLeftX = 0.0f;
-	viewport.TopLeftY = 0.0f;
-	m_pImmediateContext->RSSetViewports(1, &viewport);
+	ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
+	m_viewport.Width = static_cast<float>(winWidth);
+	m_viewport.Height = static_cast<float>(winHeight);
+	m_viewport.MinDepth = 0.0f;
+	m_viewport.MaxDepth = 1.0f;
+	m_viewport.TopLeftX = 0.0f;
+	m_viewport.TopLeftY = 0.0f;
 }
 
 bool D3D11Context::Initialize()
 {
+	m_pImmediateContext->RSSetViewports(1, &m_viewport);
+	m_pImmediateContext->RSSetState(m_pRasterizerState.Get());
 	m_pImmediateContext->OMSetRenderTargets(1, 
 		m_pRenderTargetView.GetAddressOf(), 
 		m_pDepthStencilView.Get());

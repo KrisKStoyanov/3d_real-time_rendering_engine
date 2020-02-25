@@ -78,7 +78,7 @@ void Engine::EditStage(Stage& stage)
 	LIGHT_DESC entity8_light_desc;
 	entityCollection[1].SetLight(entity8_light_desc);
 	TRANSFORM_DESC entity8_transform_desc;
-	entity8_transform_desc.position = DirectX::XMFLOAT4(5.0f, 12.5f, 10.0f, 1.0f);
+	entity8_transform_desc.position = DirectX::XMFLOAT4(5.0f, 12.5f, 5.0f, 1.0f);
 	entityCollection[1].SetTransform(entity8_transform_desc);
 	//------------------------------
 
