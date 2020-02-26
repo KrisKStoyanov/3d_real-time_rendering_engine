@@ -43,6 +43,7 @@ PS_INPUT main(VS_INPUT vs_input)
     float s = clamp(100.0f * dot(r, viewDir) - 97.0f, 0.0f, 1.0f);
     
     //vs_output.color = s * highlightColor + (1.0f - s) * (t * warmColor + (1 - t) * coolColor);  
-    vs_output.color = unlit(vs_input.normal, viewDir) + max(dot(lightDir, vs_input.normal), 0.0f) * lightColor * vs_input.color;
+    //vs_output.color = unlit(vs_input.normal, viewDir) + max(dot(lightDir, vs_input.normal), 0.0f) * lightColor * vs_input.color;
+    vs_output.color = 0.5f * coolColor + max(dpL, 0.0f) * lightColor * (s * highlightColor + (1.0f - s) * warmColor);
     return vs_output;
 }
