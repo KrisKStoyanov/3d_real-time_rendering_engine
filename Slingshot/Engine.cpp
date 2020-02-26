@@ -125,13 +125,13 @@ void Engine::EditStage(Stage& stage)
 	TRANSFORM_DESC entity6_transform_desc;
 	entity6_transform_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
 	entityCollection[7].SetTransform(entity6_transform_desc);
-	CreateSphere(*(entityCollection + 7), 30, 30, 4, DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+	CreateSphere(*(entityCollection + 7), 50, 50, 4, DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 	//Teal ball
 	TRANSFORM_DESC entity7_transform_desc;
 	entity7_transform_desc.position = DirectX::XMFLOAT4(-7.5f, 2.0f, 10.0f, 1.0f);
 	entityCollection[8].SetTransform(entity7_transform_desc);
-	CreateSphere(*(entityCollection + 8), 30, 30, 2, DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
+	CreateSphere(*(entityCollection + 8), 50, 50, 2, DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
 	//------------------------------
 
 	STAGE_DESC stage_desc;
@@ -373,8 +373,8 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		POINT ptMax = { rcClip.right, rcClip.bottom };
 		ClientToScreen(hWnd, &ptMin);
 		ClientToScreen(hWnd, &ptMax);
-		SetRect(&rcClip, ptMin.x, ptMin.y, ptMax.x, ptMax.y);
-		ClipCursor(&rcClip);
+		//SetRect(&rcClip, ptMin.x, ptMin.y, ptMax.x, ptMax.y);
+		//ClipCursor(&rcClip);
 		ShowCursor(false);
 		int xOffset = (ptMax.x - ptMin.x);
 		int yOffset = (ptMax.y - ptMin.y);
@@ -383,6 +383,14 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		SetCursorPos(xCoord, yCoord);
 		m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(xCoord, yCoord);
 		m_pStage->GetMainCamera()->GetCamera()->SetRotateStatus(true);
+	}
+	break;
+	case WM_LBUTTONUP:
+	{
+		ReleaseCapture();
+		ShowCursor(true);
+		m_pStage->GetMainCamera()->GetCamera()->SetRotateStatus(false);
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 	break;
 	case WM_MOUSEMOVE:
