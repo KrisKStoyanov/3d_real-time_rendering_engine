@@ -18,6 +18,10 @@ LRESULT CALLBACK EngineProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 {
+#if defined(_DEBUG)
+	AllocConsole();
+#endif
+
 	if ((m_pWindow = Window::Create(window_desc)) != nullptr) 
 	{
 		HWND hWnd = m_pWindow->GetHandle();
@@ -160,7 +164,8 @@ int Engine::Run()
 
 		m_pRenderer->OnFrameRender(*m_pStage);
 	}
-	return (int)msg.wParam;
+	Shutdown();
+	return static_cast<int>(msg.wParam);
 }
 
 void Engine::Shutdown()
@@ -414,43 +419,57 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 	break;
 	case WM_KEYDOWN:
 	{
+		short repeatCode = *((short*)&lParam + 1);
 		using namespace DirectX;
 		switch (wParam) {
 		case 0x57: //W 
 		{
-			m_pStage->GetMainCamera()->GetTransform()->Translate(
-				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * 
-				m_pStage->GetMainCamera()->GetTransform()->GetForwardDir() * 
-				m_pTimer->m_smoothstepF);
+			if (repeatCode == 16401)
+			{
+				m_pStage->GetMainCamera()->GetTransform()->Translate(
+					m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() *
+					m_pStage->GetMainCamera()->GetTransform()->GetForwardDir() *
+					m_pTimer->m_smoothstepF);
+			}
 		}
 		break;
 		case 0x41: //A
 		{
-			m_pStage->GetMainCamera()->GetTransform()->Translate(
-				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * 
-				m_pStage->GetMainCamera()->GetTransform()->GetRightDir() * 
-				m_pTimer->m_smoothstepF);
+			if (repeatCode == 16414)
+			{
+				m_pStage->GetMainCamera()->GetTransform()->Translate(
+					m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f *
+					m_pStage->GetMainCamera()->GetTransform()->GetRightDir() *
+					m_pTimer->m_smoothstepF);
+			}
 		}
 		break;
 		case 0x53: //S
 		{
-			m_pStage->GetMainCamera()->GetTransform()->Translate(
-				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f * 
-				m_pStage->GetMainCamera()->GetTransform()->GetForwardDir() * 
-				m_pTimer->m_smoothstepF);
+			if (repeatCode == 16415) 
+			{
+				m_pStage->GetMainCamera()->GetTransform()->Translate(
+					m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f *
+					m_pStage->GetMainCamera()->GetTransform()->GetForwardDir() *
+					m_pTimer->m_smoothstepF);
+			}
 		}
 		break;
 		case 0x44: //D
 		{
-			m_pStage->GetMainCamera()->GetTransform()->Translate(
-				m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * 
-				m_pStage->GetMainCamera()->GetTransform()->GetRightDir() * 
-				m_pTimer->m_smoothstepF);
+			if (repeatCode == 16416) 
+			{
+				m_pStage->GetMainCamera()->GetTransform()->Translate(
+					m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() *
+					m_pStage->GetMainCamera()->GetTransform()->GetRightDir() *
+					m_pTimer->m_smoothstepF);
+			}
 		}
 		break;
 		case VK_ESCAPE:
 		{
 			DestroyWindow(hWnd);
+			return DefWindowProc(hWnd, uMsg, wParam, lParam);
 		}
 		break;
 		}
@@ -465,9 +484,11 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 	}
 	break;
 	case WM_QUIT:
-		DestroyWindow(hWnd);
 	case WM_DESTROY:
 	{
+#if defined(_DEBUG)
+		FreeConsole();
+#endif
 		m_isRunning = false;
 		PostQuitMessage(0);
 	}

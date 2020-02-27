@@ -54,7 +54,6 @@ void Renderer::OnFrameRender(Stage& stage)
 void Renderer::Render(Entity& camera, Entity& renderable, Entity& light, PipelineState& pipelineState)
 {
 	renderable.GetTransform()->OnFrameRender();
-	//renderable.GetModel()->GetMesh()
 
 	ID3D11DeviceContext* deviceContext = m_pGraphicsContext->GetDeviceContext();
 	deviceContext->IASetVertexBuffers(0, 1, 

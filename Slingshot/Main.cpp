@@ -18,13 +18,9 @@ int CALLBACK wWinMain(
 
 	RENDERER_DESC renderer_desc;
 
-	Engine engine = Engine::Get();
-
-	if (engine.Initialize(window_desc, renderer_desc))
+	if (status = (Engine::Get().Initialize(window_desc, renderer_desc)))
 	{
-		status = engine.Run();
+		status = Engine::Get().Run();
 	}
-	engine.Shutdown();
-
 	return status;
 }
