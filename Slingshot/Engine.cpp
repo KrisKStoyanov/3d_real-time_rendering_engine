@@ -78,8 +78,9 @@ void Engine::EditStage(Stage& stage)
 	LIGHT_DESC entity8_light_desc;
 	entityCollection[1].SetLight(entity8_light_desc);
 	TRANSFORM_DESC entity8_transform_desc;
-	entity8_transform_desc.position = DirectX::XMFLOAT4(5.0f, 12.5f, 2.5f, 1.0f);
+	entity8_transform_desc.position = DirectX::XMFLOAT4(5.0f, 12.5f, 10.0f, 1.0f);
 	entityCollection[1].SetTransform(entity8_transform_desc);
+	//CreateCube(*(entityCollection + 1), 1.0f, 1.0f, 1.0f, DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 	//------------------------------
 
 	//	CORNEL BOX
@@ -181,19 +182,19 @@ void Engine::CreatePlane(Entity& entity, float width, float length, DirectX::XMF
 
 	entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, -1.0f * length, 1.0f);
 	entityV_collection[0].color = color;
-	entityV_collection[0].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	entityV_collection[0].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
 	entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, 1.0f * length, 1.0f);
 	entityV_collection[1].color = color;
-	entityV_collection[1].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	entityV_collection[1].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
 	entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, -1.0f * length, 1.0f);
 	entityV_collection[2].color = color;
-	entityV_collection[2].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	entityV_collection[2].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
 	entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, 1.0f * length, 1.0f);
 	entityV_collection[3].color = color;
-	entityV_collection[3].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	entityV_collection[3].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
 	unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
 	entityI_collection[0] = 0;
@@ -227,35 +228,35 @@ void Engine::CreateCube(Entity& entity, float width, float height, float length,
 	GoochShadingVertex* entityV_collection = new GoochShadingVertex[VERTEX_COUNT];
 	entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
 	entityV_collection[0].color = color;
-	entityV_collection[0].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, -1.0f, 1.0f);
+	entityV_collection[0].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, -1.0f, 0.0f);
 
 	entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
 	entityV_collection[1].color = color;
-	entityV_collection[1].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, -1.0f, 1.0f);
+	entityV_collection[1].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, -1.0f, 0.0f);
 
 	entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
 	entityV_collection[2].color = color;
-	entityV_collection[2].normal = DirectX::XMFLOAT4(1.0f, -1.0f, -1.0f, 1.0f);
+	entityV_collection[2].normal = DirectX::XMFLOAT4(1.0f, -1.0f, -1.0f, 0.0f);
 
 	entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
 	entityV_collection[3].color = color;
-	entityV_collection[3].normal = DirectX::XMFLOAT4(1.0f, 1.0f, -1.0f, 1.0f);
+	entityV_collection[3].normal = DirectX::XMFLOAT4(1.0f, 1.0f, -1.0f, 0.0f);
 
 	entityV_collection[4].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
 	entityV_collection[4].color = color;
-	entityV_collection[4].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, 1.0f, 1.0f);
+	entityV_collection[4].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, 1.0f, 0.0f);
 
 	entityV_collection[5].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
 	entityV_collection[5].color = color;
-	entityV_collection[5].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, 1.0f, 1.0f);
+	entityV_collection[5].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, 1.0f, 0.0f);
 
 	entityV_collection[6].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
 	entityV_collection[6].color = color;
-	entityV_collection[6].normal = DirectX::XMFLOAT4(1.0f, -1.0f, 1.0f, 1.0f);
+	entityV_collection[6].normal = DirectX::XMFLOAT4(1.0f, -1.0f, 1.0f, 0.0f);
 	
 	entityV_collection[7].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
 	entityV_collection[7].color = color;
-	entityV_collection[7].normal = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	entityV_collection[7].normal = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f);
 
 	unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
 
@@ -449,11 +450,7 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		break;
 		case VK_ESCAPE:
 		{
-			ReleaseCapture();
-			ClipCursor(nullptr);
-			ShowCursor(true);
-			m_pStage->GetMainCamera()->GetCamera()->SetRotateStatus(false);
-			return DefWindowProc(hWnd, uMsg, wParam, lParam);
+			DestroyWindow(hWnd);
 		}
 		break;
 		}

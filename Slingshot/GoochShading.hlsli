@@ -8,8 +8,11 @@ struct VS_INPUT
 struct PS_INPUT
 {
     float4 position : SV_Position;
+    float4 posWorld : W_POSITION;
+    
+    float4 normalWorld : W_NORMAL;
+    
     float4 color : COLOR;
-    float4 normal : NORMAL;
 };
 
 struct PS_OUTPUT

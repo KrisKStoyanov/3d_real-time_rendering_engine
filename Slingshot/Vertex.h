@@ -3,8 +3,13 @@
 
 struct VS_CONSTANT_BUFFER
 {
-	DirectX::XMMATRIX wvpMatrix;
+	DirectX::XMMATRIX worldMatrix;
+	DirectX::XMMATRIX viewMatrix;
+	DirectX::XMMATRIX projMatrix;
+};
 
+struct PS_CONSTANT_BUFFER
+{
 	DirectX::XMVECTOR camPos;
 
 	DirectX::XMVECTOR lightPos;

@@ -98,6 +98,10 @@ void D3D11Context::CreateDeviceAndContext()
 		m_pDevice.GetAddressOf(),
 		&maxSupportedFeatureLevel,
 		m_pImmediateContext.GetAddressOf()));
+
+#if defined(_DEBUG)
+	SetupDebugLayer();
+#endif
 }
 
 void D3D11Context::CreateSwapChain(
@@ -208,6 +212,27 @@ void D3D11Context::SetupViewport(UINT winWidth, UINT winHeight)
 	m_viewport.TopLeftY = 0.0f;
 }
 
+void D3D11Context::SetupDebugLayer()
+{
+	DX::ThrowIfFailed(m_pDevice.As(&m_pDebugLayer));
+	DX::ThrowIfFailed(m_pDebugLayer.As(&m_pInfoQueue));
+	m_pInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY::D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
+	m_pInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY::D3D11_MESSAGE_SEVERITY_ERROR, true);
+	//m_pInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY::D3D11_MESSAGE_SEVERITY_WARNING, true);
+	//m_pInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY::D3D11_MESSAGE_SEVERITY_INFO, true);
+	//m_pInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY::D3D11_MESSAGE_SEVERITY_MESSAGE, true);
+
+	D3D11_MESSAGE_ID hide[] =
+	{
+		D3D11_MESSAGE_ID::D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS
+	};
+	
+	D3D11_INFO_QUEUE_FILTER filter = {};
+	filter.DenyList.NumIDs = _countof(hide);
+	filter.DenyList.pIDList = hide;
+	m_pInfoQueue->AddStorageFilterEntries(&filter);
+}
+
 bool D3D11Context::Initialize()
 {
 	m_pImmediateContext->RSSetViewports(1, &m_viewport);
@@ -247,6 +272,10 @@ void D3D11Context::Shutdown()
 		SetVRS(false);
 		ShutdownNvAPI();
 	}
+	m_pDebugLayer->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	m_pDebugLayer->Release();
+
+	m_pInfoQueue->Release();
 	m_pDepthStencilBuffer->Release();
 	m_pDepthStencilView->Release();
 	m_pRenderTargetView->Release();

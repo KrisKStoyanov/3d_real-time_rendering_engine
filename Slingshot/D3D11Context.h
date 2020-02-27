@@ -5,7 +5,9 @@
 
 #include <d3d11.h>
 #include "d3d11_1.h"
+
 #include <dxgi1_6.h>
+#include <dxgidebug.h>
 
 #include "nvapi.h"
 
@@ -44,6 +46,8 @@ private:
 	void CreateRasterizerState();
 	void SetupViewport(UINT winWidth, UINT winHeight);
 
+	void SetupDebugLayer();
+
 	float m_clearColor[4];
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pImmediateContext;
@@ -55,6 +59,11 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_pRasterizerState;
 	D3D11_VIEWPORT m_viewport;
+
+	//Debugging Tools
+	Microsoft::WRL::ComPtr<ID3D11Debug> m_pDebugLayer;
+	Microsoft::WRL::ComPtr<ID3D11InfoQueue> m_pInfoQueue;
+	Microsoft::WRL::ComPtr<IDXGIInfoQueue> m_pDXGIInfoQueue;
 
 	void InitializeNvAPI();
 	void ShutdownNvAPI();

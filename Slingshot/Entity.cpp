@@ -1,6 +1,8 @@
 #include "Entity.h"
 
-Entity::Entity() : m_pTransform(nullptr), m_pCamera(nullptr), m_pModel(nullptr)
+Entity::Entity() : 
+	m_pTransform(nullptr), m_pCamera(nullptr), 
+	m_pModel(nullptr), m_pLight(nullptr)
 {
 	TRANSFORM_DESC transform_desc;
 	m_pTransform = Transform::Create(transform_desc);
@@ -10,6 +12,8 @@ void Entity::Shutdown()
 {
 	SAFE_SHUTDOWN(m_pModel);
 	SAFE_DELETE(m_pTransform);
+	SAFE_DELETE(m_pCamera);
+	SAFE_DELETE(m_pLight);
 }
 
 void Entity::SetTransform(TRANSFORM_DESC& transform_desc)
