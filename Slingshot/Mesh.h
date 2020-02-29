@@ -15,8 +15,6 @@ public:
 	static Mesh* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel);
 	void Shutdown();
 
-	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetVSCB();
-	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetPSCB();
 	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();
 	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 
@@ -29,9 +27,6 @@ public:
 	D3D11_PRIMITIVE_TOPOLOGY GetTopology();
 private:
 	Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel);
-
-	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pVSCB;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pPSCB;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pVBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIBuffer;

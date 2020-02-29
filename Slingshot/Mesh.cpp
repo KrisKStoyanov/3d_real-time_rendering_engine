@@ -16,7 +16,7 @@ void Mesh::Shutdown()
 }
 
 Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel) :
-	m_pVSCB(nullptr), m_pVBuffer(nullptr), m_pIBuffer(nullptr),
+	m_pVBuffer(nullptr), m_pIBuffer(nullptr),
 	m_vertexCount(mesh_desc.vertexCount), m_indexCount(mesh_desc.indexCount),
 	m_VBufferStride(0), m_VBufferOffset(0), m_topology(mesh_desc.topology)
 {
@@ -78,60 +78,8 @@ Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel sha
 
 	//----------------------------------
 
-	VS_CONSTANT_BUFFER vs_cb;
-
-	D3D11_BUFFER_DESC vs_cb_desc;
-	ZeroMemory(&vs_cb_desc, sizeof(vs_cb_desc));
-	vs_cb_desc.Usage = D3D11_USAGE_DEFAULT;
-	vs_cb_desc.ByteWidth = 256; // sizeof(VS_CONSTANT_BUFFER) = 128 <- constant buffer size must be a multiple of 16 bytes;
-	vs_cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	vs_cb_desc.CPUAccessFlags = 0;
-	vs_cb_desc.MiscFlags = 0;
-	vs_cb_desc.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA vs_cb_data;
-	vs_cb_data.pSysMem = &vs_cb;
-	vs_cb_data.SysMemPitch = 0;
-	vs_cb_data.SysMemSlicePitch = 0;
-
-	DX::ThrowIfFailed(graphicsContext.GetDevice()->CreateBuffer(
-		&vs_cb_desc, &vs_cb_data, m_pVSCB.GetAddressOf()));
-
-	//----------------------------------
-
-	PS_CONSTANT_BUFFER ps_cb;
-
-	D3D11_BUFFER_DESC ps_cb_desc;
-	ZeroMemory(&ps_cb_desc, sizeof(ps_cb_desc));
-	ps_cb_desc.Usage = D3D11_USAGE_DEFAULT;
-	ps_cb_desc.ByteWidth = 64; // sizeof(VS_CONSTANT_BUFFER) = 128 <- constant buffer size must be a multiple of 16 bytes;
-	ps_cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	ps_cb_desc.CPUAccessFlags = 0;
-	ps_cb_desc.MiscFlags = 0;
-	ps_cb_desc.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA ps_cb_data;
-	ps_cb_data.pSysMem = &ps_cb;
-	ps_cb_data.SysMemPitch = 0;
-	ps_cb_data.SysMemSlicePitch = 0;
-
-	DX::ThrowIfFailed(graphicsContext.GetDevice()->CreateBuffer(
-		&ps_cb_desc, &ps_cb_data, m_pPSCB.GetAddressOf()));
-
-	//----------------------------------
-
 	SAFE_DELETE_ARRAY(mesh_desc.vertexCollection);
 	SAFE_DELETE_ARRAY(mesh_desc.indexCollection);
-}
-
-const Microsoft::WRL::ComPtr<ID3D11Buffer> Mesh::GetVSCB()
-{
-	return m_pVSCB;
-}
-
-const Microsoft::WRL::ComPtr<ID3D11Buffer> Mesh::GetPSCB()
-{
-	return m_pPSCB;
 }
 
 const Microsoft::WRL::ComPtr<ID3D11Buffer> Mesh::GetVertexBuffer()

@@ -51,6 +51,44 @@ PipelineState::PipelineState(D3D11Context& graphicsContext, PIPELINE_DESC& pipel
 	break;
 	}
 
+	VS_CONSTANT_BUFFER vs_cb;
+
+	D3D11_BUFFER_DESC vs_cb_desc;
+	ZeroMemory(&vs_cb_desc, sizeof(vs_cb_desc));
+	vs_cb_desc.Usage = D3D11_USAGE_DEFAULT;
+	vs_cb_desc.ByteWidth = 256; // sizeof(VS_CONSTANT_BUFFER) = 128 <- constant buffer size must be a multiple of 16 bytes;
+	vs_cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	vs_cb_desc.CPUAccessFlags = 0;
+	vs_cb_desc.MiscFlags = 0;
+	vs_cb_desc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA vs_cb_data;
+	vs_cb_data.pSysMem = &vs_cb;
+	vs_cb_data.SysMemPitch = 0;
+	vs_cb_data.SysMemSlicePitch = 0;
+
+	DX::ThrowIfFailed(graphicsContext.GetDevice()->CreateBuffer(
+		&vs_cb_desc, &vs_cb_data, m_pVSCB.GetAddressOf()));
+
+	PS_CONSTANT_BUFFER ps_cb;
+
+	D3D11_BUFFER_DESC ps_cb_desc;
+	ZeroMemory(&ps_cb_desc, sizeof(ps_cb_desc));
+	ps_cb_desc.Usage = D3D11_USAGE_DEFAULT;
+	ps_cb_desc.ByteWidth = 64; // sizeof(VS_CONSTANT_BUFFER) = 128 <- constant buffer size must be a multiple of 16 bytes;
+	ps_cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	ps_cb_desc.CPUAccessFlags = 0;
+	ps_cb_desc.MiscFlags = 0;
+	ps_cb_desc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA ps_cb_data;
+	ps_cb_data.pSysMem = &ps_cb;
+	ps_cb_data.SysMemPitch = 0;
+	ps_cb_data.SysMemSlicePitch = 0;
+
+	DX::ThrowIfFailed(graphicsContext.GetDevice()->CreateBuffer(
+		&ps_cb_desc, &ps_cb_data, m_pPSCB.GetAddressOf()));
+
 	SAFE_DELETE_ARRAY(ColorVS_bytecode);
 	SAFE_DELETE_ARRAY(ColorPS_bytecode);
 }
@@ -60,6 +98,16 @@ void PipelineState::Shutdown()
 	SAFE_RELEASE(m_pVS);
 	SAFE_RELEASE(m_pPS);
 	SAFE_RELEASE(m_pIL);
+}
+
+const Microsoft::WRL::ComPtr<ID3D11Buffer> PipelineState::GetVSCB()
+{
+	return m_pVSCB.Get();
+}
+
+const Microsoft::WRL::ComPtr<ID3D11Buffer> PipelineState::GetPSCB()
+{
+	return m_pPSCB.Get();
 }
 
 ID3D11VertexShader* PipelineState::GetVertexShader()

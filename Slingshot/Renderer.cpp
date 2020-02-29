@@ -35,63 +35,55 @@ bool Renderer::Initialize()
 void Renderer::OnFrameRender(Stage& stage)
 {
 	m_pGraphicsContext->StartFrameRender();
-	unsigned int startRenderId = stage.GetStartRenderID();
-	for (unsigned int i = 0; i < startRenderId; ++i) {
-		(stage.GetEntityCollection() + i)->GetTransform()->OnFrameRender();
-	}
-	stage.GetMainCamera()->GetCamera()->OnFrameRender(*stage.GetMainCamera()->GetTransform());
-	for (unsigned int i = startRenderId; i < stage.GetEntityCount(); ++i)
-	{
-		Render(
-			*stage.GetMainCamera(), 
-			*(stage.GetEntityCollection() + i), 
-			*(stage.GetEntityCollection() + 1), // overhaul rendering structure to avoid hardcoding & allow for multiple rights
-			*GetPipelineState((stage.GetEntityCollection() + i)->GetModel()->GetShadingModel()));
-	}
-	m_pGraphicsContext->EndFrameRender();
-}
-
-void Renderer::Render(Entity& camera, Entity& renderable, Entity& light, PipelineState& pipelineState)
-{
-	renderable.GetTransform()->OnFrameRender();
-
 	ID3D11DeviceContext* deviceContext = m_pGraphicsContext->GetDeviceContext();
-	deviceContext->IASetVertexBuffers(0, 1, 
-		renderable.GetModel()->GetMesh()->GetVertexBuffer().GetAddressOf(), 
-		renderable.GetModel()->GetMesh()->GetVertexBufferStride(), 
-		renderable.GetModel()->GetMesh()->GetVertexBufferOffset());
-	deviceContext->IASetIndexBuffer(
-		renderable.GetModel()->GetMesh()->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
-	deviceContext->IASetPrimitiveTopology(renderable.GetModel()->GetMesh()->GetTopology());
 
-	deviceContext->IASetInputLayout(pipelineState.GetInputLayout());
-	deviceContext->VSSetShader(pipelineState.GetVertexShader(), nullptr, 0);
-	deviceContext->PSSetShader(pipelineState.GetPixelShader(), nullptr, 0);
-
-	DirectX::XMMATRIX worldMatrixT = DirectX::XMMatrixTranspose(renderable.GetTransform()->GetWorldMatrix());
-	DirectX::XMMATRIX viewMatrixT = DirectX::XMMatrixTranspose(camera.GetCamera()->GetViewMatrix());
-	DirectX::XMMATRIX projMatrixT = DirectX::XMMatrixTranspose(camera.GetCamera()->GetProjectionMatrix());
+	unsigned int entityCount = stage.GetEntityCount();
+	stage.GetMainCamera()->GetTransform()->OnFrameRender();
+	stage.GetMainCamera()->GetCamera()->OnFrameRender(*stage.GetMainCamera()->GetTransform());
 
 	VS_CONSTANT_BUFFER vs_cb;
-	
-	vs_cb.worldMatrix = worldMatrixT;
-	vs_cb.viewMatrix = viewMatrixT;
-	vs_cb.projMatrix = projMatrixT;
-
+	vs_cb.viewMatrix = DirectX::XMMatrixTranspose(stage.GetMainCamera()->GetCamera()->GetViewMatrix());
+	vs_cb.projMatrix = DirectX::XMMatrixTranspose(stage.GetMainCamera()->GetCamera()->GetProjectionMatrix());
 	PS_CONSTANT_BUFFER ps_cb;
+	ps_cb.camPos = DirectX::XMVector4Transform(
+		stage.GetMainCamera()->GetTransform()->GetPosition(), DirectX::XMMatrixTranspose(stage.GetMainCamera()->GetTransform()->GetWorldMatrix()));
+	ps_cb.lightPos = DirectX::XMVector4Transform(
+		(stage.GetEntityCollection() + 1)->GetTransform()->GetPosition(), 
+		DirectX::XMMatrixTranspose((stage.GetEntityCollection() + 1)->GetTransform()->GetWorldMatrix()));
+	ps_cb.lightColor = (stage.GetEntityCollection() + 1)->GetLight()->GetColor();
+	ps_cb.lightInt = (stage.GetEntityCollection() + 1)->GetLight()->GetIntensity();
 
-	ps_cb.camPos = DirectX::XMVector4Transform(camera.GetTransform()->GetPosition(), DirectX::XMMatrixTranspose(camera.GetTransform()->GetWorldMatrix()));
-	ps_cb.lightPos = DirectX::XMVector4Transform(light.GetTransform()->GetPosition(), DirectX::XMMatrixTranspose(light.GetTransform()->GetWorldMatrix()));
-	ps_cb.lightColor = light.GetLight()->GetColor();
-	ps_cb.lightInt = light.GetLight()->GetIntensity();
+	for (unsigned int i = 0; i < entityCount; ++i) 
+	{
+		(stage.GetEntityCollection() + i)->GetTransform()->OnFrameRender();
+		if((stage.GetEntityCollection() + i)->GetModel())
+		{
+			deviceContext->IASetVertexBuffers(0, 1,
+				(stage.GetEntityCollection() + i)->GetModel()->GetMesh()->GetVertexBuffer().GetAddressOf(),
+				(stage.GetEntityCollection() + i)->GetModel()->GetMesh()->GetVertexBufferStride(),
+				(stage.GetEntityCollection() + i)->GetModel()->GetMesh()->GetVertexBufferOffset());
+			deviceContext->IASetIndexBuffer(
+				(stage.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
+			deviceContext->IASetPrimitiveTopology((stage.GetEntityCollection() + i)->GetModel()->GetMesh()->GetTopology());
 
-	deviceContext->UpdateSubresource(renderable.GetModel()->GetMesh()->GetVSCB().Get(), 0, nullptr, &vs_cb, 0, 0);
-	deviceContext->VSSetConstantBuffers(0, 1, renderable.GetModel()->GetMesh()->GetVSCB().GetAddressOf());
+			deviceContext->IASetInputLayout(m_pPipelineState->GetInputLayout());
+			deviceContext->VSSetShader(m_pPipelineState->GetVertexShader(), nullptr, 0);
+			deviceContext->PSSetShader(m_pPipelineState->GetPixelShader(), nullptr, 0);
 
-	deviceContext->UpdateSubresource(renderable.GetModel()->GetMesh()->GetPSCB().Get(), 0, nullptr, &ps_cb, 0, 0);
-	deviceContext->PSSetConstantBuffers(0, 1, renderable.GetModel()->GetMesh()->GetPSCB().GetAddressOf());
+			vs_cb.worldMatrix = DirectX::XMMatrixTranspose((stage.GetEntityCollection() + i)->GetTransform()->GetWorldMatrix());;
 
-	deviceContext->DrawIndexed(renderable.GetModel()->GetMesh()->GetIndexCount(), 0, 0);
+			PipelineState pipelineState = *GetPipelineState((stage.GetEntityCollection() + i)->GetModel()->GetShadingModel());
+
+			deviceContext->UpdateSubresource(pipelineState.GetVSCB().Get(), 0, nullptr, &vs_cb, 0, 0);
+			deviceContext->VSSetConstantBuffers(0, 1, pipelineState.GetVSCB().GetAddressOf());
+			deviceContext->UpdateSubresource(pipelineState.GetPSCB().Get(), 0, nullptr, &ps_cb, 0, 0);
+			deviceContext->PSSetConstantBuffers(0, 1, pipelineState.GetPSCB().GetAddressOf());
+
+			deviceContext->DrawIndexed((stage.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexCount(), 0, 0);
+		}
+	}
+
+	m_pGraphicsContext->EndFrameRender();
 }
 
 void Renderer::Shutdown()

@@ -272,10 +272,11 @@ void D3D11Context::Shutdown()
 		SetVRS(false);
 		ShutdownNvAPI();
 	}
+#if defined (_DEBUG)
 	m_pDebugLayer->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 	m_pDebugLayer->Release();
-
 	m_pInfoQueue->Release();
+#endif
 	m_pDepthStencilBuffer->Release();
 	m_pDepthStencilView->Release();
 	m_pRenderTargetView->Release();

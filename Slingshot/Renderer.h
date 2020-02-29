@@ -12,7 +12,6 @@ public:
 	static Renderer* Create(HWND hWnd, RENDERER_DESC& renderer_desc);
 	bool Initialize();
 	void OnFrameRender(Stage& stage);
-	void Render(Entity& camera, Entity& renderable, Entity& light, PipelineState& pipelineState);
 	void Shutdown();
 
 	D3D11Context* GetGraphicsContext();

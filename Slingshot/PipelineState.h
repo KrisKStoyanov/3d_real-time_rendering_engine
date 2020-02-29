@@ -14,6 +14,9 @@ public:
 	static PipelineState* Create(D3D11Context& graphicsContext, PIPELINE_DESC& shader_desc, ShadingModel shadingModel);
 	void Shutdown();
 
+	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetVSCB();
+	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetPSCB();
+
 	ID3D11VertexShader* GetVertexShader();
 	ID3D11PixelShader* GetPixelShader();
 	ID3D11InputLayout* GetInputLayout();
@@ -25,6 +28,9 @@ private:
 	ID3D11VertexShader* m_pVS;
 	ID3D11PixelShader* m_pPS;
 	ID3D11InputLayout* m_pIL;
+
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pVSCB;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pPSCB;
 
 	ShadingModel m_shadingModel;
 };
