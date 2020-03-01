@@ -18,6 +18,5 @@ PS_INPUT main(VS_INPUT vs_input)
     vs_output.posWorld = mul(vs_input.position, worldMatrix);   
     vs_output.normalWorld = mul(vs_input.normal, worldMatrix);
     
-    vs_output.color = vs_input.color;
     return vs_output;
 }

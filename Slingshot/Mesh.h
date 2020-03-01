@@ -1,6 +1,6 @@
 #pragma once
 #include "D3D11Context.h"
-#include "Vertex.h"
+#include "Material.h"
 
 struct MESH_DESC {
 	Vertex* vertexCollection;
@@ -12,7 +12,7 @@ struct MESH_DESC {
 
 class Mesh {
 public:
-	static Mesh* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel);
+	static Mesh* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc);
 	void Shutdown();
 
 	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();
@@ -25,8 +25,9 @@ public:
 	unsigned int* GetVertexBufferOffset();
 
 	D3D11_PRIMITIVE_TOPOLOGY GetTopology();
+	Material* GetMaterial();
 private:
-	Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel);
+	Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc);
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pVBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIBuffer;
@@ -38,4 +39,6 @@ private:
 	unsigned int m_VBufferOffset;
 
 	D3D11_PRIMITIVE_TOPOLOGY m_topology;
+	 
+	Material* m_pMaterial;
 };

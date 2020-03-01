@@ -93,35 +93,50 @@ void Engine::EditStage(Stage& stage)
 	TRANSFORM_DESC entity1_transform_desc;
 	entity1_transform_desc.position = DirectX::XMFLOAT4(0.0f, -5.0f, 10.0f, 1.0f);
 	entityCollection[2].SetTransform(entity1_transform_desc);
-	CreatePlane(*(entityCollection + 2), 10.0f, 10.0f, DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	MATERIAL_DESC entity1_material_desc;
+	entity1_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity1_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	CreatePlane(*(entityCollection + 2), 10.0f, 10.0f, entity1_material_desc);
 
 	//Front
 	TRANSFORM_DESC entity2_transform_desc;
 	entity2_transform_desc.position = DirectX::XMFLOAT4(0.0f, 5.0f, 20.0f, 1.0f);
 	entity2_transform_desc.rotation = DirectX::XMFLOAT4(-90.0f, 0.0f, 0.0f, 0.0f);
 	entityCollection[3].SetTransform(entity2_transform_desc);
-	CreatePlane(*(entityCollection + 3), 10.0f, 10.0f, DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	MATERIAL_DESC entity2_material_desc;
+	entity2_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity2_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	CreatePlane(*(entityCollection + 3), 10.0f, 10.0f, entity2_material_desc);
 
 	//Left
 	TRANSFORM_DESC entity3_transform_desc;
 	entity3_transform_desc.position = DirectX::XMFLOAT4(-10.0f, 5.0f, 10.0f, 1.0f);
 	entity3_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 0.0f, -90.0f, 0.0f);
 	entityCollection[4].SetTransform(entity3_transform_desc);
-	CreatePlane(*(entityCollection + 4), 10.0f, 10.0f, DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	MATERIAL_DESC entity3_material_desc;
+	entity3_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity3_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	CreatePlane(*(entityCollection + 4), 10.0f, 10.0f, entity3_material_desc);
 
 	//Right
 	TRANSFORM_DESC entity4_transform_desc;
 	entity4_transform_desc.position = DirectX::XMFLOAT4(10.0f, 5.0f, 10.0f, 1.0f);
 	entity4_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 0.0f, 90.0f, 0.0f);
 	entityCollection[5].SetTransform(entity4_transform_desc);
-	CreatePlane(*(entityCollection + 5), 10.0f, 10.0f, DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
+	MATERIAL_DESC entity4_material_desc;
+	entity4_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity4_material_desc.surfaceColor = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	CreatePlane(*(entityCollection + 5), 10.0f, 10.0f, entity4_material_desc);
 
 	//Top
 	TRANSFORM_DESC entity5_transform_desc;
 	entity5_transform_desc.position = DirectX::XMFLOAT4(0.0f, 15.0f, 10.0f, 1.0f);
 	entity5_transform_desc.rotation = DirectX::XMFLOAT4(-180.0f, 0.0f, 0.0f, 0.0f);
 	entityCollection[6].SetTransform(entity5_transform_desc);
-	CreatePlane(*(entityCollection + 6), 10.0f, 10.0f, DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	MATERIAL_DESC entity5_material_desc;
+	entity5_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity5_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	CreatePlane(*(entityCollection + 6), 10.0f, 10.0f, entity5_material_desc);
 	//------------------------------
 
 	//	DECOR
@@ -130,13 +145,19 @@ void Engine::EditStage(Stage& stage)
 	TRANSFORM_DESC entity6_transform_desc;
 	entity6_transform_desc.position = DirectX::XMFLOAT4(0.0f, 2.0f, 10.0f, 1.0f);
 	entityCollection[7].SetTransform(entity6_transform_desc);
-	CreateSphere(*(entityCollection + 7), 50, 50, 4, DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+	MATERIAL_DESC entity6_material_desc;
+	entity6_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity6_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+	CreateSphere(*(entityCollection + 7), 50, 50, 4, entity6_material_desc);
 
 	//Teal ball
 	TRANSFORM_DESC entity7_transform_desc;
 	entity7_transform_desc.position = DirectX::XMFLOAT4(-7.5f, 2.0f, 10.0f, 1.0f);
 	entityCollection[8].SetTransform(entity7_transform_desc);
-	CreateSphere(*(entityCollection + 8), 50, 50, 2, DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
+	MATERIAL_DESC entity7_material_desc;
+	entity7_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity7_material_desc.surfaceColor = DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
+	CreateSphere(*(entityCollection + 8), 50, 50, 2, entity7_material_desc);
 	//------------------------------
 
 	STAGE_DESC stage_desc;
@@ -176,7 +197,7 @@ void Engine::Shutdown()
 	SAFE_DELETE(m_pTimer);
 }
 
-void Engine::CreatePlane(Entity& entity, float width, float length, DirectX::XMFLOAT4 color)
+void Engine::CreatePlane(Entity& entity, float width, float length, MATERIAL_DESC& material_desc)
 {
 	//Plane Object
 	//------------------------------
@@ -186,19 +207,15 @@ void Engine::CreatePlane(Entity& entity, float width, float length, DirectX::XMF
 	GoochShadingVertex* entityV_collection = new GoochShadingVertex[VERTEX_COUNT];
 
 	entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, -1.0f * length, 1.0f);
-	entityV_collection[0].color = color;
 	entityV_collection[0].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
 	entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, 1.0f * length, 1.0f);
-	entityV_collection[1].color = color;
 	entityV_collection[1].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
 	entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, -1.0f * length, 1.0f);
-	entityV_collection[2].color = color;
 	entityV_collection[2].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
 	entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, 1.0f * length, 1.0f);
-	entityV_collection[3].color = color;
 	entityV_collection[3].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
 	unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
@@ -217,13 +234,13 @@ void Engine::CreatePlane(Entity& entity, float width, float length, DirectX::XMF
 	groundM_desc.indexCount = INDEX_COUNT;
 
 	entity.SetModel(
-		*m_pRenderer->GetGraphicsContext(), groundM_desc, ShadingModel::GoochShading);
+		*m_pRenderer->GetGraphicsContext(), groundM_desc, material_desc);
 
 	SAFE_DELETE_ARRAY(entityV_collection);
 	SAFE_DELETE_ARRAY(entityI_collection);
 }
 
-void Engine::CreateCube(Entity& entity, float width, float height, float length, DirectX::XMFLOAT4 color)
+void Engine::CreateCube(Entity& entity, float width, float height, float length, MATERIAL_DESC& material_desc)
 {
 	//Cube Object
 	//------------------------------
@@ -232,35 +249,27 @@ void Engine::CreateCube(Entity& entity, float width, float height, float length,
 
 	GoochShadingVertex* entityV_collection = new GoochShadingVertex[VERTEX_COUNT];
 	entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
-	entityV_collection[0].color = color;
 	entityV_collection[0].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, -1.0f, 0.0f);
 
 	entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
-	entityV_collection[1].color = color;
 	entityV_collection[1].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, -1.0f, 0.0f);
 
 	entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
-	entityV_collection[2].color = color;
 	entityV_collection[2].normal = DirectX::XMFLOAT4(1.0f, -1.0f, -1.0f, 0.0f);
 
 	entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
-	entityV_collection[3].color = color;
 	entityV_collection[3].normal = DirectX::XMFLOAT4(1.0f, 1.0f, -1.0f, 0.0f);
 
 	entityV_collection[4].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
-	entityV_collection[4].color = color;
 	entityV_collection[4].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, 1.0f, 0.0f);
 
 	entityV_collection[5].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
-	entityV_collection[5].color = color;
 	entityV_collection[5].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, 1.0f, 0.0f);
 
 	entityV_collection[6].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
-	entityV_collection[6].color = color;
 	entityV_collection[6].normal = DirectX::XMFLOAT4(1.0f, -1.0f, 1.0f, 0.0f);
 	
 	entityV_collection[7].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
-	entityV_collection[7].color = color;
 	entityV_collection[7].normal = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f);
 
 	unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
@@ -296,13 +305,13 @@ void Engine::CreateCube(Entity& entity, float width, float height, float length,
 	cubeM_desc.indexCount = INDEX_COUNT;
 
 	entity.SetModel(
-		*m_pRenderer->GetGraphicsContext(), cubeM_desc, ShadingModel::GoochShading);
+		*m_pRenderer->GetGraphicsContext(), cubeM_desc, material_desc);
 
 	SAFE_DELETE_ARRAY(entityV_collection);
 	SAFE_DELETE_ARRAY(entityI_collection);
 }
 
-void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stacks, float radius, DirectX::XMFLOAT4 color)
+void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stacks, float radius, MATERIAL_DESC& material_desc)
 {
 	const int VERTEX_COUNT = (stacks + 1) * (slices + 1);
 	const int INDEX_COUNT = (slices * stacks + slices) * 6;
@@ -332,7 +341,6 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 			int index = j + i * (slices + 1);
 			entityV_collection[index].position = DirectX::XMFLOAT4(x * radius, y * radius, z * radius, 1.0f);
 			entityV_collection[index].normal = DirectX::XMFLOAT4(x, y, z, 0.0f);
-			entityV_collection[index].color = color;
 
 			//vert.uv = glm::vec2((glm::asin(vert.normal.x) / piVal + 0.5f), (glm::asin(vert.normal.y) / piVal + 0.5f));
 		}
@@ -361,7 +369,7 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 	sphereM_desc.indexCount = INDEX_COUNT;
 
 	entity.SetModel(
-		*m_pRenderer->GetGraphicsContext(), sphereM_desc, ShadingModel::GoochShading);
+		*m_pRenderer->GetGraphicsContext(), sphereM_desc, material_desc);
 
 	SAFE_DELETE_ARRAY(entityV_collection);
 	SAFE_DELETE_ARRAY(entityI_collection);

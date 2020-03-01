@@ -121,22 +121,18 @@ void D3D11Context::CreateSwapChain(
 	sd.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 	sd.Flags = 0;
 
-	IDXGIOutput* pOutput;
-	GetLatestDiscreteAdapter()->EnumOutputs(0, &pOutput);
-
-	IDXGIFactory2* pFactory;
+	Microsoft::WRL::ComPtr<IDXGIFactory2> pFactory;
 	DX::ThrowIfFailed(GetLatestDiscreteAdapter()->GetParent(IID_PPV_ARGS(&pFactory)));
 	DX::ThrowIfFailed(pFactory->CreateSwapChainForHwnd(
 		m_pDevice.Get(),
 		hWnd,
 		&sd,
 		NULL,
-		pOutput,
+		nullptr,
 		m_pSwapChain.GetAddressOf()
 	));
-
-	pOutput->Release();
-	pFactory->Release();
+	
+	SAFE_RELEASE(pFactory);
 }
 
 void D3D11Context::CreateRenderTargetView()

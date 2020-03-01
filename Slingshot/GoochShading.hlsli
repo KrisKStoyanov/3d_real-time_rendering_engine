@@ -1,8 +1,7 @@
 struct VS_INPUT
 {
-    float4 position : POSITION;
-    float4 color : COLOR;
-    float4 normal : NORMAL;
+    float4 position : POSITION0;
+    float4 normal : NORMAL0;
 };
 
 struct PS_INPUT
@@ -11,8 +10,6 @@ struct PS_INPUT
     float4 posWorld : W_POSITION;
     
     float4 normalWorld : W_NORMAL;
-    
-    float4 color : COLOR;
 };
 
 struct PS_OUTPUT

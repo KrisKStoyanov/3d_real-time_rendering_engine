@@ -17,9 +17,9 @@ public:
 	void EditStage(Stage& stage);
 	void Shutdown();
 
-	void CreatePlane(Entity& entity, float width, float length, DirectX::XMFLOAT4 color);
-	void CreateCube(Entity& entity, float width, float height, float length, DirectX::XMFLOAT4 color);
-	void CreateSphere(Entity& entity, unsigned int slices, unsigned int stacks, float radius, DirectX::XMFLOAT4 color);
+	void CreatePlane(Entity& entity, float width, float length, MATERIAL_DESC& material_desc);
+	void CreateCube(Entity& entity, float width, float height, float length, MATERIAL_DESC& material_desc);
+	void CreateSphere(Entity& entity, unsigned int slices, unsigned int stacks, float radius, MATERIAL_DESC& material_desc);
 
 	LRESULT CALLBACK HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	Renderer* GetRenderer();

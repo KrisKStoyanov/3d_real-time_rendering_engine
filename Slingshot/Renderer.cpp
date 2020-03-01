@@ -51,7 +51,6 @@ void Renderer::OnFrameRender(Stage& stage)
 		(stage.GetEntityCollection() + 1)->GetTransform()->GetPosition(), 
 		DirectX::XMMatrixTranspose((stage.GetEntityCollection() + 1)->GetTransform()->GetWorldMatrix()));
 	ps_cb.lightColor = (stage.GetEntityCollection() + 1)->GetLight()->GetColor();
-	ps_cb.lightInt = (stage.GetEntityCollection() + 1)->GetLight()->GetIntensity();
 
 	for (unsigned int i = 0; i < entityCount; ++i) 
 	{
@@ -70,9 +69,11 @@ void Renderer::OnFrameRender(Stage& stage)
 			deviceContext->VSSetShader(m_pPipelineState->GetVertexShader(), nullptr, 0);
 			deviceContext->PSSetShader(m_pPipelineState->GetPixelShader(), nullptr, 0);
 
-			vs_cb.worldMatrix = DirectX::XMMatrixTranspose((stage.GetEntityCollection() + i)->GetTransform()->GetWorldMatrix());;
+			vs_cb.worldMatrix = DirectX::XMMatrixTranspose((stage.GetEntityCollection() + i)->GetTransform()->GetWorldMatrix());
 
-			PipelineState pipelineState = *GetPipelineState((stage.GetEntityCollection() + i)->GetModel()->GetShadingModel());
+			ps_cb.surfaceColor = (stage.GetEntityCollection() + i)->GetModel()->GetMesh()->GetMaterial()->GetSurfaceColor();
+
+			PipelineState pipelineState = *GetPipelineState((stage.GetEntityCollection() + i)->GetModel()->GetMesh()->GetMaterial()->GetShadingModel());
 
 			deviceContext->UpdateSubresource(pipelineState.GetVSCB().Get(), 0, nullptr, &vs_cb, 0, 0);
 			deviceContext->VSSetConstantBuffers(0, 1, pipelineState.GetVSCB().GetAddressOf());

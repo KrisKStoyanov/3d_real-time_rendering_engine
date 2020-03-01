@@ -11,22 +11,18 @@ struct VS_CONSTANT_BUFFER
 struct PS_CONSTANT_BUFFER
 {
 	DirectX::XMVECTOR camPos;
-
 	DirectX::XMVECTOR lightPos;
 	DirectX::XMFLOAT4 lightColor;
-	float lightInt;
+	DirectX::XMFLOAT4 surfaceColor;
 };
 
-enum class ShadingModel : unsigned int {
-	GoochShading = 0,
-};
-
-struct Vertex {
+struct Vertex 
+{
 
 };
 
-struct GoochShadingVertex : public Vertex {
+struct GoochShadingVertex : public Vertex 
+{
 	DirectX::XMFLOAT4 position;
-	DirectX::XMFLOAT4 color;
 	DirectX::XMFLOAT4 normal;
 };

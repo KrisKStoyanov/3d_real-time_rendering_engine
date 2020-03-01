@@ -1,8 +1,8 @@
 #include "Mesh.h"
 
-Mesh* Mesh::Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel)
+Mesh* Mesh::Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc)
 {
-	return new Mesh(graphicsContext, mesh_desc, shadingModel);
+	return new Mesh(graphicsContext, mesh_desc, mat_desc);
 }
 
 void Mesh::Shutdown()
@@ -13,23 +13,26 @@ void Mesh::Shutdown()
 	//SAFE_RELEASE(m_pVBuffer);
 	//SAFE_RELEASE(m_pIBuffer);
 	//SAFE_RELEASE(m_pVSCB);
+	SAFE_DELETE(m_pMaterial);
 }
 
-Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel) :
-	m_pVBuffer(nullptr), m_pIBuffer(nullptr),
+Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc) :
+	m_pVBuffer(nullptr), m_pIBuffer(nullptr), m_pMaterial(nullptr),
 	m_vertexCount(mesh_desc.vertexCount), m_indexCount(mesh_desc.indexCount),
 	m_VBufferStride(0), m_VBufferOffset(0), m_topology(mesh_desc.topology)
 {
-	switch (shadingModel)
+	switch (mat_desc.shadingModel)
 	{
 	case ShadingModel::GoochShading:
 	{
+		m_pMaterial = new Material(mat_desc);
 		m_VBufferStride = sizeof(GoochShadingVertex);
 		m_VBufferOffset = 0;
 	}
 	break;
 	default:
 	{
+		m_pMaterial = new Material(mat_desc);
 		m_VBufferStride = sizeof(GoochShadingVertex);
 		m_VBufferOffset = 0;
 	}
@@ -115,4 +118,9 @@ unsigned int* Mesh::GetVertexBufferOffset()
 D3D11_PRIMITIVE_TOPOLOGY Mesh::GetTopology()
 {
 	return m_topology;
+}
+
+Material* Mesh::GetMaterial()
+{
+	return m_pMaterial;
 }

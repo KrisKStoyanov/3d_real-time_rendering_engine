@@ -30,7 +30,7 @@ PipelineState::PipelineState(D3D11Context& graphicsContext, PIPELINE_DESC& pipel
 		VS_inputLayout[0].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
 		VS_inputLayout[0].InstanceDataStepRate = 0;
 
-		VS_inputLayout[1].SemanticName = "COLOR";
+		VS_inputLayout[1].SemanticName = "NORMAL";
 		VS_inputLayout[1].SemanticIndex = 0;
 		VS_inputLayout[1].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
 		VS_inputLayout[1].InputSlot = 0;
@@ -38,15 +38,7 @@ PipelineState::PipelineState(D3D11Context& graphicsContext, PIPELINE_DESC& pipel
 		VS_inputLayout[1].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
 		VS_inputLayout[1].InstanceDataStepRate = 0;
 
-		VS_inputLayout[2].SemanticName = "NORMAL";
-		VS_inputLayout[2].SemanticIndex = 0;
-		VS_inputLayout[2].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
-		VS_inputLayout[2].InputSlot = 0;
-		VS_inputLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-		VS_inputLayout[2].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
-		VS_inputLayout[2].InstanceDataStepRate = 0;
-
-		graphicsContext.GetDevice()->CreateInputLayout(VS_inputLayout, 3, ColorVS_bytecode, ColorVS_size, &m_pIL);
+		graphicsContext.GetDevice()->CreateInputLayout(VS_inputLayout, 2, ColorVS_bytecode, ColorVS_size, &m_pIL);
 	}
 	break;
 	}

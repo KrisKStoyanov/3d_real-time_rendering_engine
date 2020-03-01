@@ -21,9 +21,9 @@ void Entity::SetTransform(TRANSFORM_DESC& transform_desc)
 	m_pTransform = Transform::Create(transform_desc);
 }
 
-void Entity::SetModel(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel)
+void Entity::SetModel(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc)
 {
-	m_pModel = Model::Create(graphicsContext, mesh_desc, shadingModel);
+	m_pModel = Model::Create(graphicsContext, mesh_desc, mat_desc);
 }
 
 void Entity::SetCamera(CAMERA_DESC& camera_desc)

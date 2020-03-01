@@ -63,6 +63,9 @@
     <ClCompile Include="Light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -72,9 +75,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Helpers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CUDAContextScheduler.cuh">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GUIConsole.h">
@@ -125,11 +125,9 @@
     <ClInclude Include="Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <CudaCompile Include="CUDAContextScheduler.cu">
-      <Filter>Source Files</Filter>
-    </CudaCompile>
+    <ClInclude Include="Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -138,10 +136,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="GoochShadingPS.hlsl">
+    <FxCompile Include="GoochShadingVS.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="GoochShadingVS.hlsl">
+    <FxCompile Include="GoochShadingPS.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>

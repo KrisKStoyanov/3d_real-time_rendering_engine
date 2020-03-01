@@ -1,6 +1,6 @@
 #pragma once
 #include "D3D11Context.h" //included twice (again in Mesh.h)
-#include "Vertex.h"
+#include "Material.h"
 #include "FileParsing.h"
 
 struct PIPELINE_DESC

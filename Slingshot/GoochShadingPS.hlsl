@@ -6,7 +6,8 @@ cbuffer PS_CONSTANT_BUFFER : register(b0)
     
     float4 lightPos;
     float4 lightColor;
-    float lightInt;
+    
+    float4 surfaceColor;
 }
 
 float4 unlit(float4 normal, float4 viewDir)
@@ -27,7 +28,7 @@ PS_OUTPUT main(PS_INPUT ps_input)
     float4 viewDir = float4(normalize(camPos.xyz - ps_input.posWorld.xyz), 0.0f);
     float4 lightDir = float4(normalize(lightPos.xyz - ps_input.posWorld.xyz), 0.0f);
     
-    float4 surfaceAmpColor = float4(0.25f * ps_input.color.xyz, ps_input.color.w);
+    float4 surfaceAmpColor = float4(0.25f * surfaceColor.xyz, surfaceColor.w);
     
     float4 coolColor = float4(0.0f, 0.0f, 0.55f, 0.0f) + surfaceAmpColor;
     float4 warmColor = float4(0.3f, 0.3f, 0.0f, 0.0f) + surfaceAmpColor;

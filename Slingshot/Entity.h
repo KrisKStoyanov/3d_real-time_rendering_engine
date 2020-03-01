@@ -11,7 +11,7 @@ public:
 	void Shutdown();
 
 	void SetTransform(TRANSFORM_DESC& transform_desc);
-	void SetModel(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, ShadingModel shadingModel);
+	void SetModel(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc);
 	void SetCamera(CAMERA_DESC& camera_desc);
 	void SetLight(LIGHT_DESC& light_desc);
 
