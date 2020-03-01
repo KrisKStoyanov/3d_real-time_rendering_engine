@@ -57,8 +57,8 @@ void Engine::EditStage(Stage& stage)
 	//	PIPELINE STATE
 	//------------------------------
 	PIPELINE_DESC pipeline_desc;
-	pipeline_desc.VS_filename = "GoochShadingVS.cso";
-	pipeline_desc.PS_filename = "GoochShadingPS.cso";
+	pipeline_desc.VS_filename = "GoochVS.cso";
+	pipeline_desc.PS_filename = "GoochPS.cso";
 	m_pRenderer->SetPipelineState(pipeline_desc, ShadingModel::GoochShading);
 	//------------------------------
 

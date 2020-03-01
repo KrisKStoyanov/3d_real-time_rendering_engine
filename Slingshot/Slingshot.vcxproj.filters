@@ -136,10 +136,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="GoochShadingVS.hlsl">
+    <FxCompile Include="GoochPS.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="GoochShadingPS.hlsl">
+    <FxCompile Include="GoochVS.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>

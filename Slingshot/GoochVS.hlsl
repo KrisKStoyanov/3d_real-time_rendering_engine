@@ -15,7 +15,7 @@ PS_INPUT main(VS_INPUT vs_input)
      
     vs_output.position = mul(vs_input.position, wvpMatrix);
     
-    vs_output.posWorld = mul(vs_input.position, worldMatrix);   
+    vs_output.posWorld = mul(vs_input.position, worldMatrix);
     vs_output.normalWorld = mul(vs_input.normal, worldMatrix);
     
     return vs_output;
