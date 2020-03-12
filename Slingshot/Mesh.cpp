@@ -30,10 +30,10 @@ Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& m
 		m_VBufferOffset = 0;
 	}
 	break;
-	default:
+	case ShadingModel::OrenNayarShading:
 	{
 		m_pMaterial = new Material(mat_desc);
-		m_VBufferStride = sizeof(GoochShadingVertex);
+		m_VBufferStride = sizeof(OrenNayarVertex);
 		m_VBufferOffset = 0;
 	}
 	break;

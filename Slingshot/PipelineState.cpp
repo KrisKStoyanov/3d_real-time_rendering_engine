@@ -41,6 +41,29 @@ PipelineState::PipelineState(D3D11Context& graphicsContext, PIPELINE_DESC& pipel
 		graphicsContext.GetDevice()->CreateInputLayout(VS_inputLayout, 2, ColorVS_bytecode, ColorVS_size, &m_pIL);
 	}
 	break;
+	case ShadingModel::OrenNayarShading:
+	{
+		D3D11_INPUT_ELEMENT_DESC VS_inputLayout[3];
+
+		VS_inputLayout[0].SemanticName = "POSITION";
+		VS_inputLayout[0].SemanticIndex = 0;
+		VS_inputLayout[0].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+		VS_inputLayout[0].InputSlot = 0;
+		VS_inputLayout[0].AlignedByteOffset = 0;
+		VS_inputLayout[0].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+		VS_inputLayout[0].InstanceDataStepRate = 0;
+
+		VS_inputLayout[1].SemanticName = "NORMAL";
+		VS_inputLayout[1].SemanticIndex = 0;
+		VS_inputLayout[1].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+		VS_inputLayout[1].InputSlot = 0;
+		VS_inputLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+		VS_inputLayout[1].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+		VS_inputLayout[1].InstanceDataStepRate = 0;
+
+		graphicsContext.GetDevice()->CreateInputLayout(VS_inputLayout, 2, ColorVS_bytecode, ColorVS_size, &m_pIL);
+	}
+	break;
 	}
 
 	VS_CONSTANT_BUFFER vs_cb;
@@ -67,7 +90,7 @@ PipelineState::PipelineState(D3D11Context& graphicsContext, PIPELINE_DESC& pipel
 	D3D11_BUFFER_DESC ps_cb_desc;
 	ZeroMemory(&ps_cb_desc, sizeof(ps_cb_desc));
 	ps_cb_desc.Usage = D3D11_USAGE_DEFAULT;
-	ps_cb_desc.ByteWidth = 64; // sizeof(VS_CONSTANT_BUFFER) = 128 <- constant buffer size must be a multiple of 16 bytes;
+	ps_cb_desc.ByteWidth = 80; // sizeof(VS_CONSTANT_BUFFER) = 128 <- constant buffer size must be a multiple of 16 bytes;
 	ps_cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	ps_cb_desc.CPUAccessFlags = 0;
 	ps_cb_desc.MiscFlags = 0;

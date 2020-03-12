@@ -16,7 +16,7 @@ public:
 
 	D3D11Context* GetGraphicsContext();
 	PipelineState* GetPipelineState(ShadingModel shadingModel); //pass enum with vertex type to get interpreting pipeline state
-	void SetPipelineState(PIPELINE_DESC pipeline_desc, ShadingModel shadingModel);
+	void SetPipelineState(ShadingModel shadingModel);
 private:
 	Renderer(HWND hWnd, RENDERER_DESC& renderer_desc);
 	

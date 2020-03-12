@@ -105,7 +105,24 @@ PipelineState* Renderer::GetPipelineState(ShadingModel shadingModel)
 	return m_pPipelineState;
 }
 
-void Renderer::SetPipelineState(PIPELINE_DESC pipeline_desc, ShadingModel shadingModel)
+void Renderer::SetPipelineState(ShadingModel shadingModel)
 {
+	PIPELINE_DESC pipeline_desc;
+	switch (shadingModel)
+	{
+	case ShadingModel::GoochShading:
+	{
+		pipeline_desc.VS_filename = "GoochVS.cso";
+		pipeline_desc.PS_filename = "GoochPS.cso";
+	}
+	break;
+	case ShadingModel::OrenNayarShading:
+	{
+		pipeline_desc.VS_filename = "OrenNayarVS.cso";
+		pipeline_desc.PS_filename = "OrenNayarPS.cso";
+	}
+	break;
+	}
+	
 	m_pPipelineState = PipelineState::Create(*m_pGraphicsContext, pipeline_desc, shadingModel);
 }

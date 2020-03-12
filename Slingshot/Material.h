@@ -4,12 +4,14 @@
 enum class ShadingModel : unsigned int 
 {
 	GoochShading = 0,
+	OrenNayarShading
 };
 
 struct MATERIAL_DESC
 {
 	ShadingModel shadingModel;
 	DirectX::XMFLOAT4 surfaceColor;
+	float roughness;
 };
 
 class Material
