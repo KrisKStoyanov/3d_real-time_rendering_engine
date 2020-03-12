@@ -56,7 +56,7 @@ void Engine::EditStage(Stage& stage)
 
 	//	PIPELINE STATE
 	//------------------------------
-	m_pRenderer->SetPipelineState(ShadingModel::GoochShading);
+	m_pRenderer->SetPipelineState(ShadingModel::OrenNayarShading);
 	//------------------------------
 
 	const int ENTITY_COUNT = 10;
@@ -91,7 +91,7 @@ void Engine::EditStage(Stage& stage)
 	entity2_transform_desc.position = DirectX::XMFLOAT4(0.0f, -5.0f, 10.0f, 1.0f);
 	entityCollection[2].SetTransform(entity2_transform_desc);
 	MATERIAL_DESC entity2_material_desc;
-	entity2_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity2_material_desc.shadingModel = ShadingModel::OrenNayarShading;
 	entity2_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	entity2_material_desc.roughness = 1.0f;
 	CreatePlane(*(entityCollection + 2), 10.0f, 10.0f, entity2_material_desc);
@@ -102,7 +102,7 @@ void Engine::EditStage(Stage& stage)
 	entity3_transform_desc.rotation = DirectX::XMFLOAT4(-90.0f, 0.0f, 0.0f, 0.0f);
 	entityCollection[3].SetTransform(entity3_transform_desc);
 	MATERIAL_DESC entity3_material_desc;
-	entity3_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity3_material_desc.shadingModel = ShadingModel::OrenNayarShading;
 	entity3_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	entity3_material_desc.roughness = 1.0f;
 	CreatePlane(*(entityCollection + 3), 10.0f, 10.0f, entity3_material_desc);
@@ -113,7 +113,7 @@ void Engine::EditStage(Stage& stage)
 	entity4_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 0.0f, -90.0f, 0.0f);
 	entityCollection[4].SetTransform(entity4_transform_desc);
 	MATERIAL_DESC entity4_material_desc;
-	entity4_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity4_material_desc.shadingModel = ShadingModel::OrenNayarShading;
 	entity4_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 	entity4_material_desc.roughness = 1.0f;
 	CreatePlane(*(entityCollection + 4), 10.0f, 10.0f, entity4_material_desc);
@@ -124,7 +124,7 @@ void Engine::EditStage(Stage& stage)
 	entity5_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 0.0f, 90.0f, 0.0f);
 	entityCollection[5].SetTransform(entity5_transform_desc);
 	MATERIAL_DESC entity5_material_desc;
-	entity5_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity5_material_desc.shadingModel = ShadingModel::OrenNayarShading;
 	entity5_material_desc.surfaceColor = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 	entity5_material_desc.roughness = 1.0f;
 	CreatePlane(*(entityCollection + 5), 10.0f, 10.0f, entity5_material_desc);
@@ -135,7 +135,7 @@ void Engine::EditStage(Stage& stage)
 	entity6_transform_desc.rotation = DirectX::XMFLOAT4(-180.0f, 0.0f, 0.0f, 0.0f);
 	entityCollection[6].SetTransform(entity6_transform_desc);
 	MATERIAL_DESC entity6_material_desc;
-	entity6_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity6_material_desc.shadingModel = ShadingModel::OrenNayarShading;
 	entity6_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	entity6_material_desc.roughness = 1.0f;
 	CreatePlane(*(entityCollection + 6), 10.0f, 10.0f, entity6_material_desc);
@@ -148,7 +148,7 @@ void Engine::EditStage(Stage& stage)
 	entity7_transform_desc.position = DirectX::XMFLOAT4(0.0f, 1.0f, 13.5f, 1.0f);
 	entityCollection[7].SetTransform(entity7_transform_desc);
 	MATERIAL_DESC entity7_material_desc;
-	entity7_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity7_material_desc.shadingModel = ShadingModel::OrenNayarShading;
 	entity7_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
 	entity7_material_desc.roughness = 1.0f;
 	CreateSphere(*(entityCollection + 7), 50, 50, 5.5f, entity7_material_desc);
@@ -158,7 +158,7 @@ void Engine::EditStage(Stage& stage)
 	entity8_transform_desc.position = DirectX::XMFLOAT4(6.5f, 0.0f, 7.5f, 1.0f);
 	entityCollection[8].SetTransform(entity8_transform_desc);
 	MATERIAL_DESC entity8_material_desc;
-	entity8_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity8_material_desc.shadingModel = ShadingModel::OrenNayarShading;
 	entity8_material_desc.surfaceColor = DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
 	entity8_material_desc.roughness = 1.0f;
 	CreateSphere(*(entityCollection + 8), 50, 50, 3.5f, entity8_material_desc);
@@ -170,7 +170,7 @@ void Engine::EditStage(Stage& stage)
 	entity9_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 12.5f, 0.0f, 0.0f);
 	entityCollection[9].SetTransform(entity9_transform_desc);
 	MATERIAL_DESC entity9_material_desc;
-	entity9_material_desc.shadingModel = ShadingModel::GoochShading;
+	entity9_material_desc.shadingModel = ShadingModel::OrenNayarShading;
 	entity9_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
 	entity9_material_desc.roughness = 1.0f;
 	CreateCube(*(entityCollection + 9), 2.75f, 4.0f, 2.75f, entity9_material_desc);

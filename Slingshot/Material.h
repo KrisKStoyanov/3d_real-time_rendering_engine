@@ -18,9 +18,13 @@ class Material
 {
 public:
 	Material(MATERIAL_DESC mat_desc);
-	ShadingModel GetShadingModel();
-	DirectX::XMFLOAT4 GetSurfaceColor();
+
+	inline ShadingModel GetShadingModel() { return m_shadingModel; }
+
+	inline DirectX::XMFLOAT4 GetSurfaceColor() { return m_surfaceColor; }
+	inline float GetRoughness() { return m_roughness; }
 private:
-	DirectX::XMFLOAT4 m_surfaceColor;
 	ShadingModel m_shadingModel;
+	DirectX::XMFLOAT4 m_surfaceColor;
+	float m_roughness;
 };

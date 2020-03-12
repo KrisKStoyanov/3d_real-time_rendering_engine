@@ -72,7 +72,7 @@ void Renderer::OnFrameRender(Stage& stage)
 			vs_cb.worldMatrix = DirectX::XMMatrixTranspose((stage.GetEntityCollection() + i)->GetTransform()->GetWorldMatrix());
 
 			ps_cb.surfaceColor = (stage.GetEntityCollection() + i)->GetModel()->GetMesh()->GetMaterial()->GetSurfaceColor();
-
+			ps_cb.roughness = (stage.GetEntityCollection() + i)->GetModel()->GetMesh()->GetMaterial()->GetRoughness();
 			PipelineState pipelineState = *GetPipelineState((stage.GetEntityCollection() + i)->GetModel()->GetMesh()->GetMaterial()->GetShadingModel());
 
 			deviceContext->UpdateSubresource(pipelineState.GetVSCB().Get(), 0, nullptr, &vs_cb, 0, 0);
