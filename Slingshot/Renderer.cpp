@@ -32,14 +32,13 @@ bool Renderer::Initialize()
 	return (m_pGraphicsContext->Initialize());
 }
 
-void Renderer::OnFrameRender(Stage& stage)
+void Renderer::Draw(Stage& stage)
 {
 	m_pGraphicsContext->StartFrameRender();
 	ID3D11DeviceContext* deviceContext = m_pGraphicsContext->GetDeviceContext();
 
 	unsigned int entityCount = stage.GetEntityCount();
-	stage.GetMainCamera()->GetTransform()->OnFrameRender();
-	stage.GetMainCamera()->GetCamera()->OnFrameRender(*stage.GetMainCamera()->GetTransform());
+	stage.UpdateCamera(stage.GetMainCameraID());
 
 	VS_CONSTANT_BUFFER vs_cb;
 	vs_cb.viewMatrix = DirectX::XMMatrixTranspose(stage.GetMainCamera()->GetCamera()->GetViewMatrix());
@@ -54,7 +53,7 @@ void Renderer::OnFrameRender(Stage& stage)
 
 	for (unsigned int i = 0; i < entityCount; ++i) 
 	{
-		(stage.GetEntityCollection() + i)->GetTransform()->OnFrameRender();
+		(stage.GetEntityCollection() + i)->GetTransform()->Update();
 		if((stage.GetEntityCollection() + i)->GetModel())
 		{
 			deviceContext->IASetVertexBuffers(0, 1,
@@ -105,24 +104,7 @@ PipelineState* Renderer::GetPipelineState(ShadingModel shadingModel)
 	return m_pPipelineState;
 }
 
-void Renderer::SetPipelineState(ShadingModel shadingModel)
+void Renderer::SetPipelineState(const PIPELINE_DESC& pipelineDesc)
 {
-	PIPELINE_DESC pipeline_desc;
-	switch (shadingModel)
-	{
-	case ShadingModel::GoochShading:
-	{
-		pipeline_desc.VS_filename = "GoochVS.cso";
-		pipeline_desc.PS_filename = "GoochPS.cso";
-	}
-	break;
-	case ShadingModel::OrenNayarShading:
-	{
-		pipeline_desc.VS_filename = "OrenNayarVS.cso";
-		pipeline_desc.PS_filename = "OrenNayarPS.cso";
-	}
-	break;
-	}
-	
-	m_pPipelineState = PipelineState::Create(*m_pGraphicsContext, pipeline_desc, shadingModel);
+	m_pPipelineState = PipelineState::Create(*m_pGraphicsContext, pipelineDesc);
 }

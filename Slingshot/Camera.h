@@ -29,7 +29,7 @@ public:
 
 	float GetTranslationSpeed();
 
-	void OnFrameRender(Transform& transform);
+	void Update(Transform& transform);
 private:
 	Camera(CAMERA_DESC& camera_desc, Transform& transform);
 

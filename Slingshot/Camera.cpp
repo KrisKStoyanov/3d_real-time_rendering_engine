@@ -65,8 +65,9 @@ float Camera::GetTranslationSpeed()
 	return m_translationSpeed;
 }
 
-void Camera::OnFrameRender(Transform& transform)
+void Camera::Update(Transform& transform)
 {
+	transform.Update();
 	m_viewMatrix = DirectX::XMMatrixLookAtLH(
 		transform.GetPosition(),
 		DirectX::XMVectorAdd(transform.GetPosition(), transform.GetForwardDir()),

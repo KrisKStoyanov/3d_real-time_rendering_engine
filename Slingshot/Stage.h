@@ -14,6 +14,11 @@ public:
 	void Shutdown();
 	unsigned int GetID();
 
+	inline void UpdateCamera(unsigned int cameraId)
+	{
+		(m_pEntityCollection + cameraId)->GetCamera()->Update(*(m_pEntityCollection + cameraId)->GetTransform());
+	}
+
 	Entity* GetMainCamera();
 
 	Entity* GetEntity(int arrayIndex);

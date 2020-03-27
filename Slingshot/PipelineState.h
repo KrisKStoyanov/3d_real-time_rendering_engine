@@ -5,13 +5,14 @@
 
 struct PIPELINE_DESC
 {
+	ShadingModel shadingModel;
 	const char* VS_filename;
 	const char* PS_filename;
 };
 
 class PipelineState {
 public:
-	static PipelineState* Create(D3D11Context& graphicsContext, PIPELINE_DESC& shader_desc, ShadingModel shadingModel);
+	static PipelineState* Create(D3D11Context& graphicsContext, const PIPELINE_DESC& shader_desc);
 	void Shutdown();
 
 	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetVSCB();
@@ -23,7 +24,7 @@ public:
 
 	ShadingModel GetShadingModel();
 private:
-	PipelineState(D3D11Context& graphicsContext, PIPELINE_DESC& shader_desc, ShadingModel shadingModel);
+	PipelineState(D3D11Context& graphicsContext, const PIPELINE_DESC& shader_desc);
 
 	ID3D11VertexShader* m_pVS;
 	ID3D11PixelShader* m_pPS;

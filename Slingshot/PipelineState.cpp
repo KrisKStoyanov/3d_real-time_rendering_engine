@@ -1,12 +1,12 @@
 #include "PipelineState.h"
 
-PipelineState* PipelineState::Create(D3D11Context& graphicsContext, PIPELINE_DESC& shader_desc, ShadingModel shadingModel)
+PipelineState* PipelineState::Create(D3D11Context& graphicsContext, const PIPELINE_DESC& pipeline_desc)
 {
-	return new PipelineState(graphicsContext, shader_desc, shadingModel);
+	return new PipelineState(graphicsContext, pipeline_desc);
 }
 
-PipelineState::PipelineState(D3D11Context& graphicsContext, PIPELINE_DESC& pipeline_desc, ShadingModel shadingModel) :
-	m_pVS(nullptr), m_pPS(nullptr), m_pIL(nullptr), m_shadingModel(shadingModel)
+PipelineState::PipelineState(D3D11Context& graphicsContext, const PIPELINE_DESC& pipeline_desc) :
+	m_pVS(nullptr), m_pPS(nullptr), m_pIL(nullptr), m_shadingModel(pipeline_desc.shadingModel)
 {
 	char* ColorVS_bytecode = nullptr, * ColorPS_bytecode = nullptr;
 	size_t ColorVS_size, ColorPS_size;
@@ -16,7 +16,7 @@ PipelineState::PipelineState(D3D11Context& graphicsContext, PIPELINE_DESC& pipel
 	graphicsContext.GetDevice()->CreateVertexShader(ColorVS_bytecode, ColorVS_size, nullptr, &m_pVS);
 	graphicsContext.GetDevice()->CreatePixelShader(ColorPS_bytecode, ColorPS_size, nullptr, &m_pPS);
 
-	switch (shadingModel)
+	switch (m_shadingModel)
 	{
 	case ShadingModel::GoochShading:
 	{

@@ -127,7 +127,7 @@ DirectX::XMVECTOR Transform::GetUpDir()
 	return m_upDir;
 }
 
-void Transform::OnFrameRender()
+void Transform::Update()
 {
 	m_worldMatrix = DirectX::XMMatrixIdentity();
 	m_scalingMatrix = DirectX::XMMatrixScalingFromVector(m_scale);

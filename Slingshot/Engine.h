@@ -22,7 +22,7 @@ public:
 	void CreateSphere(Entity& entity, unsigned int slices, unsigned int stacks, float radius, MATERIAL_DESC& material_desc);
 
 	LRESULT CALLBACK HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	Renderer* GetRenderer();
+	inline Renderer* GetRenderer() { return m_pRenderer; }
 private:
 	Engine() :
 		m_pWindow(nullptr),

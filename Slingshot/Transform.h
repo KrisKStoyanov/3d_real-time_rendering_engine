@@ -27,7 +27,7 @@ public:
 	DirectX::XMVECTOR GetRightDir();
 	DirectX::XMVECTOR GetUpDir();
 
-	void OnFrameRender();
+	void Update();
 
 	void Translate(DirectX::XMVECTOR translation);
 	void RotateEulerAngles(float eulerX, float eulerY, float eulerZ);

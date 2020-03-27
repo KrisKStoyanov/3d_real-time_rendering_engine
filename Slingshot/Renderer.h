@@ -11,12 +11,12 @@ class Renderer {
 public:
 	static Renderer* Create(HWND hWnd, RENDERER_DESC& renderer_desc);
 	bool Initialize();
-	void OnFrameRender(Stage& stage);
+	void Draw(Stage& stage);
 	void Shutdown();
 
 	D3D11Context* GetGraphicsContext();
 	PipelineState* GetPipelineState(ShadingModel shadingModel); //pass enum with vertex type to get interpreting pipeline state
-	void SetPipelineState(ShadingModel shadingModel);
+	void SetPipelineState(const PIPELINE_DESC& pipelineDesc);
 private:
 	Renderer(HWND hWnd, RENDERER_DESC& renderer_desc);
 	
