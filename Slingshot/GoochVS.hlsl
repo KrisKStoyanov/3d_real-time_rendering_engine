@@ -1,6 +1,6 @@
 #include "GoochShading.hlsli"
 
-cbuffer VS_CONSTANT_BUFFER : register(b0)
+cbuffer WVPData : register(b0)
 {
     float4x4 worldMatrix;
     float4x4 viewMatrix;

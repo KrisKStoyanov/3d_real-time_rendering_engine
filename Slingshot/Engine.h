@@ -14,7 +14,7 @@ public:
 		WINDOW_DESC& window_desc,
 		RENDERER_DESC& renderer_desc);
 	int Run();
-	void EditStage(Stage& stage);
+	void EditScene(Scene& scene);
 	void Shutdown();
 
 	void CreatePlane(Entity& entity, float width, float length, MATERIAL_DESC& material_desc);
@@ -28,13 +28,13 @@ private:
 		m_pWindow(nullptr),
 		m_pRenderer(nullptr),
 		m_pTimer(nullptr),
-		m_pStage(nullptr),
+		m_pScene(nullptr),
 		m_isRunning(false)
 	{}
 	Window* m_pWindow;	
 	Renderer* m_pRenderer;
 	Timer* m_pTimer;
-	Stage* m_pStage;
+	Scene* m_pScene;
 
 	bool m_isRunning;
 

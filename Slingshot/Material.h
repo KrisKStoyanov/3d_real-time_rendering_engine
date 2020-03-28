@@ -17,13 +17,13 @@ struct MATERIAL_DESC
 class Material
 {
 public:
-	Material(MATERIAL_DESC mat_desc);
-
+	static Material* Create(MATERIAL_DESC mat_desc);
 	inline ShadingModel GetShadingModel() { return m_shadingModel; }
 
 	inline DirectX::XMFLOAT4 GetSurfaceColor() { return m_surfaceColor; }
 	inline float GetRoughness() { return m_roughness; }
 private:
+	Material(MATERIAL_DESC mat_desc);
 	ShadingModel m_shadingModel;
 	DirectX::XMFLOAT4 m_surfaceColor;
 	float m_roughness;

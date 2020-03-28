@@ -66,8 +66,6 @@ PipelineState::PipelineState(D3D11Context& graphicsContext, const PIPELINE_DESC&
 	break;
 	}
 
-	VS_CONSTANT_BUFFER vs_cb;
-
 	D3D11_BUFFER_DESC vs_cb_desc;
 	ZeroMemory(&vs_cb_desc, sizeof(vs_cb_desc));
 	vs_cb_desc.Usage = D3D11_USAGE_DEFAULT;
@@ -78,14 +76,12 @@ PipelineState::PipelineState(D3D11Context& graphicsContext, const PIPELINE_DESC&
 	vs_cb_desc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA vs_cb_data;
-	vs_cb_data.pSysMem = &vs_cb;
+	vs_cb_data.pSysMem = &m_wvpData;
 	vs_cb_data.SysMemPitch = 0;
 	vs_cb_data.SysMemSlicePitch = 0;
 
 	DX::ThrowIfFailed(graphicsContext.GetDevice()->CreateBuffer(
-		&vs_cb_desc, &vs_cb_data, m_pVSCB.GetAddressOf()));
-
-	PS_CONSTANT_BUFFER ps_cb;
+		&vs_cb_desc, &vs_cb_data, m_pVS_WVP_CBuffer.GetAddressOf()));
 
 	D3D11_BUFFER_DESC ps_cb_desc;
 	ZeroMemory(&ps_cb_desc, sizeof(ps_cb_desc));
@@ -97,12 +93,46 @@ PipelineState::PipelineState(D3D11Context& graphicsContext, const PIPELINE_DESC&
 	ps_cb_desc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA ps_cb_data;
-	ps_cb_data.pSysMem = &ps_cb;
+	ps_cb_data.pSysMem = &m_worldTransformData;
 	ps_cb_data.SysMemPitch = 0;
 	ps_cb_data.SysMemSlicePitch = 0;
 
 	DX::ThrowIfFailed(graphicsContext.GetDevice()->CreateBuffer(
-		&ps_cb_desc, &ps_cb_data, m_pPSCB.GetAddressOf()));
+		&ps_cb_desc, &ps_cb_data, m_pPS_WorldTransform_CBuffer.GetAddressOf()));
+
+	D3D11_BUFFER_DESC ps_cb_desc0;
+	ZeroMemory(&ps_cb_desc0, sizeof(ps_cb_desc0));
+	ps_cb_desc0.Usage = D3D11_USAGE_DEFAULT;
+	ps_cb_desc0.ByteWidth = 80; // sizeof(VS_CONSTANT_BUFFER) = 128 <- constant buffer size must be a multiple of 16 bytes;
+	ps_cb_desc0.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	ps_cb_desc0.CPUAccessFlags = 0;
+	ps_cb_desc0.MiscFlags = 0;
+	ps_cb_desc0.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA ps_cb_data0;
+	ps_cb_data0.pSysMem = &m_lightData;
+	ps_cb_data0.SysMemPitch = 0;
+	ps_cb_data0.SysMemSlicePitch = 0;
+
+	DX::ThrowIfFailed(graphicsContext.GetDevice()->CreateBuffer(
+		&ps_cb_desc0, &ps_cb_data0, m_pPS_Light_CBuffer.GetAddressOf()));
+
+	D3D11_BUFFER_DESC ps_cb_desc1;
+	ZeroMemory(&ps_cb_desc1, sizeof(ps_cb_desc1));
+	ps_cb_desc1.Usage = D3D11_USAGE_DEFAULT;
+	ps_cb_desc1.ByteWidth = 80; // sizeof(VS_CONSTANT_BUFFER) = 128 <- constant buffer size must be a multiple of 16 bytes;
+	ps_cb_desc1.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	ps_cb_desc1.CPUAccessFlags = 0;
+	ps_cb_desc1.MiscFlags = 0;
+	ps_cb_desc1.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA ps_cb_data1;
+	ps_cb_data1.pSysMem = &m_materialData;
+	ps_cb_data1.SysMemPitch = 0;
+	ps_cb_data1.SysMemSlicePitch = 0;
+
+	DX::ThrowIfFailed(graphicsContext.GetDevice()->CreateBuffer(
+		&ps_cb_desc1, &ps_cb_data1, m_pPS_Material_CBuffer.GetAddressOf()));
 
 	SAFE_DELETE_ARRAY(ColorVS_bytecode);
 	SAFE_DELETE_ARRAY(ColorPS_bytecode);
@@ -115,29 +145,46 @@ void PipelineState::Shutdown()
 	SAFE_RELEASE(m_pIL);
 }
 
-const Microsoft::WRL::ComPtr<ID3D11Buffer> PipelineState::GetVSCB()
+void PipelineState::UpdateVSPerFrame(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projMatrix)
 {
-	return m_pVSCB.Get();
+	m_wvpData.viewMatrix = viewMatrix;
+	m_wvpData.projMatrix = projMatrix;
 }
 
-const Microsoft::WRL::ComPtr<ID3D11Buffer> PipelineState::GetPSCB()
+void PipelineState::UpdatePSPerFrame(DirectX::XMVECTOR cameraPos, DirectX::XMVECTOR lightPos, DirectX::XMFLOAT4 lightColor)
 {
-	return m_pPSCB.Get();
+	m_worldTransformData.camPos = cameraPos;
+	m_worldTransformData.lightPos = lightPos;
+	m_lightData.lightColor = lightColor;
 }
 
-ID3D11VertexShader* PipelineState::GetVertexShader()
+void PipelineState::UpdateVSPerEntity(DirectX::XMMATRIX worldMatrix)
 {
-	return m_pVS;
+	m_wvpData.worldMatrix = worldMatrix;
 }
 
-ID3D11PixelShader* PipelineState::GetPixelShader()
+void PipelineState::UpdatePSPerEntity(DirectX::XMFLOAT4 surfaceColor, float roughness)
 {
-	return m_pPS;
+	m_materialData.surfaceColor = surfaceColor, roughness;
 }
 
-ID3D11InputLayout* PipelineState::GetInputLayout()
+void PipelineState::Bind(ID3D11DeviceContext& deviceContext)
 {
-	return m_pIL;
+	deviceContext.IASetInputLayout(m_pIL);
+	deviceContext.VSSetShader(m_pVS, nullptr, 0);
+	deviceContext.PSSetShader(m_pPS, nullptr, 0);
+}
+
+void PipelineState::BindConstantBuffers(ID3D11DeviceContext& deviceContext)
+{
+	deviceContext.UpdateSubresource(m_pVS_WVP_CBuffer.Get(), 0, nullptr, &m_wvpData, 0, 0);
+	deviceContext.VSSetConstantBuffers(0, 1, m_pVS_WVP_CBuffer.GetAddressOf());
+	deviceContext.UpdateSubresource(m_pPS_WorldTransform_CBuffer.Get(), 0, nullptr, &m_worldTransformData, 0, 0);
+	deviceContext.PSSetConstantBuffers(0, 1, m_pPS_WorldTransform_CBuffer.GetAddressOf());
+	deviceContext.UpdateSubresource(m_pPS_Light_CBuffer.Get(), 0, nullptr, &m_lightData, 0, 0);
+	deviceContext.PSSetConstantBuffers(1, 1, m_pPS_Light_CBuffer.GetAddressOf());
+	deviceContext.UpdateSubresource(m_pPS_Material_CBuffer.Get(), 0, nullptr, &m_materialData, 0, 0);
+	deviceContext.PSSetConstantBuffers(2, 1, m_pPS_Material_CBuffer.GetAddressOf());
 }
 
 ShadingModel PipelineState::GetShadingModel()

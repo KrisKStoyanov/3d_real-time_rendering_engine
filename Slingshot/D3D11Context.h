@@ -17,11 +17,25 @@ public:
 	static D3D11Context * Create(HWND hWnd);
 	bool Initialize();
 	void StartFrameRender();
+	void DrawIndexed(
+		unsigned int indexCount, 
+		unsigned int startIndex, 
+		unsigned int baseVertexLocation);
+	//void ProcessGeometry(
+	//	D3D11Buffer& vertexBuffer, 
+	//	D3D11Buffer& indexBuffer, 
+	//	gfx::TopologyType topologyType,
+	//	D3D11Buffer& vsCBuffer,
+	//	D3D11Buffer& psCBuffer,
+	//	gfx::VS_CONSTANT_BUFFER vs_cb,
+	//	gfx::PS_CONSTANT_BUFFER ps_cb);
 	void EndFrameRender();
 	void Shutdown();
 
 	void SetVRS(bool enable);
 	bool GetVRS();
+
+	inline gfx::ContextType GetContextType() { return gfx::ContextType::D3D11; }
 
 	ID3D11Device* GetDevice();
 	ID3D11DeviceContext* GetDeviceContext();
@@ -32,17 +46,12 @@ private:
 	IDXGIAdapter* GetLatestDiscreteAdapter();
 
 	void CreateDeviceAndContext();
-
 	void CreateSwapChain(
 		HWND hWnd, UINT winWidth, UINT winHeight);
-
 	void CreateRenderTargetView();
-
 	void CreateDepthStencilBuffer(
 		UINT winWidth, UINT winHeight);
-
 	void CreateDepthStencilView();
-
 	void CreateRasterizerState();
 	void SetupViewport(UINT winWidth, UINT winHeight);
 

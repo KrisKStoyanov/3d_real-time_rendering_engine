@@ -1,15 +1,20 @@
 #include "OrenNayar.hlsli"
 
-cbuffer PS_CONSTANT_BUFFER : register(b0)
+cbuffer WorldPositionsData : register(b0)
 {
     float4 camPos;
-    
     float4 lightPos;
+}
+
+cbuffer LightingData : register(b1)
+{
     float4 lightColor;
-    
+}
+
+cbuffer MaterialData : register(b2)
+{
     float4 surfaceColor;
-    
-    min16float roughness;
+    float roughness;
 }
 
 float4 unlit(float4 normal, float4 viewDir)

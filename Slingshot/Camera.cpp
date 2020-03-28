@@ -67,7 +67,6 @@ float Camera::GetTranslationSpeed()
 
 void Camera::Update(Transform& transform)
 {
-	transform.Update();
 	m_viewMatrix = DirectX::XMMatrixLookAtLH(
 		transform.GetPosition(),
 		DirectX::XMVectorAdd(transform.GetPosition(), transform.GetForwardDir()),

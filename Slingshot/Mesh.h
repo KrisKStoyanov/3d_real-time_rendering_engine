@@ -1,44 +1,28 @@
 #pragma once
-#include "D3D11Context.h"
+#include "D3D11Buffer.h"
 #include "Material.h"
 
-struct MESH_DESC {
-	Vertex* vertexCollection;
-	unsigned int vertexCount;
-	unsigned int* indexCollection;
-	unsigned int indexCount;
-	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+struct MESH_DESC 
+{
+	VERTEX_BUFFER_DESC vertex_buffer_desc;
+	INDEX_BUFFER_DESC index_buffer_desc;
 };
 
-class Mesh {
+class Mesh 
+{
 public:
 	static Mesh* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc);
 	void Shutdown();
 
-	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();
-	const Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
+	inline D3D11VertexBuffer* GetVertexBuffer() { return m_pVertexBuffer; }
+	inline D3D11IndexBuffer* GetIndexBuffer() { return m_pIndexBuffer; }
 
-	unsigned int GetVertexCount();
-	unsigned int GetIndexCount();
-
-	unsigned int* GetVertexBufferStride();
-	unsigned int* GetVertexBufferOffset();
-
-	D3D11_PRIMITIVE_TOPOLOGY GetTopology();
 	Material* GetMaterial();
 private:
 	Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc);
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pVBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIBuffer;
-
-	unsigned int m_vertexCount;
-	unsigned int m_indexCount;
-
-	unsigned int m_VBufferStride;
-	unsigned int m_VBufferOffset;
-
-	D3D11_PRIMITIVE_TOPOLOGY m_topology;
+	D3D11VertexBuffer* m_pVertexBuffer;
+	D3D11IndexBuffer* m_pIndexBuffer;
 	 
 	Material* m_pMaterial;
 };

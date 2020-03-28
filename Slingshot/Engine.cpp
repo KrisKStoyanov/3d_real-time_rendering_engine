@@ -39,14 +39,14 @@ bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 	if (m_isRunning) 
 	{
 		m_isRunning = m_pRenderer->Initialize();
-		EditStage(*m_pStage);
+		EditScene(*m_pScene);
 		m_pTimer = new Timer();
 	}
 
 	return m_isRunning;
 }
 
-void Engine::EditStage(Stage& stage)
+void Engine::EditScene(Scene& scene)
 {
 	//	PIPELINE STATE
 	//------------------------------
@@ -176,13 +176,12 @@ void Engine::EditStage(Stage& stage)
 	CreateCube(*(entityCollection + 9), 2.75f, 4.0f, 2.75f, entity9_material_desc);
 	//------------------------------
 
-	STAGE_DESC stage_desc;
-	stage_desc.entityCollection = new Entity[ENTITY_COUNT];
-	memcpy(stage_desc.entityCollection, entityCollection, sizeof(Entity) * ENTITY_COUNT);
-	stage_desc.entityCount = ENTITY_COUNT;
-	stage_desc.mainCameraId = 0;
-	stage_desc.startRenderId = 2;
-	m_pStage = Stage::Create(0, stage_desc);
+	SCENE_DESC scene_desc;
+	scene_desc.entityCollection = new Entity[ENTITY_COUNT];
+	memcpy(scene_desc.entityCollection, entityCollection, sizeof(Entity) * ENTITY_COUNT);
+	scene_desc.entityCount = ENTITY_COUNT;
+	scene_desc.mainCameraId = 0;
+	m_pScene = Scene::Create(0, scene_desc);
 
 	SAFE_DELETE_ARRAY(entityCollection);
 }
@@ -198,8 +197,8 @@ int Engine::Run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-
-		m_pRenderer->Draw(*m_pStage);
+		m_pScene->OnUpdate();
+		m_pRenderer->Draw(*m_pScene);
 	}
 	Shutdown();
 	return static_cast<int>(msg.wParam);
@@ -207,7 +206,7 @@ int Engine::Run()
 
 void Engine::Shutdown()
 {
-	SAFE_SHUTDOWN(m_pStage);
+	SAFE_SHUTDOWN(m_pScene);
 	SAFE_SHUTDOWN(m_pRenderer);
 	SAFE_SHUTDOWN(m_pWindow);
 	SAFE_DELETE(m_pTimer);
@@ -246,13 +245,19 @@ void Engine::CreatePlane(Entity& entity, float width, float length, MATERIAL_DES
 		entityI_collection[2] = 2;
 		entityI_collection[3] = 3;
 
-		planeM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-		planeM_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
-		memcpy(planeM_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
-		planeM_desc.vertexCount = VERTEX_COUNT;
-		planeM_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(planeM_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
-		planeM_desc.indexCount = INDEX_COUNT;
+		VERTEX_BUFFER_DESC vertex_buffer_desc;
+		vertex_buffer_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
+		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
+		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
+		
+		INDEX_BUFFER_DESC index_buffer_desc;
+		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
+		index_buffer_desc.indexCount = INDEX_COUNT;
+		
+		planeM_desc.vertex_buffer_desc = vertex_buffer_desc;
+		planeM_desc.index_buffer_desc = index_buffer_desc;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
 		SAFE_DELETE_ARRAY(entityI_collection);
@@ -280,13 +285,19 @@ void Engine::CreatePlane(Entity& entity, float width, float length, MATERIAL_DES
 		entityI_collection[2] = 2;
 		entityI_collection[3] = 3;
 
-		planeM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-		planeM_desc.vertexCollection = new OrenNayarVertex[VERTEX_COUNT];
-		memcpy(planeM_desc.vertexCollection, entityV_collection, sizeof(OrenNayarVertex) * VERTEX_COUNT);
-		planeM_desc.vertexCount = VERTEX_COUNT;
-		planeM_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(planeM_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
-		planeM_desc.indexCount = INDEX_COUNT;
+		VERTEX_BUFFER_DESC vertex_buffer_desc;
+		vertex_buffer_desc.vertexCollection = new OrenNayarVertex[VERTEX_COUNT];
+		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(OrenNayarVertex) * VERTEX_COUNT);
+		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
+
+		INDEX_BUFFER_DESC index_buffer_desc;
+		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
+		index_buffer_desc.indexCount = INDEX_COUNT;
+
+		planeM_desc.vertex_buffer_desc = vertex_buffer_desc;
+		planeM_desc.index_buffer_desc = index_buffer_desc;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
 		SAFE_DELETE_ARRAY(entityI_collection);
@@ -359,13 +370,19 @@ void Engine::CreateCube(Entity& entity, float width, float height, float length,
 		entityI_collection[12] = 4;
 		entityI_collection[13] = 5;
 
-		cubeM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-		cubeM_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
-		memcpy(cubeM_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
-		cubeM_desc.vertexCount = VERTEX_COUNT;
-		cubeM_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(cubeM_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
-		cubeM_desc.indexCount = INDEX_COUNT;
+		VERTEX_BUFFER_DESC vertex_buffer_desc;
+		vertex_buffer_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
+		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
+		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
+
+		INDEX_BUFFER_DESC index_buffer_desc;
+		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
+		index_buffer_desc.indexCount = INDEX_COUNT;
+
+		cubeM_desc.vertex_buffer_desc = vertex_buffer_desc;
+		cubeM_desc.index_buffer_desc = index_buffer_desc;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
 		SAFE_DELETE_ARRAY(entityI_collection);
@@ -421,13 +438,19 @@ void Engine::CreateCube(Entity& entity, float width, float height, float length,
 		entityI_collection[12] = 4;
 		entityI_collection[13] = 5;
 
-		cubeM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-		cubeM_desc.vertexCollection = new OrenNayarVertex[VERTEX_COUNT];
-		memcpy(cubeM_desc.vertexCollection, entityV_collection, sizeof(OrenNayarVertex) * VERTEX_COUNT);
-		cubeM_desc.vertexCount = VERTEX_COUNT;
-		cubeM_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(cubeM_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
-		cubeM_desc.indexCount = INDEX_COUNT;
+		VERTEX_BUFFER_DESC vertex_buffer_desc;
+		vertex_buffer_desc.vertexCollection = new OrenNayarVertex[VERTEX_COUNT];
+		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(OrenNayarVertex)* VERTEX_COUNT);
+		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
+
+		INDEX_BUFFER_DESC index_buffer_desc;
+		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int)* INDEX_COUNT);
+		index_buffer_desc.indexCount = INDEX_COUNT;
+
+		cubeM_desc.vertex_buffer_desc = vertex_buffer_desc;
+		cubeM_desc.index_buffer_desc = index_buffer_desc;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
 		SAFE_DELETE_ARRAY(entityI_collection);
@@ -493,13 +516,19 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 			index += 6;
 		}
 
-		sphereM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-		sphereM_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
-		memcpy(sphereM_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
-		sphereM_desc.vertexCount = VERTEX_COUNT;
-		sphereM_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(sphereM_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
-		sphereM_desc.indexCount = INDEX_COUNT;
+		VERTEX_BUFFER_DESC vertex_buffer_desc;
+		vertex_buffer_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
+		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
+		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
+
+		INDEX_BUFFER_DESC index_buffer_desc;
+		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
+		index_buffer_desc.indexCount = INDEX_COUNT;
+
+		sphereM_desc.vertex_buffer_desc = vertex_buffer_desc;
+		sphereM_desc.index_buffer_desc = index_buffer_desc;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
 		SAFE_DELETE_ARRAY(entityI_collection);
@@ -550,14 +579,19 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 			index += 6;
 		}
 
-		sphereM_desc.topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-		sphereM_desc.vertexCollection = new OrenNayarVertex[VERTEX_COUNT];
-		memcpy(sphereM_desc.vertexCollection, entityV_collection, sizeof(OrenNayarVertex) * VERTEX_COUNT);
-		sphereM_desc.vertexCount = VERTEX_COUNT;
-		sphereM_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(sphereM_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
-		sphereM_desc.indexCount = INDEX_COUNT;
+		VERTEX_BUFFER_DESC vertex_buffer_desc;
+		vertex_buffer_desc.vertexCollection = new OrenNayarVertex[VERTEX_COUNT];
+		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(OrenNayarVertex)* VERTEX_COUNT);
+		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
+		INDEX_BUFFER_DESC index_buffer_desc;
+		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int)* INDEX_COUNT);
+		index_buffer_desc.indexCount = INDEX_COUNT;
+
+		sphereM_desc.vertex_buffer_desc = vertex_buffer_desc;
+		sphereM_desc.index_buffer_desc = index_buffer_desc;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
 		SAFE_DELETE_ARRAY(entityI_collection);
@@ -589,33 +623,33 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		int xCoord = ptMax.x - xOffset / 2;
 		int yCoord = ptMax.y - yOffset / 2;
 		SetCursorPos(xCoord, yCoord);
-		m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(xCoord, yCoord);
-		m_pStage->GetMainCamera()->GetCamera()->SetRotateStatus(true);
+		m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetCamera()->SetMouseCoord(xCoord, yCoord);
+		m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetCamera()->SetRotateStatus(true);
 	}
 	break;
 	case WM_LBUTTONUP:
 	{
 		ReleaseCapture();
 		ShowCursor(true);
-		m_pStage->GetMainCamera()->GetCamera()->SetRotateStatus(false);
+		m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetCamera()->SetRotateStatus(false);
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 	break;
 	case WM_MOUSEMOVE:
 	{
-		if (m_pStage->GetMainCamera()->GetCamera()->GetRotateStatus()) {
+		if (m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetCamera()->GetRotateStatus()) {
 			int xCoord = GET_X_LPARAM(lParam);
 			int yCoord = GET_Y_LPARAM(lParam);
 			POINT pt = { xCoord, yCoord };
 			ClientToScreen(hWnd, &pt);
 			int lastMouseX, lastMouseY;
-			m_pStage->GetMainCamera()->GetCamera()->GetMouseCoord(lastMouseX, lastMouseY);
-			m_pStage->GetMainCamera()->GetCamera()->SetMouseCoord(pt.x, pt.y);
+			m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetCamera()->GetMouseCoord(lastMouseX, lastMouseY);
+			m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetCamera()->SetMouseCoord(pt.x, pt.y);
 			float offsetX = static_cast<float>(pt.x) - lastMouseX;
 			float offsetY = static_cast<float>(pt.y) - lastMouseY;
-			float pitch = offsetX * m_pStage->GetMainCamera()->GetCamera()->GetRotationSpeed();
-			float head = offsetY * m_pStage->GetMainCamera()->GetCamera()->GetRotationSpeed();
-			m_pStage->GetMainCamera()->GetTransform()->RotateEulerAngles(head, pitch, 0.0f);
+			float pitch = offsetX * m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetCamera()->GetRotationSpeed();
+			float head = offsetY * m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetCamera()->GetRotationSpeed();
+			m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetTransform()->RotateEulerAngles(head, pitch, 0.0f);
 		}
 	}
 	break;
@@ -628,9 +662,9 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		{
 			if (repeatCode == 16401)
 			{
-				m_pStage->GetMainCamera()->GetTransform()->Translate(
-					m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() *
-					m_pStage->GetMainCamera()->GetTransform()->GetForwardDir() *
+				m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetTransform()->Translate(
+					m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetCamera()->GetTranslationSpeed() *
+					m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetTransform()->GetForwardDir() *
 					m_pTimer->m_smoothstepF);
 			}
 		}
@@ -639,9 +673,9 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		{
 			if (repeatCode == 16414)
 			{
-				m_pStage->GetMainCamera()->GetTransform()->Translate(
-					m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f *
-					m_pStage->GetMainCamera()->GetTransform()->GetRightDir() *
+				m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetTransform()->Translate(
+					m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetCamera()->GetTranslationSpeed() * -1.0f *
+					m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetTransform()->GetRightDir() *
 					m_pTimer->m_smoothstepF);
 			}
 		}
@@ -650,9 +684,9 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		{
 			if (repeatCode == 16415) 
 			{
-				m_pStage->GetMainCamera()->GetTransform()->Translate(
-					m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() * -1.0f *
-					m_pStage->GetMainCamera()->GetTransform()->GetForwardDir() *
+				m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetTransform()->Translate(
+					m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetCamera()->GetTranslationSpeed() * -1.0f *
+					m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetTransform()->GetForwardDir() *
 					m_pTimer->m_smoothstepF);
 			}
 		}
@@ -661,9 +695,9 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		{
 			if (repeatCode == 16416) 
 			{
-				m_pStage->GetMainCamera()->GetTransform()->Translate(
-					m_pStage->GetMainCamera()->GetCamera()->GetTranslationSpeed() *
-					m_pStage->GetMainCamera()->GetTransform()->GetRightDir() *
+				m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetTransform()->Translate(
+					m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetCamera()->GetTranslationSpeed() *
+					m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetTransform()->GetRightDir() *
 					m_pTimer->m_smoothstepF);
 			}
 		}
@@ -681,7 +715,7 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 	{
 		ReleaseCapture();
 		ShowCursor(true);
-		m_pStage->GetMainCamera()->GetCamera()->SetRotateStatus(false);
+		m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetCamera()->SetRotateStatus(false);
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 	break;

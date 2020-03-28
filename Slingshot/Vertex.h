@@ -1,20 +1,14 @@
 #pragma once
 #include "Transform.h"
 
-struct VS_CONSTANT_BUFFER
+enum class Topology : unsigned int
 {
-	DirectX::XMMATRIX worldMatrix;
-	DirectX::XMMATRIX viewMatrix;
-	DirectX::XMMATRIX projMatrix;
-};
-
-struct PS_CONSTANT_BUFFER
-{
-	DirectX::XMVECTOR camPos;
-	DirectX::XMVECTOR lightPos;
-	DirectX::XMFLOAT4 lightColor;
-	DirectX::XMFLOAT4 surfaceColor;
-	float roughness;
+	TRIANGLESTRIP = 0,
+	TRIANGLELIST,
+	LINESTRIP,
+	LINELIST,
+	POINTLIST,
+	PATCHLIST //pending tessalation implementation
 };
 
 struct Vertex 

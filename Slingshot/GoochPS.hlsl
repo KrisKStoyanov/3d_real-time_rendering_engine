@@ -1,12 +1,18 @@
 #include "GoochShading.hlsli"
 
-cbuffer PS_CONSTANT_BUFFER : register(b0)
+cbuffer WorldPositionsData : register(b0)
 {
     float4 camPos;
-    
     float4 lightPos;
+}
+
+cbuffer LightData : register(b1)
+{
     float4 lightColor;
-    
+}
+
+cbuffer MaterialData : register(b2)
+{
     float4 surfaceColor;
 }
 
