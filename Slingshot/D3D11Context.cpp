@@ -263,6 +263,12 @@ void D3D11Context::BindMeshBuffers(D3D11VertexBuffer& vertexBuffer, D3D11IndexBu
 	indexBuffer.Bind(*m_pImmediateContext.Get());
 }
 
+void D3D11Context::BindPipelineState(ShadingModel shadingModel)
+{
+	//Will be iterated on to feature instrumentation of multiple pipeline states
+	m_pPipelineState->Bind(*m_pImmediateContext.Get());
+}
+
 void D3D11Context::UpdatePipelinePerFrame(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projMatrix, DirectX::XMVECTOR cameraPos, DirectX::XMVECTOR lightPos, DirectX::XMFLOAT4 lightColor)
 {
 	m_pPipelineState->UpdateVSPerFrame(viewMatrix, projMatrix);
@@ -273,12 +279,6 @@ void D3D11Context::UpdatePipelinePerModel(DirectX::XMMATRIX worldMatrix, DirectX
 {
 	m_pPipelineState->UpdateVSPerModel(worldMatrix);
 	m_pPipelineState->UpdatePSPerModel(surfaceColor, roughness);
-}
-
-void D3D11Context::BindPipelineState(ShadingModel shadingModel)
-{
-	//Will be iterated on to feature instrumentation of multiple pipeline states
-	m_pPipelineState->Bind(*m_pImmediateContext.Get());
 }
 
 void D3D11Context::BindConstantBuffers()
@@ -386,14 +386,4 @@ void D3D11Context::SetVRS(bool enable)
 bool D3D11Context::GetVRS()
 {
 	return m_enableVRS;
-}
-
-ID3D11Device* D3D11Context::GetDevice()
-{
-	return m_pDevice.Get();
-}
-
-ID3D11DeviceContext* D3D11Context::GetDeviceContext()
-{
-	return m_pImmediateContext.Get();
 }

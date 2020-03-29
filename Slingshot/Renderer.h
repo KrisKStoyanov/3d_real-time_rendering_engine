@@ -14,7 +14,7 @@ public:
 	void Draw(Scene& scene);
 	void Shutdown();
 
-	D3D11Context* GetGraphicsContext();
+	GraphicsContext* GetGraphicsContext();
 private:
 	Renderer(HWND hWnd, RENDERER_DESC& renderer_desc);	
 	D3D11Context* m_pGraphicsContext;

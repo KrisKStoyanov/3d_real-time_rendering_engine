@@ -29,7 +29,8 @@ struct CONSTANT_BUFFER_DESC
 class Buffer
 {
 public:
-
+	virtual unsigned int GetElementCount() = 0;
+	virtual void Destroy() = 0;
 private:
 
 };

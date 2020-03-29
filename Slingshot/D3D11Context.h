@@ -12,28 +12,34 @@ class D3D11Context : public GraphicsContext
 public:
 	static D3D11Context * Create(HWND hWnd);
 	bool Initialize(PIPELINE_DESC pipeline_desc);
-	void StartFrameRender();
+	void Shutdown();
 
-	void BindMeshBuffers(D3D11VertexBuffer& vertexBuffer, D3D11IndexBuffer& indexBuffer);
-	void UpdatePipelinePerFrame(
+	virtual void StartFrameRender();
+	virtual void EndFrameRender();
+	
+	virtual void BindMeshBuffers(
+		D3D11VertexBuffer& vertexBuffer, 
+		D3D11IndexBuffer& indexBuffer);
+
+	virtual void UpdatePipelinePerFrame(
 		DirectX::XMMATRIX viewMatrix,
 		DirectX::XMMATRIX projMatrix,
 		DirectX::XMVECTOR cameraPos,
 		DirectX::XMVECTOR lightPos,
 		DirectX::XMFLOAT4 lightColor);
-	void UpdatePipelinePerModel(
+
+	virtual void UpdatePipelinePerModel(
 		DirectX::XMMATRIX worldMatrix,
-		DirectX::XMFLOAT4 surfaceColor, float roughness);
+		DirectX::XMFLOAT4 surfaceColor, 
+		float roughness);
 
-	void BindPipelineState(ShadingModel shadingModel);
-	void BindConstantBuffers();
+	virtual void BindPipelineState(ShadingModel shadingModel);
+	virtual void BindConstantBuffers();
 
-	void DrawIndexed(
+	virtual void DrawIndexed(
 		unsigned int indexCount, 
 		unsigned int startIndex, 
 		unsigned int baseVertexLocation);
-	void EndFrameRender();
-	void Shutdown();
 
 	D3D11VertexBuffer* CreateVertexBuffer(VERTEX_BUFFER_DESC desc) override;
 	D3D11IndexBuffer* CreateIndexBuffer(INDEX_BUFFER_DESC desc) override;
@@ -42,9 +48,6 @@ public:
 	bool GetVRS();
 
 	inline gfx::ContextType GetContextType() { return gfx::ContextType::D3D11; }
-
-	ID3D11Device* GetDevice();
-	ID3D11DeviceContext* GetDeviceContext();
 private:
 	D3D11Context(HWND hWnd);
 

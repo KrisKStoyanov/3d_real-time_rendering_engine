@@ -53,8 +53,8 @@ void Renderer::Draw(Scene& scene)
 		if((scene.GetEntityCollection() + i)->GetModel())
 		{
 			m_pGraphicsContext->BindMeshBuffers(
-				*(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetVertexBuffer(),
-				*(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexBuffer());
+				*static_cast<D3D11VertexBuffer*>((scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetVertexBuffer()),
+				*static_cast<D3D11IndexBuffer*>((scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexBuffer()));
 
 			m_pGraphicsContext->UpdatePipelinePerModel(
 				DirectX::XMMatrixTranspose((scene.GetEntityCollection() + i)->GetTransform()->GetWorldMatrix()),
@@ -64,7 +64,7 @@ void Renderer::Draw(Scene& scene)
 			m_pGraphicsContext->BindConstantBuffers();
 
 			//Forward implementation
-			m_pGraphicsContext->DrawIndexed((scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexBuffer()->GetIndexCount(), 0, 0);
+			m_pGraphicsContext->DrawIndexed((scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexBuffer()->GetElementCount(), 0, 0);
 		}
 	}
 
@@ -76,7 +76,7 @@ void Renderer::Shutdown()
 	m_pGraphicsContext->Shutdown();
 }
 
-D3D11Context* Renderer::GetGraphicsContext()
+GraphicsContext* Renderer::GetGraphicsContext()
 {
 	return m_pGraphicsContext;
 }

@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "DirectXMath.h"
 #include "Buffer.h"
+#include "PipelineState.h"
 
 namespace gfx
 {
@@ -51,6 +52,7 @@ namespace gfx
 //virtual abstract class for extending functionality across different graphics APIs through polymorphism
 class GraphicsContext
 {
+public:
 	virtual Buffer* CreateVertexBuffer(VERTEX_BUFFER_DESC) = 0;
 	virtual Buffer* CreateIndexBuffer(INDEX_BUFFER_DESC) = 0;
 };

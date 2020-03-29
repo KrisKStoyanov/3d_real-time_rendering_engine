@@ -10,8 +10,10 @@ public:
 	static D3D11VertexBuffer* Create(
 		ID3D11Device& device, 
 		VERTEX_BUFFER_DESC desc);
-	void Destroy();
+	void Destroy() override;
 	void Bind(ID3D11DeviceContext& deviceContext);
+
+	unsigned int GetElementCount() override;
 
 	inline unsigned int GetVertexCount() { return m_vertexCount; }
 private:
@@ -32,10 +34,10 @@ public:
 	static D3D11IndexBuffer* Create(
 		ID3D11Device& device,
 		INDEX_BUFFER_DESC desc);
-	void Destroy();
+	void Destroy() override;
 	void Bind(ID3D11DeviceContext& deviceContext);
 
-	inline unsigned int GetIndexCount() { return m_indexCount; }
+	unsigned int GetElementCount() override;
 private:
 	D3D11IndexBuffer(
 		ID3D11Device& device,
@@ -51,8 +53,10 @@ public:
 	static D3D11ConstantBuffer* Create(
 		ID3D11Device& device,
 		CONSTANT_BUFFER_DESC desc);
-	void Destroy();
+	void Destroy() override; 
 	void Bind(ID3D11DeviceContext& deviceContext, void* data);
+
+	unsigned int GetElementCount() override;
 private:
 	D3D11ConstantBuffer(
 		ID3D11Device& device,

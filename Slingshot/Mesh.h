@@ -11,18 +11,18 @@ struct MESH_DESC
 class Mesh 
 {
 public:
-	static Mesh* Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc);
+	static Mesh* Create(GraphicsContext& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc);
 	void Shutdown();
 
-	inline D3D11VertexBuffer* GetVertexBuffer() { return m_pVertexBuffer; }
-	inline D3D11IndexBuffer* GetIndexBuffer() { return m_pIndexBuffer; }
+	inline Buffer* GetVertexBuffer() { return m_pVertexBuffer; }
+	inline Buffer* GetIndexBuffer() { return m_pIndexBuffer; }
 
 	Material* GetMaterial();
 private:
-	Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc);
+	Mesh(GraphicsContext& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc);
 
-	D3D11VertexBuffer* m_pVertexBuffer;
-	D3D11IndexBuffer* m_pIndexBuffer;
+	Buffer* m_pVertexBuffer;
+	Buffer* m_pIndexBuffer;
 	 
 	Material* m_pMaterial;
 };

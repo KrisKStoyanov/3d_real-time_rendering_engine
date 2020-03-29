@@ -19,6 +19,11 @@ void D3D11VertexBuffer::Bind(ID3D11DeviceContext& context)
 	context.IASetPrimitiveTopology(m_topology);
 }
 
+unsigned int D3D11VertexBuffer::GetElementCount()
+{
+	return m_vertexCount;
+}
+
 
 D3D11VertexBuffer::D3D11VertexBuffer(ID3D11Device& device, VERTEX_BUFFER_DESC desc) :
 	m_stride(desc.stride), m_offset(desc.offset), 
@@ -91,6 +96,11 @@ void D3D11IndexBuffer::Destroy()
 void D3D11IndexBuffer::Bind(ID3D11DeviceContext& deviceContext)
 {
 	deviceContext.IASetIndexBuffer(m_pBuffer, DXGI_FORMAT_R32_UINT, 0);
+}
+
+unsigned int D3D11IndexBuffer::GetElementCount()
+{
+	return m_indexCount;
 }
 
 D3D11IndexBuffer::D3D11IndexBuffer(ID3D11Device& device, INDEX_BUFFER_DESC desc) :
@@ -167,4 +177,9 @@ void D3D11ConstantBuffer::Bind(ID3D11DeviceContext& deviceContext, void* data)
 	}
 	break;
 	}
+}
+
+unsigned int D3D11ConstantBuffer::GetElementCount()
+{
+	return 0;
 }

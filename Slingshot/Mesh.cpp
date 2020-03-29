@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-Mesh* Mesh::Create(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc)
+Mesh* Mesh::Create(GraphicsContext& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc)
 {
 	return new Mesh(graphicsContext, mesh_desc, mat_desc);
 }
@@ -16,7 +16,7 @@ void Mesh::Shutdown()
 	SAFE_DELETE(m_pMaterial);
 }
 
-Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc) :
+Mesh::Mesh(GraphicsContext& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& mat_desc) :
 	m_pVertexBuffer(nullptr), m_pIndexBuffer(nullptr), m_pMaterial(nullptr)
 {
 	m_pMaterial = Material::Create(mat_desc);
