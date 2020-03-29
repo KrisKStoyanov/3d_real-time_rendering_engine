@@ -35,6 +35,7 @@ bool Renderer::Initialize(PIPELINE_DESC pipeline_desc)
 void Renderer::Draw(Scene& scene)
 {
 	m_pGraphicsContext->StartFrameRender();
+	m_pGraphicsContext->BindPipelineState(ShadingModel::GoochShading);
 
 	m_pGraphicsContext->UpdateVSPerFrame(
 		DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetViewMatrix()),
@@ -65,6 +66,7 @@ void Renderer::Draw(Scene& scene)
 			
 			m_pGraphicsContext->BindConstantBuffers();
 
+			//Forward implementation
 			m_pGraphicsContext->DrawIndexed((scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexBuffer()->GetIndexCount(), 0, 0);
 		}
 	}

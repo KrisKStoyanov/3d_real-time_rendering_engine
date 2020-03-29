@@ -283,9 +283,14 @@ void D3D11Context::UpdatePSPerEntity(DirectX::XMFLOAT4 surfaceColor, float rough
 	m_pPipelineState->UpdatePSPerEntity(surfaceColor, roughness);
 }
 
+void D3D11Context::BindPipelineState(ShadingModel shadingModel)
+{
+	//Will be iterated on to feature instrumentation of multiple pipeline states
+	m_pPipelineState->Bind(*m_pImmediateContext.Get());
+}
+
 void D3D11Context::BindConstantBuffers()
 {
-	m_pPipelineState->Bind(*m_pImmediateContext.Get());
 	m_pPipelineState->BindConstantBuffers(*m_pImmediateContext.Get());
 }
 

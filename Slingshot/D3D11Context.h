@@ -25,6 +25,7 @@ public:
 	void UpdateVSPerEntity(DirectX::XMMATRIX worldMatrix);
 	void UpdatePSPerEntity(DirectX::XMFLOAT4 surfaceColor, float roughness);
 
+	void BindPipelineState(ShadingModel shadingModel);
 	void BindConstantBuffers();
 
 	void DrawIndexed(

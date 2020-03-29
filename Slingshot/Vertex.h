@@ -32,30 +32,25 @@ enum class ShaderType : unsigned int
 	PIXEL_SHADER
 };
 
-struct CBufferData
-{
-
-};
-
-struct WVPData : public CBufferData
+struct WVPData
 {
 	DirectX::XMMATRIX worldMatrix;
 	DirectX::XMMATRIX viewMatrix;
 	DirectX::XMMATRIX projMatrix;
 };
 
-struct WorldTransformData : public CBufferData
+struct WorldTransformData
 {
 	DirectX::XMVECTOR camPos;
 	DirectX::XMVECTOR lightPos;
 };
 
-struct LightData : public CBufferData
+struct LightData
 {
 	DirectX::XMFLOAT4 lightColor;
 };
 
-struct MaterialData : public CBufferData
+struct MaterialData
 {
 	DirectX::XMFLOAT4 surfaceColor;
 	float roughness;

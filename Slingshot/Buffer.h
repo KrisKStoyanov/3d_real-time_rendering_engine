@@ -20,9 +20,10 @@ struct INDEX_BUFFER_DESC
 
 struct CONSTANT_BUFFER_DESC
 {
-	CBufferData* cbufferData;
+	void* cbufferData;
 	unsigned int cbufferSize;
 	ShaderType shaderType;
+	unsigned int id;
 };
 
 class Buffer

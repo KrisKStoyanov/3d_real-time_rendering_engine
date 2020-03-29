@@ -52,13 +52,12 @@ public:
 		ID3D11Device& device,
 		CONSTANT_BUFFER_DESC desc);
 	void Destroy();
-	void Update(CBufferData& data);
-	void Bind(ID3D11DeviceContext& deviceContext);
+	void Bind(ID3D11DeviceContext& deviceContext, void* data);
 private:
 	D3D11ConstantBuffer(
 		ID3D11Device& device,
 		CONSTANT_BUFFER_DESC desc);
 	ID3D11Buffer* m_pBuffer;
-	CBufferData* m_pData;
 	ShaderType m_shaderType;
+	unsigned int m_id;
 };
