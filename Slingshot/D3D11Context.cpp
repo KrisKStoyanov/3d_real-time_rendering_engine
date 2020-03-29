@@ -327,6 +327,11 @@ D3D11IndexBuffer* D3D11Context::CreateIndexBuffer(INDEX_BUFFER_DESC desc)
 	return D3D11IndexBuffer::Create(*m_pDevice.Get(), desc);
 }
 
+D3D11ConstantBuffer* D3D11Context::CreateConstantBuffer(CONSTANT_BUFFER_DESC desc)
+{
+	return D3D11ConstantBuffer::Create(*m_pDevice.Get(), desc);
+}
+
 void D3D11Context::InitializeNvAPI()
 {
 	NvAPI_Status NvStatus = NvAPI_Initialize();

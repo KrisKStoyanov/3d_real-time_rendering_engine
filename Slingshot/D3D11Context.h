@@ -14,40 +14,41 @@ public:
 	bool Initialize(PIPELINE_DESC pipeline_desc);
 	void Shutdown();
 
-	virtual void StartFrameRender();
-	virtual void EndFrameRender();
+	void StartFrameRender();
+	void EndFrameRender();
 	
-	virtual void BindMeshBuffers(
+	void BindMeshBuffers(
 		D3D11VertexBuffer& vertexBuffer, 
 		D3D11IndexBuffer& indexBuffer);
 
-	virtual void UpdatePipelinePerFrame(
+	void UpdatePipelinePerFrame(
 		DirectX::XMMATRIX viewMatrix,
 		DirectX::XMMATRIX projMatrix,
 		DirectX::XMVECTOR cameraPos,
 		DirectX::XMVECTOR lightPos,
 		DirectX::XMFLOAT4 lightColor);
 
-	virtual void UpdatePipelinePerModel(
+	void UpdatePipelinePerModel(
 		DirectX::XMMATRIX worldMatrix,
 		DirectX::XMFLOAT4 surfaceColor, 
 		float roughness);
 
-	virtual void BindPipelineState(ShadingModel shadingModel);
-	virtual void BindConstantBuffers();
+	void BindPipelineState(ShadingModel shadingModel);
+	void BindConstantBuffers();
 
-	virtual void DrawIndexed(
+	void DrawIndexed(
 		unsigned int indexCount, 
 		unsigned int startIndex, 
 		unsigned int baseVertexLocation);
 
 	D3D11VertexBuffer* CreateVertexBuffer(VERTEX_BUFFER_DESC desc) override;
 	D3D11IndexBuffer* CreateIndexBuffer(INDEX_BUFFER_DESC desc) override;
+	D3D11ConstantBuffer* CreateConstantBuffer(CONSTANT_BUFFER_DESC desc) override;
 
 	void SetVRS(bool enable);
 	bool GetVRS();
 
-	inline gfx::ContextType GetContextType() { return gfx::ContextType::D3D11; }
+	inline ContextType GetContextType() { return ContextType::D3D11; }
 private:
 	D3D11Context(HWND hWnd);
 

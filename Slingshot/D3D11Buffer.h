@@ -1,6 +1,5 @@
 #pragma once
 #include "Buffer.h"
-
 #include <d3d11.h>
 #include "d3d11_1.h"
 
@@ -14,8 +13,6 @@ public:
 	void Bind(ID3D11DeviceContext& deviceContext);
 
 	unsigned int GetElementCount() override;
-
-	inline unsigned int GetVertexCount() { return m_vertexCount; }
 private:
 	D3D11VertexBuffer(
 		ID3D11Device& device,

@@ -4,7 +4,7 @@
 
 struct RENDERER_DESC 
 {
-	gfx::ContextType gfxContextType = gfx::ContextType::D3D11;
+	ContextType gfxContextType = ContextType::D3D11;
 };
 
 class Renderer {

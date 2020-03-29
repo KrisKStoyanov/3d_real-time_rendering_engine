@@ -10,7 +10,7 @@ Renderer::Renderer(HWND hWnd, RENDERER_DESC& renderer_desc) :
 {
 	switch (renderer_desc.gfxContextType)
 	{
-	case gfx::ContextType::D3D11:
+	case ContextType::D3D11:
 	{
 		m_pGraphicsContext = D3D11Context::Create(hWnd);
 	}
