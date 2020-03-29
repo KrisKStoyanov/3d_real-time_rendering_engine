@@ -83,7 +83,7 @@ D3D11Context* Renderer::GetGraphicsContext()
 	return m_pGraphicsContext;
 }
 
-PipelineState* Renderer::GetPipelineState(ShadingModel shadingModel)
+D3D11PipelineState* Renderer::GetPipelineState(ShadingModel shadingModel)
 {
 	//have a switch statement that returns corresponding pipeline state
 	//or loop through an array of pipeline states and match the vertex type with the queried argument
@@ -93,5 +93,5 @@ PipelineState* Renderer::GetPipelineState(ShadingModel shadingModel)
 
 void Renderer::SetPipelineState(const PIPELINE_DESC& pipelineDesc)
 {
-	m_pPipelineState = PipelineState::Create(*m_pGraphicsContext, pipelineDesc);
+	m_pPipelineState = D3D11PipelineState::Create(*m_pGraphicsContext->GetDevice(), pipelineDesc);
 }

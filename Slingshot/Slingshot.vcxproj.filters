@@ -60,9 +60,6 @@
     <ClCompile Include="Material.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="PipelineState.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
@@ -79,6 +76,9 @@
       <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="D3D11Buffer.cpp">
+      <Filter>Graphics\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D11PipelineState.cpp">
       <Filter>Graphics\D3D11</Filter>
     </ClCompile>
   </ItemGroup>
@@ -125,9 +125,6 @@
     <ClInclude Include="Light.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="PipelineState.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Material.h">
       <Filter>Graphics</Filter>
     </ClInclude>
@@ -147,6 +144,9 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="D3D11Buffer.h">
+      <Filter>Graphics\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D11PipelineState.h">
       <Filter>Graphics\D3D11</Filter>
     </ClInclude>
   </ItemGroup>

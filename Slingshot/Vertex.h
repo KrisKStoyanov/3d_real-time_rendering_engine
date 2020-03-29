@@ -25,3 +25,27 @@ struct OrenNayarVertex : public Vertex
 {
 	DirectX::XMFLOAT4 normal;
 };
+
+struct WVPData
+{
+	DirectX::XMMATRIX worldMatrix;
+	DirectX::XMMATRIX viewMatrix;
+	DirectX::XMMATRIX projMatrix;
+};
+
+struct WorldTransformData
+{
+	DirectX::XMVECTOR camPos;
+	DirectX::XMVECTOR lightPos;
+};
+
+struct LightData
+{
+	DirectX::XMFLOAT4 lightColor;
+};
+
+struct MaterialData
+{
+	DirectX::XMFLOAT4 surfaceColor;
+	float roughness;
+};
