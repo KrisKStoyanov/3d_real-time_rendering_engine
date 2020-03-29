@@ -26,25 +26,36 @@ struct OrenNayarVertex : public Vertex
 	DirectX::XMFLOAT4 normal;
 };
 
-struct WVPData
+enum class ShaderType : unsigned int
+{
+	VERTEX_SHADER = 0,
+	PIXEL_SHADER
+};
+
+struct CBufferData
+{
+
+};
+
+struct WVPData : public CBufferData
 {
 	DirectX::XMMATRIX worldMatrix;
 	DirectX::XMMATRIX viewMatrix;
 	DirectX::XMMATRIX projMatrix;
 };
 
-struct WorldTransformData
+struct WorldTransformData : public CBufferData
 {
 	DirectX::XMVECTOR camPos;
 	DirectX::XMVECTOR lightPos;
 };
 
-struct LightData
+struct LightData : public CBufferData
 {
 	DirectX::XMFLOAT4 lightColor;
 };
 
-struct MaterialData
+struct MaterialData : public CBufferData
 {
 	DirectX::XMFLOAT4 surfaceColor;
 	float roughness;

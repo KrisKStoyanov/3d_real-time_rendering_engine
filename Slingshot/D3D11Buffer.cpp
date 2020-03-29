@@ -116,3 +116,65 @@ D3D11IndexBuffer::D3D11IndexBuffer(ID3D11Device& device, INDEX_BUFFER_DESC desc)
 
 	SAFE_DELETE_ARRAY(desc.indexCollection);
 }
+
+D3D11ConstantBuffer* D3D11ConstantBuffer::Create(ID3D11Device& device, CONSTANT_BUFFER_DESC desc)
+{
+	return new D3D11ConstantBuffer(device, desc);
+}
+
+D3D11ConstantBuffer::D3D11ConstantBuffer(ID3D11Device& device, CONSTANT_BUFFER_DESC desc)
+	: m_shaderType(desc.shaderType)
+{
+	//Ensure size is valid (multiple of 16)
+	desc.cbufferSize = ((desc.cbufferSize - 1) | 15) + 1;
+
+	m_pData = desc.cbufferData;
+
+	D3D11_BUFFER_DESC vs_cb_desc;
+	ZeroMemory(&vs_cb_desc, sizeof(vs_cb_desc));
+	vs_cb_desc.Usage = D3D11_USAGE_DEFAULT;
+	vs_cb_desc.ByteWidth = desc.cbufferSize; 
+	vs_cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	vs_cb_desc.CPUAccessFlags = 0;
+	vs_cb_desc.MiscFlags = 0;
+	vs_cb_desc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA vs_cb_data;
+	vs_cb_data.pSysMem = &m_pData;
+	vs_cb_data.SysMemPitch = 0;
+	vs_cb_data.SysMemSlicePitch = 0;
+
+	DX::ThrowIfFailed(device.CreateBuffer(
+		&vs_cb_desc, &vs_cb_data, &m_pBuffer));
+
+	SAFE_DELETE(desc.cbufferData);
+}
+
+void D3D11ConstantBuffer::Destroy()
+{
+	SAFE_RELEASE(m_pBuffer);
+	SAFE_DELETE(m_pData);
+}
+
+void D3D11ConstantBuffer::Update(CBufferData& data)
+{
+	m_pData = &data;
+}
+
+void D3D11ConstantBuffer::Bind(ID3D11DeviceContext& deviceContext)
+{
+	deviceContext.UpdateSubresource(m_pBuffer, 0, nullptr, m_pData, 0, 0);
+	switch (m_shaderType)
+	{
+	case ShaderType::VERTEX_SHADER:
+	{
+		deviceContext.VSSetConstantBuffers(0, 1, &m_pBuffer);
+	}
+	break;
+	case ShaderType::PIXEL_SHADER:
+	{
+		deviceContext.PSSetConstantBuffers(0, 1, &m_pBuffer);
+	}
+	break;
+	}
+}

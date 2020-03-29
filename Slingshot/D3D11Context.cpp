@@ -257,6 +257,12 @@ void D3D11Context::StartFrameRender()
 		m_pDepthStencilView.Get());
 }
 
+void D3D11Context::BindMeshBuffers(D3D11VertexBuffer& vertexBuffer, D3D11IndexBuffer& indexBuffer)
+{
+	vertexBuffer.Bind(*m_pImmediateContext.Get());
+	indexBuffer.Bind(*m_pImmediateContext.Get());
+}
+
 void D3D11Context::UpdateVSPerFrame(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projMatrix)
 {
 	m_pPipelineState->UpdateVSPerFrame(viewMatrix, projMatrix);
@@ -287,18 +293,6 @@ void D3D11Context::DrawIndexed(unsigned int indexCount, unsigned int startIndexL
 {
 	m_pImmediateContext->DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
 }
-
-//void D3D11Context::ProcessGeometry(
-//	D3D11Buffer& vertexBuffer, 
-//	D3D11Buffer& indexBuffer, 
-//	gfx::TopologyType topologyType,
-//	D3D11Buffer& vsCBuffer,
-//	D3D11Buffer& psCBuffer,
-//	gfx::VS_CONSTANT_BUFFER vs_cb,
-//	gfx::PS_CONSTANT_BUFFER ps_cb)
-//{
-//
-//}
 
 void D3D11Context::EndFrameRender()
 {

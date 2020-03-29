@@ -1,6 +1,6 @@
 #pragma once
 #include "Scene.h"
-#include "D3D11PipelineState.h"
+#include "D3D11Context.h"
 
 struct RENDERER_DESC 
 {

@@ -18,6 +18,13 @@ struct INDEX_BUFFER_DESC
 	unsigned int indexCount;
 };
 
+struct CONSTANT_BUFFER_DESC
+{
+	CBufferData* cbufferData;
+	unsigned int cbufferSize;
+	ShaderType shaderType;
+};
+
 class Buffer
 {
 public:

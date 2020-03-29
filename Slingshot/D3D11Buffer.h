@@ -44,3 +44,21 @@ private:
 	ID3D11Buffer* m_pBuffer;
 	unsigned int m_indexCount;
 };
+
+class D3D11ConstantBuffer : public Buffer
+{
+public:
+	static D3D11ConstantBuffer* Create(
+		ID3D11Device& device,
+		CONSTANT_BUFFER_DESC desc);
+	void Destroy();
+	void Update(CBufferData& data);
+	void Bind(ID3D11DeviceContext& deviceContext);
+private:
+	D3D11ConstantBuffer(
+		ID3D11Device& device,
+		CONSTANT_BUFFER_DESC desc);
+	ID3D11Buffer* m_pBuffer;
+	CBufferData* m_pData;
+	ShaderType m_shaderType;
+};

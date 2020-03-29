@@ -35,7 +35,7 @@ bool Renderer::Initialize(PIPELINE_DESC pipeline_desc)
 void Renderer::Draw(Scene& scene)
 {
 	m_pGraphicsContext->StartFrameRender();
-	
+
 	m_pGraphicsContext->UpdateVSPerFrame(
 		DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetViewMatrix()),
 		DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetProjectionMatrix()));
@@ -52,8 +52,9 @@ void Renderer::Draw(Scene& scene)
 	{
 		if((scene.GetEntityCollection() + i)->GetModel())
 		{
-			(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetVertexBuffer()->Bind(*m_pGraphicsContext->GetDeviceContext());
-			(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexBuffer()->Bind(*m_pGraphicsContext->GetDeviceContext());
+			m_pGraphicsContext->BindMeshBuffers(
+				*(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetVertexBuffer(),
+				*(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexBuffer());
 
 			m_pGraphicsContext->UpdateVSPerEntity(
 				DirectX::XMMatrixTranspose((scene.GetEntityCollection() + i)->GetTransform()->GetWorldMatrix()));

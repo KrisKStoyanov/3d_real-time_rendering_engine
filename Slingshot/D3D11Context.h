@@ -14,7 +14,7 @@ public:
 	bool Initialize(PIPELINE_DESC pipeline_desc);
 	void StartFrameRender();
 
-	//Temporary solution
+	void BindMeshBuffers(D3D11VertexBuffer& vertexBuffer, D3D11IndexBuffer& indexBuffer);
 	void UpdateVSPerFrame(
 		DirectX::XMMATRIX viewMatrix,
 		DirectX::XMMATRIX projMatrix);
@@ -31,14 +31,6 @@ public:
 		unsigned int indexCount, 
 		unsigned int startIndex, 
 		unsigned int baseVertexLocation);
-	//void ProcessGeometry(
-	//	D3D11Buffer& vertexBuffer, 
-	//	D3D11Buffer& indexBuffer, 
-	//	gfx::TopologyType topologyType,
-	//	D3D11Buffer& vsCBuffer,
-	//	D3D11Buffer& psCBuffer,
-	//	gfx::VS_CONSTANT_BUFFER vs_cb,
-	//	gfx::PS_CONSTANT_BUFFER ps_cb);
 	void EndFrameRender();
 	void Shutdown();
 

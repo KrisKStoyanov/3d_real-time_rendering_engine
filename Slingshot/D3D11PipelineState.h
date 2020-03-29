@@ -38,6 +38,11 @@ private:
 	ID3D11PixelShader* m_pPS;
 	ID3D11InputLayout* m_pIL;
 
+	//D3D11ConstantBuffer* m_pVS_WVP_CBuffer;
+	//D3D11ConstantBuffer* m_pPS_WorldTransform_CBuffer;
+	//D3D11ConstantBuffer* m_pPS_Light_CBuffer;
+	//D3D11ConstantBuffer* m_pPS_Material_CBuffer;
+
 	ID3D11Buffer* m_pVS_WVP_CBuffer;
 	ID3D11Buffer* m_pPS_WorldTransform_CBuffer;
 	ID3D11Buffer* m_pPS_Light_CBuffer;
