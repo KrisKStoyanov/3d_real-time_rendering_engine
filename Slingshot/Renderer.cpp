@@ -37,16 +37,15 @@ void Renderer::Draw(Scene& scene)
 	m_pGraphicsContext->StartFrameRender();
 	m_pGraphicsContext->BindPipelineState(ShadingModel::GoochShading);
 
-	m_pGraphicsContext->UpdateVSPerFrame(
+	m_pGraphicsContext->UpdatePipelinePerFrame(
 		DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetViewMatrix()),
-		DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetProjectionMatrix()));
-	m_pGraphicsContext->UpdatePSPerFrame(
-			DirectX::XMVector4Transform(
-				scene.GetCamera(scene.GetMainCameraID())->GetTransform()->GetPosition(), 
-				DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetTransform()->GetWorldMatrix())),
-			DirectX::XMVector4Transform(
-				(scene.GetEntityCollection() + 1)->GetTransform()->GetPosition(),
-				DirectX::XMMatrixTranspose((scene.GetEntityCollection() + 1)->GetTransform()->GetWorldMatrix())),
+		DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetProjectionMatrix()),
+		DirectX::XMVector4Transform(
+			scene.GetCamera(scene.GetMainCameraID())->GetTransform()->GetPosition(),
+			DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetTransform()->GetWorldMatrix())),
+		DirectX::XMVector4Transform(
+		(scene.GetEntityCollection() + 1)->GetTransform()->GetPosition(),
+			DirectX::XMMatrixTranspose((scene.GetEntityCollection() + 1)->GetTransform()->GetWorldMatrix())),
 			(scene.GetEntityCollection() + 1)->GetLight()->GetColor());
 
 	for (unsigned int i = 0; i < scene.GetEntityCount(); ++i)
@@ -57,10 +56,8 @@ void Renderer::Draw(Scene& scene)
 				*(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetVertexBuffer(),
 				*(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexBuffer());
 
-			m_pGraphicsContext->UpdateVSPerEntity(
-				DirectX::XMMatrixTranspose((scene.GetEntityCollection() + i)->GetTransform()->GetWorldMatrix()));
-
-			m_pGraphicsContext->UpdatePSPerEntity(
+			m_pGraphicsContext->UpdatePipelinePerModel(
+				DirectX::XMMatrixTranspose((scene.GetEntityCollection() + i)->GetTransform()->GetWorldMatrix()),
 				(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetMaterial()->GetSurfaceColor(),
 				(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetMaterial()->GetRoughness());
 			

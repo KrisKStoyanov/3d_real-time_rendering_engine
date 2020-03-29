@@ -263,24 +263,16 @@ void D3D11Context::BindMeshBuffers(D3D11VertexBuffer& vertexBuffer, D3D11IndexBu
 	indexBuffer.Bind(*m_pImmediateContext.Get());
 }
 
-void D3D11Context::UpdateVSPerFrame(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projMatrix)
+void D3D11Context::UpdatePipelinePerFrame(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projMatrix, DirectX::XMVECTOR cameraPos, DirectX::XMVECTOR lightPos, DirectX::XMFLOAT4 lightColor)
 {
 	m_pPipelineState->UpdateVSPerFrame(viewMatrix, projMatrix);
-}
-
-void D3D11Context::UpdatePSPerFrame(DirectX::XMVECTOR cameraPos, DirectX::XMVECTOR lightPos, DirectX::XMFLOAT4 lightColor)
-{
 	m_pPipelineState->UpdatePSPerFrame(cameraPos, lightPos, lightColor);
 }
 
-void D3D11Context::UpdateVSPerEntity(DirectX::XMMATRIX worldMatrix)
+void D3D11Context::UpdatePipelinePerModel(DirectX::XMMATRIX worldMatrix, DirectX::XMFLOAT4 surfaceColor, float roughness)
 {
-	m_pPipelineState->UpdateVSPerEntity(worldMatrix);
-}
-
-void D3D11Context::UpdatePSPerEntity(DirectX::XMFLOAT4 surfaceColor, float roughness)
-{
-	m_pPipelineState->UpdatePSPerEntity(surfaceColor, roughness);
+	m_pPipelineState->UpdateVSPerModel(worldMatrix);
+	m_pPipelineState->UpdatePSPerModel(surfaceColor, roughness);
 }
 
 void D3D11Context::BindPipelineState(ShadingModel shadingModel)

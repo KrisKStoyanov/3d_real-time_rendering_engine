@@ -15,15 +15,15 @@ public:
 	void StartFrameRender();
 
 	void BindMeshBuffers(D3D11VertexBuffer& vertexBuffer, D3D11IndexBuffer& indexBuffer);
-	void UpdateVSPerFrame(
+	void UpdatePipelinePerFrame(
 		DirectX::XMMATRIX viewMatrix,
-		DirectX::XMMATRIX projMatrix);
-	void UpdatePSPerFrame(
+		DirectX::XMMATRIX projMatrix,
 		DirectX::XMVECTOR cameraPos,
 		DirectX::XMVECTOR lightPos,
 		DirectX::XMFLOAT4 lightColor);
-	void UpdateVSPerEntity(DirectX::XMMATRIX worldMatrix);
-	void UpdatePSPerEntity(DirectX::XMFLOAT4 surfaceColor, float roughness);
+	void UpdatePipelinePerModel(
+		DirectX::XMMATRIX worldMatrix,
+		DirectX::XMFLOAT4 surfaceColor, float roughness);
 
 	void BindPipelineState(ShadingModel shadingModel);
 	void BindConstantBuffers();

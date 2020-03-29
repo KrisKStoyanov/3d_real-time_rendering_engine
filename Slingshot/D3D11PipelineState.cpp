@@ -6,7 +6,7 @@ D3D11PipelineState* D3D11PipelineState::Create(ID3D11Device& device, const PIPEL
 }
 
 D3D11PipelineState::D3D11PipelineState(ID3D11Device& device, const PIPELINE_DESC& pipeline_desc) :
-	m_pVS(nullptr), m_pPS(nullptr), m_pIL(nullptr), m_shadingModel(pipeline_desc.shadingModel)
+	m_pVS(nullptr), m_pPS(nullptr), m_pIL(nullptr)
 {
 	char* ColorVS_bytecode = nullptr, * ColorPS_bytecode = nullptr;
 	size_t ColorVS_size, ColorPS_size;
@@ -16,7 +16,7 @@ D3D11PipelineState::D3D11PipelineState(ID3D11Device& device, const PIPELINE_DESC
 	device.CreateVertexShader(ColorVS_bytecode, ColorVS_size, nullptr, &m_pVS);
 	device.CreatePixelShader(ColorPS_bytecode, ColorPS_size, nullptr, &m_pPS);
 
-	switch (m_shadingModel)
+	switch (pipeline_desc.shadingModel)
 	{
 	case ShadingModel::GoochShading:
 	{
@@ -66,6 +66,8 @@ D3D11PipelineState::D3D11PipelineState(ID3D11Device& device, const PIPELINE_DESC
 	break;
 	}
 
+	SetShadingModel(pipeline_desc.shadingModel);
+
 	CONSTANT_BUFFER_DESC desc0;
 	desc0.cbufferData = &m_wvpData;
 	desc0.cbufferSize = sizeof(m_wvpData);
@@ -103,6 +105,11 @@ void D3D11PipelineState::Shutdown()
 	SAFE_RELEASE(m_pVS);
 	SAFE_RELEASE(m_pPS);
 	SAFE_RELEASE(m_pIL);
+
+	SAFE_DESTROY(m_pVS_WVP_CBuffer);
+	SAFE_DESTROY(m_pPS_WorldTransform_CBuffer);
+	SAFE_DESTROY(m_pPS_Light_CBuffer);
+	SAFE_DESTROY(m_pPS_Material_CBuffer);
 }
 
 void D3D11PipelineState::UpdateVSPerFrame(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projMatrix)
@@ -118,12 +125,12 @@ void D3D11PipelineState::UpdatePSPerFrame(DirectX::XMVECTOR cameraPos, DirectX::
 	m_lightData.lightColor = lightColor;
 }
 
-void D3D11PipelineState::UpdateVSPerEntity(DirectX::XMMATRIX worldMatrix)
+void D3D11PipelineState::UpdateVSPerModel(DirectX::XMMATRIX worldMatrix)
 {
 	m_wvpData.worldMatrix = worldMatrix;
 }
 
-void D3D11PipelineState::UpdatePSPerEntity(DirectX::XMFLOAT4 surfaceColor, float roughness)
+void D3D11PipelineState::UpdatePSPerModel(DirectX::XMFLOAT4 surfaceColor, float roughness)
 {
 	m_materialData.surfaceColor = surfaceColor, roughness;
 }
@@ -141,9 +148,4 @@ void D3D11PipelineState::BindConstantBuffers(ID3D11DeviceContext& deviceContext)
 	m_pPS_WorldTransform_CBuffer->Bind(deviceContext, &m_worldTransformData);
 	m_pPS_Light_CBuffer->Bind(deviceContext, &m_lightData);
 	m_pPS_Material_CBuffer->Bind(deviceContext, &m_materialData);
-}
-
-ShadingModel D3D11PipelineState::GetShadingModel()
-{
-	return m_shadingModel;
 }
