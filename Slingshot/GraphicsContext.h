@@ -1,6 +1,7 @@
 #pragma once
 #include "Window.h"
 #include "DirectXMath.h"
+#include "Buffer.h"
 
 namespace gfx
 {
@@ -47,5 +48,9 @@ namespace gfx
 	};
 }
 
-//TODO:
-//virtual abstract class for extending functionality across different context types through polymorphism
+//virtual abstract class for extending functionality across different graphics APIs through polymorphism
+class GraphicsContext
+{
+	virtual Buffer* CreateVertexBuffer(VERTEX_BUFFER_DESC) = 0;
+	virtual Buffer* CreateIndexBuffer(INDEX_BUFFER_DESC) = 0;
+};

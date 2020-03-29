@@ -2,6 +2,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <stdexcept>
 
 //MS D3D API - COM Interface derived pointer handling 
 namespace DX

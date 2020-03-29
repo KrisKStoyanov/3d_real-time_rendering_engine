@@ -37,8 +37,8 @@ Mesh::Mesh(D3D11Context& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC& m
 	break;
 	}
 
-	m_pVertexBuffer = D3D11VertexBuffer::Create(*graphicsContext.GetDevice(), mesh_desc.vertex_buffer_desc);
-	m_pIndexBuffer = D3D11IndexBuffer::Create(*graphicsContext.GetDevice(), mesh_desc.index_buffer_desc);
+	m_pVertexBuffer = graphicsContext.CreateVertexBuffer(mesh_desc.vertex_buffer_desc);
+	m_pIndexBuffer = graphicsContext.CreateIndexBuffer(mesh_desc.index_buffer_desc);
 }
 
 Material* Mesh::GetMaterial()

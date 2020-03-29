@@ -1,6 +1,7 @@
 #pragma once
 #include "Vertex.h"
 #include "Macros.h"
+#include "Helpers.h"
 
 struct VERTEX_BUFFER_DESC
 {

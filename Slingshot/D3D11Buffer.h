@@ -1,8 +1,10 @@
 #pragma once
-#include "D3D11Context.h"
 #include "Buffer.h"
 
-class D3D11VertexBuffer
+#include <d3d11.h>
+#include "d3d11_1.h"
+
+class D3D11VertexBuffer : public Buffer
 {
 public:
 	static D3D11VertexBuffer* Create(
@@ -24,7 +26,7 @@ private:
 	unsigned int m_vertexCount;
 };
 
-class D3D11IndexBuffer
+class D3D11IndexBuffer : public Buffer
 {
 public:
 	static D3D11IndexBuffer* Create(

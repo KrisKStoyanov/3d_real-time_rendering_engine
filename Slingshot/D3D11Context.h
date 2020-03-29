@@ -1,22 +1,32 @@
 #pragma once
 #include "GraphicsContext.h"
-#include "Helpers.h"
-#include "Macros.h"
-
-#include <d3d11.h>
-#include "d3d11_1.h"
+#include "D3D11PipelineState.h"
 
 #include <dxgi1_6.h>
 #include <dxgidebug.h>
 
 #include "nvapi.h"
 
-class D3D11Context
+class D3D11Context : public GraphicsContext
 {
 public:
 	static D3D11Context * Create(HWND hWnd);
-	bool Initialize();
+	bool Initialize(PIPELINE_DESC pipeline_desc);
 	void StartFrameRender();
+
+	//Temporary solution
+	void UpdateVSPerFrame(
+		DirectX::XMMATRIX viewMatrix,
+		DirectX::XMMATRIX projMatrix);
+	void UpdatePSPerFrame(
+		DirectX::XMVECTOR cameraPos,
+		DirectX::XMVECTOR lightPos,
+		DirectX::XMFLOAT4 lightColor);
+	void UpdateVSPerEntity(DirectX::XMMATRIX worldMatrix);
+	void UpdatePSPerEntity(DirectX::XMFLOAT4 surfaceColor, float roughness);
+
+	void BindConstantBuffers();
+
 	void DrawIndexed(
 		unsigned int indexCount, 
 		unsigned int startIndex, 
@@ -31,6 +41,9 @@ public:
 	//	gfx::PS_CONSTANT_BUFFER ps_cb);
 	void EndFrameRender();
 	void Shutdown();
+
+	D3D11VertexBuffer* CreateVertexBuffer(VERTEX_BUFFER_DESC desc) override;
+	D3D11IndexBuffer* CreateIndexBuffer(INDEX_BUFFER_DESC desc) override;
 
 	void SetVRS(bool enable);
 	bool GetVRS();
@@ -68,6 +81,8 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_pRasterizerState;
 	D3D11_VIEWPORT m_viewport;
+
+	D3D11PipelineState* m_pPipelineState;
 
 	//Debugging Tools
 	Microsoft::WRL::ComPtr<ID3D11Debug> m_pDebugLayer;

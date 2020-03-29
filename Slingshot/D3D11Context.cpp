@@ -229,13 +229,15 @@ void D3D11Context::SetupDebugLayer()
 	m_pInfoQueue->AddStorageFilterEntries(&filter);
 }
 
-bool D3D11Context::Initialize()
+bool D3D11Context::Initialize(PIPELINE_DESC pipeline_desc)
 {
 	m_pImmediateContext->RSSetViewports(1, &m_viewport);
 	m_pImmediateContext->RSSetState(m_pRasterizerState.Get());
 	m_pImmediateContext->OMSetRenderTargets(1, 
 		m_pRenderTargetView.GetAddressOf(), 
 		m_pDepthStencilView.Get());
+
+	m_pPipelineState = D3D11PipelineState::Create(*m_pDevice.Get(), pipeline_desc);
 
 	InitializeNvAPI();
 	if (m_gfxCaps.bVariablePixelRateShadingSupported) 
@@ -253,6 +255,32 @@ void D3D11Context::StartFrameRender()
 	m_pImmediateContext->OMSetRenderTargets(1,
 		m_pRenderTargetView.GetAddressOf(),
 		m_pDepthStencilView.Get());
+}
+
+void D3D11Context::UpdateVSPerFrame(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projMatrix)
+{
+	m_pPipelineState->UpdateVSPerFrame(viewMatrix, projMatrix);
+}
+
+void D3D11Context::UpdatePSPerFrame(DirectX::XMVECTOR cameraPos, DirectX::XMVECTOR lightPos, DirectX::XMFLOAT4 lightColor)
+{
+	m_pPipelineState->UpdatePSPerFrame(cameraPos, lightPos, lightColor);
+}
+
+void D3D11Context::UpdateVSPerEntity(DirectX::XMMATRIX worldMatrix)
+{
+	m_pPipelineState->UpdateVSPerEntity(worldMatrix);
+}
+
+void D3D11Context::UpdatePSPerEntity(DirectX::XMFLOAT4 surfaceColor, float roughness)
+{
+	m_pPipelineState->UpdatePSPerEntity(surfaceColor, roughness);
+}
+
+void D3D11Context::BindConstantBuffers()
+{
+	m_pPipelineState->Bind(*m_pImmediateContext.Get());
+	m_pPipelineState->BindConstantBuffers(*m_pImmediateContext.Get());
 }
 
 void D3D11Context::DrawIndexed(unsigned int indexCount, unsigned int startIndexLocation, unsigned int baseVertexLocation)
@@ -296,6 +324,16 @@ void D3D11Context::Shutdown()
 	m_pSwapChain->Release();
 	m_pDevice->Release();
 	m_pImmediateContext->Release();
+}
+
+D3D11VertexBuffer* D3D11Context::CreateVertexBuffer(VERTEX_BUFFER_DESC desc)
+{
+	return D3D11VertexBuffer::Create(*m_pDevice.Get(), desc);
+}
+
+D3D11IndexBuffer* D3D11Context::CreateIndexBuffer(INDEX_BUFFER_DESC desc)
+{
+	return D3D11IndexBuffer::Create(*m_pDevice.Get(), desc);
 }
 
 void D3D11Context::InitializeNvAPI()

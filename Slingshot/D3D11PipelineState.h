@@ -1,8 +1,8 @@
 #pragma once
-#include "Mesh.h"
 #include "FileParsing.h"
 #include "Helpers.h"
-#include "D3D11Context.h"
+#include "D3D11Buffer.h"
+#include "Material.h"
 
 struct PIPELINE_DESC
 {

@@ -6,7 +6,7 @@ Renderer* Renderer::Create(HWND hWnd, RENDERER_DESC& renderer_desc)
 }
 
 Renderer::Renderer(HWND hWnd, RENDERER_DESC& renderer_desc) : 
-	m_pGraphicsContext(nullptr), m_pPipelineState(nullptr)
+	m_pGraphicsContext(nullptr)
 {
 	switch (renderer_desc.gfxContextType)
 	{
@@ -27,19 +27,19 @@ Renderer::Renderer(HWND hWnd, RENDERER_DESC& renderer_desc) :
 	}
 }
 
-bool Renderer::Initialize()
+bool Renderer::Initialize(PIPELINE_DESC pipeline_desc)
 {
-	return (m_pGraphicsContext->Initialize());
+	return (m_pGraphicsContext->Initialize(pipeline_desc));
 }
 
 void Renderer::Draw(Scene& scene)
 {
 	m_pGraphicsContext->StartFrameRender();
 	
-	m_pPipelineState->UpdateVSPerFrame(
+	m_pGraphicsContext->UpdateVSPerFrame(
 		DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetViewMatrix()),
 		DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetProjectionMatrix()));
-	m_pPipelineState->UpdatePSPerFrame(
+	m_pGraphicsContext->UpdatePSPerFrame(
 			DirectX::XMVector4Transform(
 				scene.GetCamera(scene.GetMainCameraID())->GetTransform()->GetPosition(), 
 				DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetTransform()->GetWorldMatrix())),
@@ -55,16 +55,14 @@ void Renderer::Draw(Scene& scene)
 			(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetVertexBuffer()->Bind(*m_pGraphicsContext->GetDeviceContext());
 			(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexBuffer()->Bind(*m_pGraphicsContext->GetDeviceContext());
 
-			m_pPipelineState->Bind(*m_pGraphicsContext->GetDeviceContext());
-
-			m_pPipelineState->UpdateVSPerEntity(
+			m_pGraphicsContext->UpdateVSPerEntity(
 				DirectX::XMMatrixTranspose((scene.GetEntityCollection() + i)->GetTransform()->GetWorldMatrix()));
 
-			m_pPipelineState->UpdatePSPerEntity(
+			m_pGraphicsContext->UpdatePSPerEntity(
 				(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetMaterial()->GetSurfaceColor(),
 				(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetMaterial()->GetRoughness());
 			
-			m_pPipelineState->BindConstantBuffers(*m_pGraphicsContext->GetDeviceContext());
+			m_pGraphicsContext->BindConstantBuffers();
 
 			m_pGraphicsContext->DrawIndexed((scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexBuffer()->GetIndexCount(), 0, 0);
 		}
@@ -81,17 +79,4 @@ void Renderer::Shutdown()
 D3D11Context* Renderer::GetGraphicsContext()
 {
 	return m_pGraphicsContext;
-}
-
-D3D11PipelineState* Renderer::GetPipelineState(ShadingModel shadingModel)
-{
-	//have a switch statement that returns corresponding pipeline state
-	//or loop through an array of pipeline states and match the vertex type with the queried argument
-
-	return m_pPipelineState;
-}
-
-void Renderer::SetPipelineState(const PIPELINE_DESC& pipelineDesc)
-{
-	m_pPipelineState = D3D11PipelineState::Create(*m_pGraphicsContext->GetDevice(), pipelineDesc);
 }
