@@ -1,11 +1,15 @@
 #include "Camera.h"
 
-Camera* Camera::Create(CAMERA_DESC& camera_desc, Transform& transform)
+Camera* Camera::Create(
+	CAMERA_DESC& camera_desc,
+	Transform& transform)
 {
 	return new Camera(camera_desc, transform);
 }
 
-Camera::Camera(CAMERA_DESC& camera_desc, Transform& transform) :
+Camera::Camera(
+	CAMERA_DESC& camera_desc,
+	Transform& transform) :
 	m_viewMatrix(), m_projectionMatrix(),
 	m_lastMouseX(0), m_lastMouseY(0),
 	m_rotationSpeed(camera_desc.rotationSpeed),

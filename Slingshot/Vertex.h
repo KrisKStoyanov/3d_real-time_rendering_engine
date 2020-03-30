@@ -1,6 +1,12 @@
 #pragma once
 #include "Transform.h"
 
+enum class ShadingModel : unsigned int
+{
+	GoochShading = 0,
+	OrenNayarShading
+};
+
 enum class Topology : unsigned int
 {
 	TRIANGLESTRIP = 0,
@@ -32,25 +38,25 @@ enum class ShaderType : unsigned int
 	PIXEL_SHADER
 };
 
-struct WVPData
+struct WVPData //vertex exclusive
 {
 	DirectX::XMMATRIX worldMatrix;
 	DirectX::XMMATRIX viewMatrix;
 	DirectX::XMMATRIX projMatrix;
 };
 
-struct WorldTransformData
+struct WorldTransformData //pixel exclusive
 {
 	DirectX::XMVECTOR camPos;
-	DirectX::XMVECTOR lightPos;
 };
 
-struct LightData
+struct LightData //pixel exclusive
 {
+	DirectX::XMVECTOR lightPos;
 	DirectX::XMFLOAT4 lightColor;
 };
 
-struct MaterialData
+struct MaterialData //pixel exclusive
 {
 	DirectX::XMFLOAT4 surfaceColor;
 	float roughness;

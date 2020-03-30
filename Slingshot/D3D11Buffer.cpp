@@ -127,13 +127,19 @@ D3D11IndexBuffer::D3D11IndexBuffer(ID3D11Device& device, INDEX_BUFFER_DESC desc)
 	SAFE_DELETE_ARRAY(desc.indexCollection);
 }
 
-D3D11ConstantBuffer* D3D11ConstantBuffer::Create(ID3D11Device& device, CONSTANT_BUFFER_DESC desc)
+D3D11ConstantBuffer* D3D11ConstantBuffer::Create(
+	ID3D11Device& device, 
+	CONSTANT_BUFFER_DESC desc,
+	unsigned int registerSlot)
 {
-	return new D3D11ConstantBuffer(device, desc);
+	return new D3D11ConstantBuffer(device, desc, registerSlot);
 }
 
-D3D11ConstantBuffer::D3D11ConstantBuffer(ID3D11Device& device, CONSTANT_BUFFER_DESC desc)
-	: m_shaderType(desc.shaderType), m_id(desc.id)
+D3D11ConstantBuffer::D3D11ConstantBuffer(
+	ID3D11Device& device, 
+	CONSTANT_BUFFER_DESC desc, 
+	unsigned int registerSlot)
+	: m_shaderType(desc.shaderType), m_registerSlot(registerSlot)
 {
 	//Ensure size is valid (multiple of 16 bytes)
 	desc.cbufferSize = ((desc.cbufferSize - 1) | 15) + 1;
@@ -168,12 +174,12 @@ void D3D11ConstantBuffer::Bind(ID3D11DeviceContext& deviceContext, void* data)
 	{
 	case ShaderType::VERTEX_SHADER:
 	{
-		deviceContext.VSSetConstantBuffers(m_id, 1, &m_pBuffer);
+		deviceContext.VSSetConstantBuffers(m_registerSlot, 1, &m_pBuffer);
 	}
 	break;
 	case ShaderType::PIXEL_SHADER:
 	{
-		deviceContext.PSSetConstantBuffers(m_id, 1, &m_pBuffer);
+		deviceContext.PSSetConstantBuffers(m_registerSlot, 1, &m_pBuffer);
 	}
 	break;
 	}

@@ -1,5 +1,4 @@
 #pragma once
-#include "D3D11Context.h"
 #include "Material.h"
 
 struct MESH_DESC 

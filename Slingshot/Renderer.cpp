@@ -48,23 +48,24 @@ void Renderer::Draw(Scene& scene)
 			DirectX::XMMatrixTranspose((scene.GetEntityCollection() + 1)->GetTransform()->GetWorldMatrix())),
 			(scene.GetEntityCollection() + 1)->GetLight()->GetColor());
 
-	for (unsigned int i = 0; i < scene.GetEntityCount(); ++i)
+	for (int i = 0; i < scene.GetEntityCount(); ++i)
 	{
-		if((scene.GetEntityCollection() + i)->GetModel())
+		Entity& entity = *(scene.GetEntityCollection() + i);
+		if(entity.GetModel())
 		{
 			m_pGraphicsContext->BindMeshBuffers(
-				*static_cast<D3D11VertexBuffer*>((scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetVertexBuffer()),
-				*static_cast<D3D11IndexBuffer*>((scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexBuffer()));
+				*static_cast<D3D11VertexBuffer*>(entity.GetModel()->GetMesh()->GetVertexBuffer()),
+				*static_cast<D3D11IndexBuffer*>(entity.GetModel()->GetMesh()->GetIndexBuffer()));
 
 			m_pGraphicsContext->UpdatePipelinePerModel(
-				DirectX::XMMatrixTranspose((scene.GetEntityCollection() + i)->GetTransform()->GetWorldMatrix()),
-				(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetMaterial()->GetSurfaceColor(),
-				(scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetMaterial()->GetRoughness());
+				DirectX::XMMatrixTranspose(entity.GetTransform()->GetWorldMatrix()),
+				entity.GetModel()->GetMesh()->GetMaterial()->GetSurfaceColor(),
+				entity.GetModel()->GetMesh()->GetMaterial()->GetRoughness());
 			
 			m_pGraphicsContext->BindConstantBuffers();
 
 			//Forward implementation
-			m_pGraphicsContext->DrawIndexed((scene.GetEntityCollection() + i)->GetModel()->GetMesh()->GetIndexBuffer()->GetElementCount(), 0, 0);
+			m_pGraphicsContext->DrawIndexed(entity.GetModel()->GetMesh()->GetIndexBuffer()->GetElementCount(), 0, 0);
 		}
 	}
 

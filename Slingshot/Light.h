@@ -21,10 +21,7 @@ public:
 	float GetIntensity();
 	DirectX::XMFLOAT4 GetColor();
 private:
-	Light(LIGHT_DESC light_desc) : 
-		m_intensity(light_desc.intensity),
-		m_color(light_desc.color),
-		m_type(light_desc.type) {}
+	Light(LIGHT_DESC light_desc);
 	LightType m_type;
 	float m_intensity;
 	DirectX::XMFLOAT4 m_color;

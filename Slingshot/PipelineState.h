@@ -1,7 +1,8 @@
 #pragma once
 #include "Helpers.h"
-#include "Material.h"
+#include "Macros.h"
 #include "FileParsing.h"
+#include "Vertex.h"
 
 struct PIPELINE_DESC
 {

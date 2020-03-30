@@ -72,29 +72,25 @@ D3D11PipelineState::D3D11PipelineState(ID3D11Device& device, const PIPELINE_DESC
 	desc0.cbufferData = &m_wvpData;
 	desc0.cbufferSize = sizeof(m_wvpData);
 	desc0.shaderType = ShaderType::VERTEX_SHADER;
-	desc0.id = 0;
-	m_pVS_WVP_CBuffer = D3D11ConstantBuffer::Create(device, desc0);
+	m_pVS_WVP_CBuffer = D3D11ConstantBuffer::Create(device, desc0, 0);
 
 	CONSTANT_BUFFER_DESC desc1;
 	desc1.cbufferData = &m_worldTransformData;
 	desc1.cbufferSize = 64; //sizeof(m_worldTransformData) inaccurate interpretation - pending fix
 	desc1.shaderType = ShaderType::PIXEL_SHADER;
-	desc1.id = 0;
-	m_pPS_WorldTransform_CBuffer = D3D11ConstantBuffer::Create(device, desc1);
+	m_pPS_WorldTransform_CBuffer = D3D11ConstantBuffer::Create(device, desc1, 0);
 
 	CONSTANT_BUFFER_DESC desc2;
 	desc2.cbufferData = &m_lightData;
 	desc2.cbufferSize = sizeof(m_lightData); 
 	desc2.shaderType = ShaderType::PIXEL_SHADER;
-	desc2.id = 1;
-	m_pPS_Light_CBuffer = D3D11ConstantBuffer::Create(device, desc2);
+	m_pPS_Light_CBuffer = D3D11ConstantBuffer::Create(device, desc2, 1);
 
 	CONSTANT_BUFFER_DESC desc3;
 	desc3.cbufferData = &m_materialData; 
 	desc3.cbufferSize = sizeof(m_materialData); 
 	desc3.shaderType = ShaderType::PIXEL_SHADER;
-	desc3.id = 2;
-	m_pPS_Material_CBuffer = D3D11ConstantBuffer::Create(device, desc3);
+	m_pPS_Material_CBuffer = D3D11ConstantBuffer::Create(device, desc3, 2);
 
 	SAFE_DELETE_ARRAY(ColorVS_bytecode);
 	SAFE_DELETE_ARRAY(ColorPS_bytecode);
@@ -121,7 +117,7 @@ void D3D11PipelineState::UpdateVSPerFrame(DirectX::XMMATRIX viewMatrix, DirectX:
 void D3D11PipelineState::UpdatePSPerFrame(DirectX::XMVECTOR cameraPos, DirectX::XMVECTOR lightPos, DirectX::XMFLOAT4 lightColor)
 {
 	m_worldTransformData.camPos = cameraPos;
-	m_worldTransformData.lightPos = lightPos;
+	m_lightData.lightPos = lightPos;
 	m_lightData.lightColor = lightColor;
 }
 
