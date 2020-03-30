@@ -5,7 +5,7 @@ D3D11Context* D3D11Context::Create(HWND hWnd)
 	return new D3D11Context(hWnd);
 }
 
-D3D11Context::D3D11Context(HWND hWnd) 
+D3D11Context::D3D11Context(HWND hWnd)
 	: m_cbufferVSRegCounter(0), m_cbufferPSRegCounter(0)
 {
 	RECT winRect;
@@ -230,7 +230,7 @@ void D3D11Context::SetupDebugLayer()
 	m_pInfoQueue->AddStorageFilterEntries(&filter);
 }
 
-bool D3D11Context::Initialize(PIPELINE_DESC pipeline_desc)
+bool D3D11Context::Initialize()
 {
 	m_pImmediateContext->RSSetViewports(1, &m_viewport);
 	m_pImmediateContext->RSSetState(m_pRasterizerState.Get());
@@ -238,7 +238,7 @@ bool D3D11Context::Initialize(PIPELINE_DESC pipeline_desc)
 		m_pRenderTargetView.GetAddressOf(), 
 		m_pDepthStencilView.Get());
 
-	m_pPipelineState = D3D11PipelineState::Create(*m_pDevice.Get(), pipeline_desc);
+	//m_pPipelineState = D3D11PipelineState::Create(*m_pDevice.Get(), pipeline_desc);
 
 	InitializeNvAPI();
 	if (m_gfxCaps.bVariablePixelRateShadingSupported) 
@@ -264,31 +264,29 @@ void D3D11Context::BindMeshBuffers(D3D11VertexBuffer& vertexBuffer, D3D11IndexBu
 	indexBuffer.Bind(*m_pImmediateContext.Get());
 }
 
-void D3D11Context::BindPipelineState(ShadingModel shadingModel)
+void D3D11Context::BindPipelineState(D3D11PipelineState& pipelineState)
 {
-	//Will be iterated on to feature instrumentation of multiple pipeline states
-	m_pPipelineState->Bind(*m_pImmediateContext.Get());
+	pipelineState.Bind(*m_pImmediateContext.Get());
 }
 
-void D3D11Context::UpdatePipelinePerFrame(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projMatrix, DirectX::XMVECTOR cameraPos, DirectX::XMVECTOR lightPos, DirectX::XMFLOAT4 lightColor)
+void D3D11Context::BindConstantBuffers(D3D11PipelineState& pipelineState)
 {
-	m_pPipelineState->UpdateVSPerFrame(viewMatrix, projMatrix);
-	m_pPipelineState->UpdatePSPerFrame(cameraPos, lightPos, lightColor);
+	pipelineState.BindConstantBuffers(*m_pImmediateContext.Get());
 }
 
-void D3D11Context::UpdatePipelinePerModel(DirectX::XMMATRIX worldMatrix, DirectX::XMFLOAT4 surfaceColor, float roughness)
+void D3D11Context::BindConstantBuffer(D3D11ConstantBuffer& constantBuffer, void* data)
 {
-	m_pPipelineState->UpdateVSPerModel(worldMatrix);
-	m_pPipelineState->UpdatePSPerModel(surfaceColor, roughness);
+	constantBuffer.Bind(*m_pImmediateContext.Get(), data);
 }
 
-void D3D11Context::BindConstantBuffers()
-{
-	m_pPipelineState->BindConstantBuffers(*m_pImmediateContext.Get());
-}
 void D3D11Context::DrawIndexed(unsigned int indexCount, unsigned int startIndexLocation, unsigned int baseVertexLocation)
 {
 	m_pImmediateContext->DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
+}
+
+D3D11PipelineState* D3D11Context::CreatePipelineState(PIPELINE_DESC desc)
+{
+	return D3D11PipelineState::Create(*m_pDevice.Get(), desc);
 }
 
 void D3D11Context::EndFrameRender()
@@ -341,6 +339,11 @@ D3D11ConstantBuffer* D3D11Context::CreateConstantBuffer(CONSTANT_BUFFER_DESC des
 	{
 		return D3D11ConstantBuffer::Create(*m_pDevice.Get(), desc, m_cbufferPSRegCounter);
 		m_cbufferPSRegCounter++;
+	}
+	break;
+	default:
+	{
+		return nullptr;
 	}
 	break;
 	}

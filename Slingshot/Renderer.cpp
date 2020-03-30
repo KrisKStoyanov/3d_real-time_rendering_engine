@@ -29,15 +29,20 @@ Renderer::Renderer(HWND hWnd, RENDERER_DESC& renderer_desc) :
 
 bool Renderer::Initialize(PIPELINE_DESC pipeline_desc)
 {
-	return (m_pGraphicsContext->Initialize(pipeline_desc));
+	if (!m_pGraphicsContext->Initialize())
+	{
+		return false;
+	}
+	m_pPipelineState = m_pGraphicsContext->CreatePipelineState(pipeline_desc);
+	return (m_pPipelineState != nullptr);
 }
 
 void Renderer::Draw(Scene& scene)
 {
 	m_pGraphicsContext->StartFrameRender();
-	m_pGraphicsContext->BindPipelineState(ShadingModel::GoochShading);
+	m_pGraphicsContext->BindPipelineState(*m_pPipelineState);
 
-	m_pGraphicsContext->UpdatePipelinePerFrame(
+	m_pPipelineState->UpdatePerFrame(
 		DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetViewMatrix()),
 		DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetProjectionMatrix()),
 		DirectX::XMVector4Transform(
@@ -48,6 +53,7 @@ void Renderer::Draw(Scene& scene)
 			DirectX::XMMatrixTranspose((scene.GetEntityCollection() + 1)->GetTransform()->GetWorldMatrix())),
 			(scene.GetEntityCollection() + 1)->GetLight()->GetColor());
 
+
 	for (int i = 0; i < scene.GetEntityCount(); ++i)
 	{
 		Entity& entity = *(scene.GetEntityCollection() + i);
@@ -57,12 +63,12 @@ void Renderer::Draw(Scene& scene)
 				*static_cast<D3D11VertexBuffer*>(entity.GetModel()->GetMesh()->GetVertexBuffer()),
 				*static_cast<D3D11IndexBuffer*>(entity.GetModel()->GetMesh()->GetIndexBuffer()));
 
-			m_pGraphicsContext->UpdatePipelinePerModel(
+			m_pPipelineState->UpdatePerModel(
 				DirectX::XMMatrixTranspose(entity.GetTransform()->GetWorldMatrix()),
 				entity.GetModel()->GetMesh()->GetMaterial()->GetSurfaceColor(),
 				entity.GetModel()->GetMesh()->GetMaterial()->GetRoughness());
 			
-			m_pGraphicsContext->BindConstantBuffers();
+			m_pGraphicsContext->BindConstantBuffers(*m_pPipelineState);
 
 			//Forward implementation
 			m_pGraphicsContext->DrawIndexed(entity.GetModel()->GetMesh()->GetIndexBuffer()->GetElementCount(), 0, 0);
@@ -74,6 +80,7 @@ void Renderer::Draw(Scene& scene)
 
 void Renderer::Shutdown()
 {
+	m_pPipelineState->Shutdown();
 	m_pGraphicsContext->Shutdown();
 }
 

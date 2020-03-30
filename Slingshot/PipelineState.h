@@ -22,6 +22,11 @@ public:
 	{
 		m_shadingModel = shadingModel;
 	}
+
+	//virtual void UpdatePerFrame() = 0;
+	//virtual void UpdatePerModel() = 0;
+	//virtual void Shutdown() = 0;
+
 private:
 
 	ShadingModel m_shadingModel;

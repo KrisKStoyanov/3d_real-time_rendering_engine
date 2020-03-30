@@ -4,14 +4,14 @@
 struct SCENE_DESC
 {
 	Entity* entityCollection;
-	unsigned int entityCount;
-	unsigned int mainCameraId;
+	int entityCount;
+	int mainCameraId;
 };
 
 class Scene
 {
 public:
-	inline static Scene* Create(unsigned int id, SCENE_DESC& scene_desc)
+	inline static Scene* Create(int id, SCENE_DESC& scene_desc)
 	{
 		return new Scene(id, scene_desc);
 	}
@@ -19,17 +19,17 @@ public:
 	void OnUpdate();
 	void Shutdown();
 
-	inline unsigned int GetID() 
+	inline int GetID() 
 	{ 
 		return m_id; 
 	}
 
-	inline void UpdateCamera(unsigned int cameraId)
+	inline void UpdateCamera(int cameraId)
 	{
 		(m_pEntityCollection + cameraId)->GetCamera()->Update(*(m_pEntityCollection + cameraId)->GetTransform());
 	}
 
-	inline Entity* GetCamera(unsigned int cameraId)
+	inline Entity* GetCamera(int cameraId)
 	{
 		return (m_pEntityCollection + cameraId);
 	}
@@ -44,25 +44,25 @@ public:
 		return m_pEntityCollection;
 	}
 
-	inline unsigned int GetEntityCount()
+	inline int GetEntityCount()
 	{
 		return m_entityCount;
 	}
 
-	inline unsigned int GetMainCameraID()
+	inline int GetMainCameraID()
 	{
 		return m_mainCameraId;
 	}
 private:
-	Scene(unsigned int id, SCENE_DESC& scene_desc);
+	Scene(int id, SCENE_DESC& scene_desc);
 
-	unsigned int m_id;
-	unsigned int m_mainCameraId;
+	int m_id;
+	int m_mainCameraId;
 
 	Entity* m_pEntityCollection;
-	unsigned int m_entityCount;
+	int m_entityCount;
 
-	unsigned int m_lightStartId;
-	unsigned int m_lightCount;
+	int m_lightStartId;
+	int m_lightCount;
 };
 

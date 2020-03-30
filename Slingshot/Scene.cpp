@@ -2,7 +2,7 @@
 
 void Scene::OnUpdate()
 {
-	for (unsigned int i = 0; i < m_entityCount; ++i) 
+	for (int i = 0; i < m_entityCount; ++i) 
 	{
 		(m_pEntityCollection + i)->GetTransform()->Update();
 	}
@@ -11,13 +11,13 @@ void Scene::OnUpdate()
 
 void Scene::Shutdown()
 {
-	for (unsigned int i = 0; i < m_entityCount; ++i) 
+	for (int i = 0; i < m_entityCount; ++i) 
 	{
 		(m_pEntityCollection + i)->Shutdown();
 	}
 }
 
-Scene::Scene(unsigned int id, SCENE_DESC& scene_desc) :
+Scene::Scene(int id, SCENE_DESC& scene_desc) :
 	m_id(id), m_entityCount(scene_desc.entityCount),
 	m_mainCameraId(scene_desc.mainCameraId)
 {

@@ -8,15 +8,16 @@ public:
 	static D3D11PipelineState* Create(ID3D11Device& device, const PIPELINE_DESC& shader_desc);
 	void Shutdown();
 
-	void UpdateVSPerFrame(
+	void UpdatePerFrame(
 		DirectX::XMMATRIX viewMatrix,
-		DirectX::XMMATRIX projMatrix);
-	void UpdatePSPerFrame(
+		DirectX::XMMATRIX projMatrix,
 		DirectX::XMVECTOR cameraPos,
 		DirectX::XMVECTOR lightPos,
 		DirectX::XMFLOAT4 lightColor);
-	void UpdateVSPerModel(DirectX::XMMATRIX worldMatrix);
-	void UpdatePSPerModel(DirectX::XMFLOAT4 surfaceColor, float roughness);
+	void UpdatePerModel(
+		DirectX::XMMATRIX worldMatrix,
+		DirectX::XMFLOAT4 surfaceColor, 
+		float roughness);
 
 	void Bind(ID3D11DeviceContext& deviceContext);
 	void BindConstantBuffers(ID3D11DeviceContext& deviceContext);

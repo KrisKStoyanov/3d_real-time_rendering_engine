@@ -11,44 +11,43 @@ class D3D11Context : public GraphicsContext
 {
 public:
 	static D3D11Context * Create(HWND hWnd);
-	bool Initialize(PIPELINE_DESC pipeline_desc);
-	void Shutdown();
+	virtual bool Initialize() override;
+	virtual void Shutdown() override;
 
-	void StartFrameRender();
-	void EndFrameRender();
+	virtual void StartFrameRender() override;
+	virtual void EndFrameRender() override;
 	
 	void BindMeshBuffers(
 		D3D11VertexBuffer& vertexBuffer, 
 		D3D11IndexBuffer& indexBuffer);
 
-	void UpdatePipelinePerFrame(
-		DirectX::XMMATRIX viewMatrix,
-		DirectX::XMMATRIX projMatrix,
-		DirectX::XMVECTOR cameraPos,
-		DirectX::XMVECTOR lightPos,
-		DirectX::XMFLOAT4 lightColor);
+	void BindPipelineState(
+		D3D11PipelineState& pipelineState);
 
-	void UpdatePipelinePerModel(
-		DirectX::XMMATRIX worldMatrix,
-		DirectX::XMFLOAT4 surfaceColor, 
-		float roughness);
+	//Temporary solution
+	void BindConstantBuffers(
+		D3D11PipelineState& pipelineState);
 
-	void BindPipelineState(ShadingModel shadingModel);
-	void BindConstantBuffers();
+	void BindConstantBuffer(
+		D3D11ConstantBuffer& constantBuffer, void* data);
 
-	void DrawIndexed(
+	virtual void DrawIndexed(
 		unsigned int indexCount, 
 		unsigned int startIndex, 
-		unsigned int baseVertexLocation);
+		unsigned int baseVertexLocation) override;
 
-	D3D11VertexBuffer* CreateVertexBuffer(VERTEX_BUFFER_DESC desc) override;
-	D3D11IndexBuffer* CreateIndexBuffer(INDEX_BUFFER_DESC desc) override;
-	D3D11ConstantBuffer* CreateConstantBuffer(CONSTANT_BUFFER_DESC desc) override;
+	virtual D3D11PipelineState* CreatePipelineState(PIPELINE_DESC desc) override;
+	virtual D3D11VertexBuffer* CreateVertexBuffer(VERTEX_BUFFER_DESC desc) override;
+	virtual D3D11IndexBuffer* CreateIndexBuffer(INDEX_BUFFER_DESC desc) override;
+	virtual D3D11ConstantBuffer* CreateConstantBuffer(CONSTANT_BUFFER_DESC desc) override;
 
 	void SetVRS(bool enable);
 	bool GetVRS();
 
-	inline ContextType GetContextType() { return ContextType::D3D11; }
+	inline ContextType GetContextType() 
+	{ 
+		return ContextType::D3D11; 
+	}
 private:
 	D3D11Context(HWND hWnd);
 
@@ -78,8 +77,6 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_pRasterizerState;
 	D3D11_VIEWPORT m_viewport;
-
-	D3D11PipelineState* m_pPipelineState;
 
 	//Debugging Tools
 	Microsoft::WRL::ComPtr<ID3D11Debug> m_pDebugLayer;

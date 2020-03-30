@@ -108,27 +108,28 @@ void D3D11PipelineState::Shutdown()
 	SAFE_DESTROY(m_pPS_Material_CBuffer);
 }
 
-void D3D11PipelineState::UpdateVSPerFrame(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projMatrix)
+void D3D11PipelineState::UpdatePerFrame(
+	DirectX::XMMATRIX viewMatrix, 
+	DirectX::XMMATRIX projMatrix,
+	DirectX::XMVECTOR cameraPos, 
+	DirectX::XMVECTOR lightPos, 
+	DirectX::XMFLOAT4 lightColor)
 {
 	m_wvpData.viewMatrix = viewMatrix;
 	m_wvpData.projMatrix = projMatrix;
-}
-
-void D3D11PipelineState::UpdatePSPerFrame(DirectX::XMVECTOR cameraPos, DirectX::XMVECTOR lightPos, DirectX::XMFLOAT4 lightColor)
-{
 	m_worldTransformData.camPos = cameraPos;
 	m_lightData.lightPos = lightPos;
 	m_lightData.lightColor = lightColor;
 }
 
-void D3D11PipelineState::UpdateVSPerModel(DirectX::XMMATRIX worldMatrix)
+void D3D11PipelineState::UpdatePerModel(
+	DirectX::XMMATRIX worldMatrix,
+	DirectX::XMFLOAT4 surfaceColor, 
+	float roughness)
 {
 	m_wvpData.worldMatrix = worldMatrix;
-}
-
-void D3D11PipelineState::UpdatePSPerModel(DirectX::XMFLOAT4 surfaceColor, float roughness)
-{
-	m_materialData.surfaceColor = surfaceColor, roughness;
+	m_materialData.surfaceColor = surfaceColor;
+	m_materialData.roughness = roughness;
 }
 
 void D3D11PipelineState::Bind(ID3D11DeviceContext& deviceContext)

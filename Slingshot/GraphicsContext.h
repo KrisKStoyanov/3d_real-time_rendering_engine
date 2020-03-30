@@ -16,6 +16,24 @@ enum class ContextType : unsigned int
 class GraphicsContext
 {
 public:
+	virtual bool Initialize() = 0;
+	virtual void Shutdown() = 0;
+
+	//virtual void BindPipelineState(PipelineState&) = 0;
+	//virtual void BindMeshBuffers(Buffer& vertexBuffer, Buffer& indexBuffer) = 0;
+	//virtual void BindConstantBuffer(Buffer& constantBuffer) = 0;
+
+	virtual void StartFrameRender() = 0;
+	virtual void EndFrameRender() = 0;
+
+	virtual void DrawIndexed(
+		unsigned int indexCount,
+		unsigned int startIndex,
+		unsigned int baseVertexLocation) = 0;
+	//virtual void Draw() = 0;
+	//virtual void DrawInstanced() = 0;
+
+	virtual PipelineState* CreatePipelineState(PIPELINE_DESC) = 0;
 	virtual Buffer* CreateVertexBuffer(VERTEX_BUFFER_DESC) = 0;
 	virtual Buffer* CreateIndexBuffer(INDEX_BUFFER_DESC) = 0;
 	virtual Buffer* CreateConstantBuffer(CONSTANT_BUFFER_DESC) = 0;
