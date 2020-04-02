@@ -50,8 +50,7 @@ class D3D11ConstantBuffer : public Buffer
 public:
 	static D3D11ConstantBuffer* Create(
 		ID3D11Device& device,
-		CONSTANT_BUFFER_DESC desc,
-		unsigned int registerSlot);
+		CONSTANT_BUFFER_DESC desc);
 	void Destroy() override; 
 	void Bind(ID3D11DeviceContext& deviceContext, void* data);
 
@@ -59,8 +58,7 @@ public:
 private:
 	D3D11ConstantBuffer(
 		ID3D11Device& device,
-		CONSTANT_BUFFER_DESC desc,
-		unsigned int registerSlot);
+		CONSTANT_BUFFER_DESC desc);
 	ID3D11Buffer* m_pBuffer;
 	ShaderType m_shaderType;
 	unsigned int m_registerSlot;

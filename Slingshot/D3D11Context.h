@@ -90,8 +90,4 @@ private:
 	NV_D3D1x_GRAPHICS_CAPS m_gfxCaps;
 	bool m_enableNvAPI;
 	bool m_enableVRS;
-
-	//Might be more optimal to store in the pipeline state
-	unsigned int m_cbufferVSRegCounter;
-	unsigned int m_cbufferPSRegCounter;
 };

@@ -37,5 +37,8 @@ private:
 	WorldTransformData m_worldTransformData;
 	LightData m_lightData;
 	MaterialData m_materialData;
+
+	unsigned int m_cbufferVSRegCounter;
+	unsigned int m_cbufferPSRegCounter;
 };
 

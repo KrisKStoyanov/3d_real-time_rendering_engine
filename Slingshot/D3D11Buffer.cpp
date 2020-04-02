@@ -129,17 +129,15 @@ D3D11IndexBuffer::D3D11IndexBuffer(ID3D11Device& device, INDEX_BUFFER_DESC desc)
 
 D3D11ConstantBuffer* D3D11ConstantBuffer::Create(
 	ID3D11Device& device, 
-	CONSTANT_BUFFER_DESC desc,
-	unsigned int registerSlot)
+	CONSTANT_BUFFER_DESC desc)
 {
-	return new D3D11ConstantBuffer(device, desc, registerSlot);
+	return new D3D11ConstantBuffer(device, desc);
 }
 
 D3D11ConstantBuffer::D3D11ConstantBuffer(
 	ID3D11Device& device, 
-	CONSTANT_BUFFER_DESC desc, 
-	unsigned int registerSlot)
-	: m_shaderType(desc.shaderType), m_registerSlot(registerSlot)
+	CONSTANT_BUFFER_DESC desc)
+	: m_shaderType(desc.shaderType), m_registerSlot(desc.registerSlot)
 {
 	//Ensure size is valid (multiple of 16 bytes)
 	desc.cbufferSize = ((desc.cbufferSize - 1) | 15) + 1;

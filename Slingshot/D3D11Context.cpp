@@ -6,7 +6,6 @@ D3D11Context* D3D11Context::Create(HWND hWnd)
 }
 
 D3D11Context::D3D11Context(HWND hWnd)
-	: m_cbufferVSRegCounter(0), m_cbufferPSRegCounter(0)
 {
 	RECT winRect;
 	GetWindowRect(hWnd, &winRect);
@@ -331,14 +330,12 @@ D3D11ConstantBuffer* D3D11Context::CreateConstantBuffer(CONSTANT_BUFFER_DESC des
 	{
 	case ShaderType::VERTEX_SHADER:
 	{
-		return D3D11ConstantBuffer::Create(*m_pDevice.Get(), desc, m_cbufferVSRegCounter);
-		m_cbufferVSRegCounter++;
+		return D3D11ConstantBuffer::Create(*m_pDevice.Get(), desc);
 	}
 	break;
 	case ShaderType::PIXEL_SHADER:
 	{
-		return D3D11ConstantBuffer::Create(*m_pDevice.Get(), desc, m_cbufferPSRegCounter);
-		m_cbufferPSRegCounter++;
+		return D3D11ConstantBuffer::Create(*m_pDevice.Get(), desc);
 	}
 	break;
 	default:

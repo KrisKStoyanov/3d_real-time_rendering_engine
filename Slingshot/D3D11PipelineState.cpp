@@ -6,7 +6,7 @@ D3D11PipelineState* D3D11PipelineState::Create(ID3D11Device& device, const PIPEL
 }
 
 D3D11PipelineState::D3D11PipelineState(ID3D11Device& device, const PIPELINE_DESC& pipeline_desc) :
-	m_pVS(nullptr), m_pPS(nullptr), m_pIL(nullptr)
+	m_pVS(nullptr), m_pPS(nullptr), m_pIL(nullptr), m_cbufferVSRegCounter(0), m_cbufferPSRegCounter(0)
 {
 	char* ColorVS_bytecode = nullptr, * ColorPS_bytecode = nullptr;
 	size_t ColorVS_size, ColorPS_size;
@@ -72,25 +72,33 @@ D3D11PipelineState::D3D11PipelineState(ID3D11Device& device, const PIPELINE_DESC
 	desc0.cbufferData = &m_wvpData;
 	desc0.cbufferSize = sizeof(m_wvpData);
 	desc0.shaderType = ShaderType::VERTEX_SHADER;
-	m_pVS_WVP_CBuffer = D3D11ConstantBuffer::Create(device, desc0, 0);
+	desc0.registerSlot = m_cbufferVSRegCounter;
+	m_pVS_WVP_CBuffer = D3D11ConstantBuffer::Create(device, desc0);
+	m_cbufferVSRegCounter++;
 
 	CONSTANT_BUFFER_DESC desc1;
 	desc1.cbufferData = &m_worldTransformData;
 	desc1.cbufferSize = 64; //sizeof(m_worldTransformData) inaccurate interpretation - pending fix
 	desc1.shaderType = ShaderType::PIXEL_SHADER;
-	m_pPS_WorldTransform_CBuffer = D3D11ConstantBuffer::Create(device, desc1, 0);
+	desc1.registerSlot = m_cbufferPSRegCounter;
+	m_pPS_WorldTransform_CBuffer = D3D11ConstantBuffer::Create(device, desc1);
+	m_cbufferPSRegCounter++;
 
 	CONSTANT_BUFFER_DESC desc2;
 	desc2.cbufferData = &m_lightData;
 	desc2.cbufferSize = sizeof(m_lightData); 
 	desc2.shaderType = ShaderType::PIXEL_SHADER;
-	m_pPS_Light_CBuffer = D3D11ConstantBuffer::Create(device, desc2, 1);
+	desc2.registerSlot = m_cbufferPSRegCounter;
+	m_pPS_Light_CBuffer = D3D11ConstantBuffer::Create(device, desc2);
+	m_cbufferPSRegCounter++;
 
 	CONSTANT_BUFFER_DESC desc3;
 	desc3.cbufferData = &m_materialData; 
 	desc3.cbufferSize = sizeof(m_materialData); 
 	desc3.shaderType = ShaderType::PIXEL_SHADER;
-	m_pPS_Material_CBuffer = D3D11ConstantBuffer::Create(device, desc3, 2);
+	desc3.registerSlot = m_cbufferPSRegCounter;
+	m_pPS_Material_CBuffer = D3D11ConstantBuffer::Create(device, desc3);
+	m_cbufferPSRegCounter++;
 
 	SAFE_DELETE_ARRAY(ColorVS_bytecode);
 	SAFE_DELETE_ARRAY(ColorPS_bytecode);

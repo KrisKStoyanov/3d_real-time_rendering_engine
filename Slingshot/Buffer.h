@@ -23,6 +23,7 @@ struct CONSTANT_BUFFER_DESC
 	void* cbufferData;
 	unsigned int cbufferSize;
 	ShaderType shaderType;
+	unsigned int registerSlot;
 };
 
 class Buffer
