@@ -14,8 +14,8 @@ public:
 	virtual bool Initialize() override;
 	virtual void Shutdown() override;
 
-	virtual void StartFrameRender() override;
-	virtual void EndFrameRender() override;
+	void StartFrameRender(D3D11PipelineState& pipelineState);
+	void EndFrameRender();
 	
 	void BindMeshBuffers(
 		D3D11VertexBuffer& vertexBuffer, 
@@ -30,6 +30,11 @@ public:
 
 	void BindConstantBuffer(
 		D3D11ConstantBuffer& constantBuffer, void* data);
+
+	void Dispatch(
+		unsigned int nX, 
+		unsigned int nY, 
+		unsigned int nZ);
 
 	virtual void DrawIndexed(
 		unsigned int indexCount, 
@@ -57,25 +62,15 @@ private:
 	void CreateDeviceAndContext();
 	void CreateSwapChain(
 		HWND hWnd, UINT winWidth, UINT winHeight);
-	void CreateRenderTargetView();
-	void CreateDepthStencilBuffer(
-		UINT winWidth, UINT winHeight);
-	void CreateDepthStencilView();
-	void CreateRasterizerState();
-	void SetupViewport(UINT winWidth, UINT winHeight);
 
+
+	void SetupViewport(UINT winWidth, UINT winHeight);
 	void SetupDebugLayer();
 
-	float m_clearColor[4];
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pImmediateContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> m_pSwapChain;
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_pRenderTargetView;
 
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_pDepthStencilBuffer;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_pDepthStencilView;
-
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_pRasterizerState;
 	D3D11_VIEWPORT m_viewport;
 
 	//Debugging Tools

@@ -34,6 +34,11 @@ Mesh::Mesh(GraphicsContext& graphicsContext, MESH_DESC& mesh_desc, MATERIAL_DESC
 		mesh_desc.vertex_buffer_desc.stride = sizeof(OrenNayarVertex);
 		mesh_desc.vertex_buffer_desc.offset = 0;
 	}
+	case ShadingModel::FinalGathering:
+	{
+		mesh_desc.vertex_buffer_desc.stride = sizeof(FinalGatheringVertex);
+		mesh_desc.vertex_buffer_desc.offset = 0;
+	}
 	break;
 	}
 

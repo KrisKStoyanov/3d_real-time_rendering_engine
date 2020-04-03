@@ -161,6 +161,9 @@
     <None Include="OrenNayar.hlsli">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="FinalGathering.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="GoochPS.hlsl">
@@ -173,6 +176,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="OrenNayarPS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FinalGatheringVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FinalGatheringPS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

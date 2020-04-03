@@ -26,6 +26,15 @@ struct CONSTANT_BUFFER_DESC
 	unsigned int registerSlot;
 };
 
+struct STRUCTURED_BUFFER_DESC
+{
+	unsigned int structureSize;
+	unsigned int byteStride; //<- size of largest struct element
+	unsigned int registerSlot;
+	unsigned int numStructs;
+	unsigned int numElementsPerStruct;
+};
+
 class Buffer
 {
 public:

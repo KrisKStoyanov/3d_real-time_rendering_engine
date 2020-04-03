@@ -4,7 +4,8 @@
 enum class ShadingModel : unsigned int
 {
 	GoochShading = 0,
-	OrenNayarShading
+	OrenNayarShading,
+	FinalGathering
 };
 
 enum class Topology : unsigned int
@@ -32,32 +33,14 @@ struct OrenNayarVertex : public Vertex
 	DirectX::XMFLOAT4 normal;
 };
 
+struct FinalGatheringVertex : public Vertex
+{
+	DirectX::XMFLOAT4 normal;
+};
+
 enum class ShaderType : unsigned int
 {
 	VERTEX_SHADER = 0,
-	PIXEL_SHADER
-};
-
-struct WVPData //vertex exclusive
-{
-	DirectX::XMMATRIX worldMatrix;
-	DirectX::XMMATRIX viewMatrix;
-	DirectX::XMMATRIX projMatrix;
-};
-
-struct WorldTransformData //pixel exclusive
-{
-	DirectX::XMVECTOR camPos;
-};
-
-struct LightData //pixel exclusive
-{
-	DirectX::XMVECTOR lightPos;
-	DirectX::XMFLOAT4 lightColor;
-};
-
-struct MaterialData //pixel exclusive
-{
-	DirectX::XMFLOAT4 surfaceColor;
-	float roughness;
+	PIXEL_SHADER,
+	COMPUTE_SHADER
 };

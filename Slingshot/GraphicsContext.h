@@ -23,8 +23,8 @@ public:
 	//virtual void BindMeshBuffers(Buffer& vertexBuffer, Buffer& indexBuffer) = 0;
 	//virtual void BindConstantBuffer(Buffer& constantBuffer) = 0;
 
-	virtual void StartFrameRender() = 0;
-	virtual void EndFrameRender() = 0;
+	//virtual void StartFrameRender() = 0;
+	//virtual void EndFrameRender() = 0;
 
 	virtual void DrawIndexed(
 		unsigned int indexCount,

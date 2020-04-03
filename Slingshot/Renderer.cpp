@@ -39,8 +39,9 @@ bool Renderer::Initialize(PIPELINE_DESC pipeline_desc)
 
 void Renderer::Draw(Scene& scene)
 {
-	m_pGraphicsContext->StartFrameRender();
 	m_pGraphicsContext->BindPipelineState(*m_pPipelineState);
+
+	m_pGraphicsContext->StartFrameRender(*m_pPipelineState);
 
 	m_pPipelineState->UpdatePerFrame(
 		DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetViewMatrix()),
@@ -70,7 +71,6 @@ void Renderer::Draw(Scene& scene)
 			
 			m_pGraphicsContext->BindConstantBuffers(*m_pPipelineState);
 
-			//Forward implementation
 			m_pGraphicsContext->DrawIndexed(entity.GetModel()->GetMesh()->GetIndexBuffer()->GetElementCount(), 0, 0);
 		}
 	}

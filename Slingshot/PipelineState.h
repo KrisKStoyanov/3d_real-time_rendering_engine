@@ -7,7 +7,11 @@
 struct PIPELINE_DESC
 {
 	ShadingModel shadingModel;
+	const char* CS_filename;
 	const char* VS_filename;
+	const char* HS_filename;
+	const char* DS_filename;
+	const char* GS_filename;
 	const char* PS_filename;
 };
 

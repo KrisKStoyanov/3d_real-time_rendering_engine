@@ -63,3 +63,26 @@ private:
 	ShaderType m_shaderType;
 	unsigned int m_registerSlot;
 };
+
+class D3D11StructuredBuffer : public Buffer
+{
+public:
+	static D3D11StructuredBuffer* Create(
+		ID3D11Device& device,
+		STRUCTURED_BUFFER_DESC desc);
+	void Destroy() override;
+
+	unsigned int GetElementCount() override;
+
+	inline ID3D11Buffer* GetBuffer() { return m_pBuffer; }
+private:
+	D3D11StructuredBuffer(
+		ID3D11Device& device,
+		STRUCTURED_BUFFER_DESC desc);
+	ID3D11Buffer* m_pBuffer;
+
+	unsigned int m_registerSlot;
+
+	unsigned int m_numStructs;
+	unsigned int m_numElementsPerStruct;
+};

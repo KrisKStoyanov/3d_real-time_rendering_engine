@@ -179,6 +179,10 @@ void D3D11ConstantBuffer::Bind(ID3D11DeviceContext& deviceContext, void* data)
 	{
 		deviceContext.PSSetConstantBuffers(m_registerSlot, 1, &m_pBuffer);
 	}
+	case ShaderType::COMPUTE_SHADER:
+	{
+		deviceContext.CSSetConstantBuffers(m_registerSlot, 1, &m_pBuffer);
+	}
 	break;
 	}
 }
@@ -186,4 +190,49 @@ void D3D11ConstantBuffer::Bind(ID3D11DeviceContext& deviceContext, void* data)
 unsigned int D3D11ConstantBuffer::GetElementCount()
 {
 	return 0;
+}
+
+D3D11StructuredBuffer* D3D11StructuredBuffer::Create(ID3D11Device& device, STRUCTURED_BUFFER_DESC desc)
+{
+	return new D3D11StructuredBuffer(device, desc);
+}
+
+void D3D11StructuredBuffer::Destroy()
+{
+	SAFE_RELEASE(m_pBuffer);
+}
+
+unsigned int D3D11StructuredBuffer::GetElementCount()
+{
+	return 0;
+}
+
+D3D11StructuredBuffer::D3D11StructuredBuffer(ID3D11Device& device, STRUCTURED_BUFFER_DESC desc) :
+	m_numElementsPerStruct(desc.numElementsPerStruct), m_numStructs(desc.numStructs)
+{
+	//Padding for cache coherence efficiency
+	desc.byteStride = ((desc.structureSize - 1) | 15) + 1;
+
+	D3D11_BUFFER_DESC sb_desc;
+	ZeroMemory(&sb_desc, sizeof(sb_desc));
+	sb_desc.Usage = D3D11_USAGE_DEFAULT;
+	sb_desc.ByteWidth = desc.structureSize * desc.numStructs;
+	sb_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE; //provides CS (read/write) & PS (read) functionality
+	sb_desc.CPUAccessFlags = 0;
+	sb_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	sb_desc.StructureByteStride = desc.byteStride;
+
+	DX::ThrowIfFailed(device.CreateBuffer(
+		&sb_desc, nullptr, &m_pBuffer));
+
+	//if (m_pBuffer)
+	//{
+	//	D3D11_UNORDERED_ACCESS_VIEW_DESC sbUAV_desc;
+	//	sbUAV_desc.Buffer.FirstElement = 0;
+	//	sbUAV_desc.Buffer.Flags = 0;
+	//	sbUAV_desc.Buffer.NumElements = desc.numElementsPerStruct * desc.numStructs;
+	//	sbUAV_desc.Format = DXGI_FORMAT_UNKNOWN;
+	//	sbUAV_desc.ViewDimension = D3D11_UAV_DIMENSION::D3D11_UAV_DIMENSION_BUFFER;
+	//	device.CreateUnorderedAccessView(m_pBuffer, &sbUAV_desc, &m_pBufferUAV);
+	//}
 }

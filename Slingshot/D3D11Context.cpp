@@ -11,27 +11,13 @@ D3D11Context::D3D11Context(HWND hWnd)
 	GetWindowRect(hWnd, &winRect);
 	UINT winWidth = winRect.right - winRect.left;
 	UINT winHeight = winRect.bottom - winRect.top;
-
-	m_clearColor[0] = 0.2f;
-	m_clearColor[1] = 0.8f;
-	m_clearColor[2] = 1.0f;
-	m_clearColor[3] = 1.0f;
 	
 	CreateDeviceAndContext();
 
 	CreateSwapChain(
 		hWnd, winWidth, winHeight);
 
-	CreateRenderTargetView();
-
-	CreateDepthStencilBuffer(
-		winWidth, 
-		winHeight);
-
-	CreateDepthStencilView();
-
 	SetupViewport(winWidth, winHeight);
-	CreateRasterizerState();
 }
 
 std::vector<IDXGIAdapter*> D3D11Context::QueryAdapters()
@@ -135,68 +121,6 @@ void D3D11Context::CreateSwapChain(
 	SAFE_RELEASE(pFactory);
 }
 
-void D3D11Context::CreateRenderTargetView()
-{
-	ID3D11Texture2D* pBackBuffer;
-	DX::ThrowIfFailed(m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
-	if (pBackBuffer != nullptr) {
-		DX::ThrowIfFailed(m_pDevice->CreateRenderTargetView(pBackBuffer, nullptr, m_pRenderTargetView.GetAddressOf()));
-		pBackBuffer->Release();
-	}
-}
-
-void D3D11Context::CreateDepthStencilBuffer(
-	UINT winWidth, UINT winHeight)
-{
-	D3D11_TEXTURE2D_DESC depthBufferDesc;
-	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
-	depthBufferDesc.Width = winWidth;
-	depthBufferDesc.Height = winHeight;
-	depthBufferDesc.MipLevels = 1;
-	depthBufferDesc.ArraySize = 1;
-	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthBufferDesc.SampleDesc.Count = 1;
-	depthBufferDesc.SampleDesc.Quality = 0;
-	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	depthBufferDesc.CPUAccessFlags = 0;
-	depthBufferDesc.MiscFlags = 0;
-
-	DX::ThrowIfFailed(m_pDevice->CreateTexture2D(&depthBufferDesc, nullptr, m_pDepthStencilBuffer.GetAddressOf()));
-}
-
-void D3D11Context::CreateDepthStencilView()
-{
-	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
-	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
-	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	depthStencilViewDesc.Texture2D.MipSlice = 0;
-
-	DX::ThrowIfFailed(
-		m_pDevice->CreateDepthStencilView(
-			m_pDepthStencilBuffer.Get(), 
-			&depthStencilViewDesc, 
-			m_pDepthStencilView.GetAddressOf()));
-}
-
-void D3D11Context::CreateRasterizerState()
-{
-	D3D11_RASTERIZER_DESC rasterizer_desc;
-	rasterizer_desc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
-	rasterizer_desc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE; //overhaul sphere engine creation method and switch to backface culling
-	rasterizer_desc.FrontCounterClockwise = false;
-	rasterizer_desc.DepthBias = false;
-	rasterizer_desc.DepthBiasClamp = 0;
-	rasterizer_desc.SlopeScaledDepthBias = 0;
-	rasterizer_desc.DepthClipEnable = true;
-	rasterizer_desc.ScissorEnable = false;
-	rasterizer_desc.MultisampleEnable = false;
-	rasterizer_desc.AntialiasedLineEnable = false;
-	//rasterizer_desc.ForcedSampleCount = 0; <-featured in D3D11_RASTERIZER_DESC1 (requires device1), future update consideration
-	m_pDevice->CreateRasterizerState(&rasterizer_desc, m_pRasterizerState.GetAddressOf());
-}
-
 void D3D11Context::SetupViewport(UINT winWidth, UINT winHeight)
 {
 	ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
@@ -232,10 +156,6 @@ void D3D11Context::SetupDebugLayer()
 bool D3D11Context::Initialize()
 {
 	m_pImmediateContext->RSSetViewports(1, &m_viewport);
-	m_pImmediateContext->RSSetState(m_pRasterizerState.Get());
-	m_pImmediateContext->OMSetRenderTargets(1, 
-		m_pRenderTargetView.GetAddressOf(), 
-		m_pDepthStencilView.Get());
 
 	//m_pPipelineState = D3D11PipelineState::Create(*m_pDevice.Get(), pipeline_desc);
 
@@ -248,13 +168,9 @@ bool D3D11Context::Initialize()
 	return true;
 }
 
-void D3D11Context::StartFrameRender()
+void D3D11Context::StartFrameRender(D3D11PipelineState& pipelineState)
 {
-	m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_clearColor);
-	m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 1);
-	m_pImmediateContext->OMSetRenderTargets(1,
-		m_pRenderTargetView.GetAddressOf(),
-		m_pDepthStencilView.Get());
+	pipelineState.StartFrameRender(*m_pImmediateContext.Get());
 }
 
 void D3D11Context::BindMeshBuffers(D3D11VertexBuffer& vertexBuffer, D3D11IndexBuffer& indexBuffer)
@@ -278,6 +194,11 @@ void D3D11Context::BindConstantBuffer(D3D11ConstantBuffer& constantBuffer, void*
 	constantBuffer.Bind(*m_pImmediateContext.Get(), data);
 }
 
+void D3D11Context::Dispatch(unsigned int nX, unsigned int nY, unsigned int nZ)
+{
+	m_pImmediateContext->Dispatch(nX, nY, nZ);
+}
+
 void D3D11Context::DrawIndexed(unsigned int indexCount, unsigned int startIndexLocation, unsigned int baseVertexLocation)
 {
 	m_pImmediateContext->DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
@@ -285,7 +206,7 @@ void D3D11Context::DrawIndexed(unsigned int indexCount, unsigned int startIndexL
 
 D3D11PipelineState* D3D11Context::CreatePipelineState(PIPELINE_DESC desc)
 {
-	return D3D11PipelineState::Create(*m_pDevice.Get(), desc);
+	return D3D11PipelineState::Create(*m_pDevice.Get(), *m_pImmediateContext.Get(), *m_pSwapChain.Get(), desc);
 }
 
 void D3D11Context::EndFrameRender()
@@ -306,9 +227,6 @@ void D3D11Context::Shutdown()
 	m_pDebugLayer->Release();
 	m_pInfoQueue->Release();
 #endif
-	m_pDepthStencilBuffer->Release();
-	m_pDepthStencilView->Release();
-	m_pRenderTargetView->Release();
 	m_pSwapChain->Release();
 	m_pDevice->Release();
 	m_pImmediateContext->Release();
