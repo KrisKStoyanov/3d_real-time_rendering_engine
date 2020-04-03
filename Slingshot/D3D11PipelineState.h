@@ -9,18 +9,14 @@ struct WVPData //vertex
 	DirectX::XMMATRIX projMatrix;
 };
 
-struct WorldTransformData //pixel 
+struct PerFrameData //pixel 
 {
 	DirectX::XMVECTOR camPos;
-};
-
-struct LightData //pixel 
-{
 	DirectX::XMVECTOR lightPos;
 	DirectX::XMFLOAT4 lightColor;
 };
 
-struct MaterialData //pixel 
+struct PerDrawCallData //pixel 
 {
 	DirectX::XMFLOAT4 surfaceColor;
 	float roughness;
@@ -72,14 +68,12 @@ private:
 	ID3D11DepthStencilView* m_pDepthStencilView;
 
 	D3D11ConstantBuffer* m_pVS_WVP_CBuffer;
-	D3D11ConstantBuffer* m_pPS_WorldTransform_CBuffer;
-	D3D11ConstantBuffer* m_pPS_Light_CBuffer;
-	D3D11ConstantBuffer* m_pPS_Material_CBuffer;
+	D3D11ConstantBuffer* m_pPS_PerFrameCBuffer;
+	D3D11ConstantBuffer* m_pPS_PerDrawCallCBuffer;
 
 	WVPData m_wvpData;
-	WorldTransformData m_worldTransformData;
-	LightData m_lightData;
-	MaterialData m_materialData;
+	PerFrameData m_perFrameData;
+	PerDrawCallData m_perDrawCallData;
 
 	unsigned int m_cbufferVSRegCounter;
 	unsigned int m_cbufferPSRegCounter;

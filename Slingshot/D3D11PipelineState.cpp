@@ -15,7 +15,7 @@ D3D11PipelineState::D3D11PipelineState(
 	IDXGISwapChain1& swapChain, 
 	const PIPELINE_DESC& desc) :
 	m_pVS(nullptr), m_pPS(nullptr), m_pIL(nullptr), m_cbufferVSRegCounter(0), m_cbufferPSRegCounter(0),
-	m_lightData(), m_materialData(), m_worldTransformData(), m_wvpData()
+	m_wvpData(), m_perFrameData(), m_perDrawCallData()
 {
 	m_clearColor[0] = 0.0f;
 	m_clearColor[1] = 0.0f;
@@ -114,27 +114,19 @@ D3D11PipelineState::D3D11PipelineState(
 	m_cbufferVSRegCounter++;
 
 	CONSTANT_BUFFER_DESC desc1;
-	desc1.cbufferData = &m_worldTransformData;
-	desc1.cbufferSize = 64; //sizeof(m_worldTransformData) inaccurate interpretation - pending fix
+	desc1.cbufferData = &m_perFrameData;
+	desc1.cbufferSize = sizeof(m_perFrameData); //sizeof(m_perFrameData) inaccurate interpretation - pending fix
 	desc1.shaderType = ShaderType::PIXEL_SHADER;
 	desc1.registerSlot = m_cbufferPSRegCounter;
-	m_pPS_WorldTransform_CBuffer = D3D11ConstantBuffer::Create(device, desc1);
+	m_pPS_PerFrameCBuffer = D3D11ConstantBuffer::Create(device, desc1);
 	m_cbufferPSRegCounter++;
 
 	CONSTANT_BUFFER_DESC desc2;
-	desc2.cbufferData = &m_lightData;
-	desc2.cbufferSize = sizeof(m_lightData); 
+	desc2.cbufferData = &m_perDrawCallData;
+	desc2.cbufferSize = sizeof(m_perDrawCallData);
 	desc2.shaderType = ShaderType::PIXEL_SHADER;
 	desc2.registerSlot = m_cbufferPSRegCounter;
-	m_pPS_Light_CBuffer = D3D11ConstantBuffer::Create(device, desc2);
-	m_cbufferPSRegCounter++;
-
-	CONSTANT_BUFFER_DESC desc3;
-	desc3.cbufferData = &m_materialData; 
-	desc3.cbufferSize = sizeof(m_materialData); 
-	desc3.shaderType = ShaderType::PIXEL_SHADER;
-	desc3.registerSlot = m_cbufferPSRegCounter;
-	m_pPS_Material_CBuffer = D3D11ConstantBuffer::Create(device, desc3);
+	m_pPS_PerDrawCallCBuffer = D3D11ConstantBuffer::Create(device, desc2);
 	m_cbufferPSRegCounter++;
 
 	DX::ThrowIfFailed(swapChain.GetBuffer(0, IID_PPV_ARGS(&m_pBackBuffer)));
@@ -160,17 +152,20 @@ D3D11PipelineState::D3D11PipelineState(
 	depthStencilBufferDesc.MiscFlags = 0;
 	DX::ThrowIfFailed(device.CreateTexture2D(&depthStencilBufferDesc, nullptr, &m_pDepthStencilBuffer));
 
-	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
-	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
-	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	depthStencilViewDesc.Texture2D.MipSlice = 0;
+	if (m_pDepthStencilBuffer)
+	{
+		D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+		ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+		depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		depthStencilViewDesc.Texture2D.MipSlice = 0;
 
-	DX::ThrowIfFailed(
-		device.CreateDepthStencilView(
-			m_pDepthStencilBuffer,
-			&depthStencilViewDesc,
-			&m_pDepthStencilView));
+		DX::ThrowIfFailed(
+			device.CreateDepthStencilView(
+				m_pDepthStencilBuffer,
+				&depthStencilViewDesc,
+				&m_pDepthStencilView));
+	}
 
 	D3D11_RASTERIZER_DESC rasterizer_desc;
 	rasterizer_desc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
@@ -195,9 +190,8 @@ void D3D11PipelineState::Shutdown()
 	SAFE_RELEASE(m_pRasterizerState);
 
 	SAFE_DESTROY(m_pVS_WVP_CBuffer);
-	SAFE_DESTROY(m_pPS_WorldTransform_CBuffer);
-	SAFE_DESTROY(m_pPS_Light_CBuffer);
-	SAFE_DESTROY(m_pPS_Material_CBuffer);
+	SAFE_DESTROY(m_pPS_PerFrameCBuffer);
+	SAFE_DESTROY(m_pPS_PerDrawCallCBuffer);
 }
 
 void D3D11PipelineState::StartFrameRender(ID3D11DeviceContext& deviceContext)
@@ -218,9 +212,9 @@ void D3D11PipelineState::UpdatePerFrame(
 {
 	m_wvpData.viewMatrix = viewMatrix;
 	m_wvpData.projMatrix = projMatrix;
-	m_worldTransformData.camPos = cameraPos;
-	m_lightData.lightPos = lightPos;
-	m_lightData.lightColor = lightColor;
+	m_perFrameData.camPos = cameraPos;
+	m_perFrameData.lightPos = lightPos;
+	m_perFrameData.lightColor = lightColor;
 }
 
 void D3D11PipelineState::UpdatePerModel(
@@ -229,8 +223,8 @@ void D3D11PipelineState::UpdatePerModel(
 	float roughness)
 {
 	m_wvpData.worldMatrix = worldMatrix;
-	m_materialData.surfaceColor = surfaceColor;
-	m_materialData.roughness = roughness;
+	m_perDrawCallData.surfaceColor = surfaceColor;
+	m_perDrawCallData.roughness = roughness;
 }
 
 void D3D11PipelineState::Bind(ID3D11DeviceContext& deviceContext)
@@ -244,7 +238,6 @@ void D3D11PipelineState::Bind(ID3D11DeviceContext& deviceContext)
 void D3D11PipelineState::BindConstantBuffers(ID3D11DeviceContext& deviceContext)
 {
 	m_pVS_WVP_CBuffer->Bind(deviceContext, &m_wvpData);
-	m_pPS_WorldTransform_CBuffer->Bind(deviceContext, &m_worldTransformData);
-	m_pPS_Light_CBuffer->Bind(deviceContext, &m_lightData);
-	m_pPS_Material_CBuffer->Bind(deviceContext, &m_materialData);
+	m_pPS_PerFrameCBuffer->Bind(deviceContext, &m_perFrameData);
+	m_pPS_PerDrawCallCBuffer->Bind(deviceContext, &m_perDrawCallData);
 }

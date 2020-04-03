@@ -1,6 +1,21 @@
 #include "FinalGathering.hlsli"
 
-float4 main() : SV_TARGET
+cbuffer PerFrameBuffer : register(b0)
 {
-	return float4(1.0f, 1.0f, 1.0f, 1.0f);
+    float4 camPos;
+    float4 lightPos;
+    float4 lightColor;
+}
+
+cbuffer PerDrawCallBuffer : register(b1)
+{
+    float4 surfaceColor;
+}
+
+PS_OUTPUT main(PS_INPUT ps_input)
+{
+    PS_OUTPUT ps_output;
+    
+    ps_output.color = surfaceColor;
+    return ps_output;
 }

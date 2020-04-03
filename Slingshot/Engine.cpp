@@ -40,8 +40,8 @@ bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 	{
 		PIPELINE_DESC pipeline_desc;
 		pipeline_desc.shadingModel = ShadingModel::FinalGathering;
-		pipeline_desc.VS_filename = "GoochVS.cso";
-		pipeline_desc.PS_filename = "GoochPS.cso";
+		pipeline_desc.VS_filename = "FinalGatheringVS.cso";
+		pipeline_desc.PS_filename = "FinalGatheringPS.cso";
 		m_isRunning = m_pRenderer->Initialize(pipeline_desc);
 		EditScene(*m_pScene);
 		m_pTimer = new Timer();

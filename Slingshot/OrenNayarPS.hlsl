@@ -1,17 +1,13 @@
 #include "OrenNayar.hlsli"
 
-cbuffer WorldPositionsData : register(b0)
+cbuffer PerFrameBuffer : register(b0)
 {
     float4 camPos;
     float4 lightPos;
-}
-
-cbuffer LightingData : register(b1)
-{
     float4 lightColor;
 }
 
-cbuffer MaterialData : register(b2)
+cbuffer PerDrawCallBuffer : register(b1)
 {
     float4 surfaceColor;
     float roughness;
