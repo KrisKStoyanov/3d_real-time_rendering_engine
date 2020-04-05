@@ -168,9 +168,14 @@ bool D3D11Context::Initialize()
 	return true;
 }
 
-void D3D11Context::StartFrameRender(D3D11PipelineState& pipelineState)
+void D3D11Context::SetShadowMapRender(D3D11PipelineState& pipelineState)
 {
-	pipelineState.StartFrameRender(*m_pImmediateContext.Get());
+	pipelineState.SetShadowMapRender(*m_pImmediateContext.Get());
+}
+
+void D3D11Context::SetBackBufferRender(D3D11PipelineState& pipelineState)
+{
+	pipelineState.SetBackBufferRender(*m_pImmediateContext.Get());
 }
 
 void D3D11Context::BindMeshBuffers(D3D11VertexBuffer& vertexBuffer, D3D11IndexBuffer& indexBuffer)
@@ -187,16 +192,6 @@ void D3D11Context::BindPipelineState(D3D11PipelineState& pipelineState)
 void D3D11Context::BindConstantBuffers(D3D11PipelineState& pipelineState)
 {
 	pipelineState.BindConstantBuffers(*m_pImmediateContext.Get());
-}
-
-void D3D11Context::BindConstantBuffer(D3D11ConstantBuffer& constantBuffer, void* data)
-{
-	constantBuffer.Bind(*m_pImmediateContext.Get(), data);
-}
-
-void D3D11Context::Dispatch(unsigned int nX, unsigned int nY, unsigned int nZ)
-{
-	m_pImmediateContext->Dispatch(nX, nY, nZ);
 }
 
 void D3D11Context::DrawIndexed(unsigned int indexCount, unsigned int startIndexLocation, unsigned int baseVertexLocation)

@@ -1,25 +1,30 @@
 #pragma once
 #include "PipelineState.h"
-#include "D3D11Buffer.h"
+#include "D3D11RenderTexture.h"
 
-struct WVPData //vertex 
+struct PerFrameDataVS
+{
+	DirectX::XMMATRIX cameraViewMatrix;
+	DirectX::XMMATRIX cameraProjMatrix;
+	DirectX::XMMATRIX lightViewMatrix;
+	DirectX::XMMATRIX lightProjMatrix;
+	DirectX::XMVECTOR lightPos;
+};
+
+struct PerDrawCallDataVS
 {
 	DirectX::XMMATRIX worldMatrix;
-	DirectX::XMMATRIX viewMatrix;
-	DirectX::XMMATRIX projMatrix;
 };
 
-struct PerFrameData //pixel 
+struct PerFrameDataPS 
 {
-	DirectX::XMVECTOR camPos;
-	DirectX::XMVECTOR lightPos;
-	DirectX::XMFLOAT4 lightColor;
+	DirectX::XMFLOAT4 ambientColor; 
+	DirectX::XMFLOAT4 diffuseColor; 
 };
 
-struct PerDrawCallData //pixel 
+struct PerDrawCallDataPS 
 {
 	DirectX::XMFLOAT4 surfaceColor;
-	float roughness;
 };
 
 class D3D11PipelineState : public PipelineState
@@ -32,21 +37,17 @@ public:
 		const PIPELINE_DESC& shader_desc);
 	void Shutdown();
 
-	void StartFrameRender(ID3D11DeviceContext& deviceContext);
+	void SetShadowMapRender(ID3D11DeviceContext& deviceContext);
+	void SetBackBufferRender(ID3D11DeviceContext& deviceContext);
 
-	void UpdatePerFrame(
-		DirectX::XMMATRIX viewMatrix,
-		DirectX::XMMATRIX projMatrix,
-		DirectX::XMVECTOR cameraPos,
-		DirectX::XMVECTOR lightPos,
-		DirectX::XMFLOAT4 lightColor);
-	void UpdatePerModel(
-		DirectX::XMMATRIX worldMatrix,
-		DirectX::XMFLOAT4 surfaceColor, 
-		float roughness);
+	void UpdateVSPerFrame(PerFrameDataVS& data);
+	void UpdateVSPerDrawCall(PerDrawCallDataVS& data);
+	void UpdatePSPerFrame(PerFrameDataPS& data);
+	void UpdatePSPerDrawCall(PerDrawCallDataPS& data);
 
 	void Bind(ID3D11DeviceContext& deviceContext);
 	void BindConstantBuffers(ID3D11DeviceContext& deviceContext);
+
 private:
 	D3D11PipelineState(
 		ID3D11Device& device,
@@ -59,23 +60,41 @@ private:
 	ID3D11InputLayout* m_pIL;
 	ID3D11VertexShader* m_pVS;
 	ID3D11PixelShader* m_pPS;
-
 	ID3D11RasterizerState* m_pRasterizerState;
+	ID3D11DepthStencilState* m_pDepthStencilState;
 
-	ID3D11Texture2D* m_pBackBuffer;
 	ID3D11RenderTargetView* m_pRenderTargetView;
-	ID3D11Texture2D* m_pDepthStencilBuffer;
 	ID3D11DepthStencilView* m_pDepthStencilView;
 
-	D3D11ConstantBuffer* m_pVS_WVP_CBuffer;
-	D3D11ConstantBuffer* m_pPS_PerFrameCBuffer;
-	D3D11ConstantBuffer* m_pPS_PerDrawCallCBuffer;
+	D3D11ConstantBuffer* m_pPerFrameCBufferVS;
+	D3D11ConstantBuffer* m_pPerDrawCallCBufferVS;
+	D3D11ConstantBuffer* m_pPerFrameCBufferPS;
+	D3D11ConstantBuffer* m_pPerDrawCallCBufferPS;
 
-	WVPData m_wvpData;
-	PerFrameData m_perFrameData;
-	PerDrawCallData m_perDrawCallData;
+	PerFrameDataVS m_perFrameDataVS;
+	PerDrawCallDataVS m_perDrawCallDataVS;
+	PerFrameDataPS m_perFrameDataPS;
+	PerDrawCallDataPS m_perDrawCallDataPS;
 
 	unsigned int m_cbufferVSRegCounter;
 	unsigned int m_cbufferPSRegCounter;
+
+	unsigned int m_textureVSRegCounter;
+	unsigned int m_texturePSRegCounter;
+
+	unsigned int m_samplerVSRegCounter;
+	unsigned int m_samplerPSRegCounter;
+
+	// Direct Illumination
+	D3D11RenderTexture* m_pShadowMap;
+	ID3D11SamplerState* m_pSampleStateWrap;
+	ID3D11SamplerState* m_pSampleStateClamp;
+
+	// Indirect Illumination (Final Gathering)
+	ID3D11Texture2D* m_pBufferA;
+	ID3D11Texture2D* m_pBufferB;
+	ID3D11Texture2D* m_pBufferC;
+	ID3D11Texture2D* m_pBufferD;
+	ID3D11Texture2D* m_pBufferE;
 };
 

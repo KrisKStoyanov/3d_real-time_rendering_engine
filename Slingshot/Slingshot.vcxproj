@@ -183,17 +183,22 @@
     <ClCompile Include="D3D11Buffer.cpp" />
     <ClCompile Include="D3D11Context.cpp" />
     <ClCompile Include="D3D11PipelineState.cpp" />
+    <ClCompile Include="D3D11RenderTexture.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="FileParsing.cpp" />
+    <ClCompile Include="Fragment.cpp" />
     <ClCompile Include="GUIConsole.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="LightMap.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="PhotonMap.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -204,32 +209,50 @@
     <ClInclude Include="D3D11Buffer.h" />
     <ClInclude Include="D3D11Context.h" />
     <ClInclude Include="D3D11PipelineState.h" />
+    <ClInclude Include="D3D11RenderTexture.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="FileParsing.h" />
+    <ClInclude Include="Fragment.h" />
     <ClInclude Include="GraphicsContext.h" />
     <ClInclude Include="GUIConsole.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="LightMap.h" />
     <ClInclude Include="Macros.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="PhotonMap.h" />
     <ClInclude Include="PipelineState.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DirectIllumination.hlsli" />
     <None Include="FinalGathering.hlsli" />
     <None Include="GoochShading.hlsli" />
     <None Include="cpp.hint" />
     <None Include="OrenNayar.hlsli" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="DirectIlluminationVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="DirectIlluminationPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="FinalGatheringPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

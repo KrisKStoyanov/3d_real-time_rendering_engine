@@ -14,12 +14,12 @@ public:
 		WINDOW_DESC& window_desc,
 		RENDERER_DESC& renderer_desc);
 	int Run();
-	void EditScene(Scene& scene);
+	GEOMETRY_DESC SetupScene(Scene& scene, const int entityCount);
 	void Shutdown();
 
-	void CreatePlane(Entity& entity, float width, float length, MATERIAL_DESC& material_desc);
-	void CreateCube(Entity& entity, float width, float height, float length, MATERIAL_DESC& material_desc);
-	void CreateSphere(Entity& entity, unsigned int slices, unsigned int stacks, float radius, MATERIAL_DESC& material_desc);
+	void CreatePlane(Entity& entity, PLANE_DESC& plane_desc, MATERIAL_DESC& material_desc);
+	void CreateCube(Entity& entity, CUBE_DESC& cube_desc, MATERIAL_DESC& material_desc);
+	void CreateSphere(Entity& entity, SPHERE_DESC& sphere_desc, MATERIAL_DESC& material_desc);
 
 	LRESULT CALLBACK HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	inline Renderer* GetRenderer() { return m_pRenderer; }

@@ -13,6 +13,8 @@ void Mesh::Shutdown()
 	//SAFE_RELEASE(m_pVBuffer);
 	//SAFE_RELEASE(m_pIBuffer);
 	//SAFE_RELEASE(m_pVSCB);
+	SAFE_DESTROY(m_pIndexBuffer);
+	SAFE_DESTROY(m_pVertexBuffer);
 	SAFE_DELETE(m_pMaterial);
 }
 

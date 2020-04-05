@@ -6,6 +6,8 @@ struct SCENE_DESC
 	Entity* entityCollection;
 	int entityCount;
 	int mainCameraId;
+	int startLightId;
+	int lightCount;
 };
 
 class Scene
@@ -42,6 +44,16 @@ public:
 	inline Entity* GetEntityCollection()
 	{
 		return m_pEntityCollection;
+	}
+
+	inline Entity* GetLights()
+	{
+		return (m_pEntityCollection + m_lightStartId);
+	}
+
+	inline int GetLightCount()
+	{
+		return m_lightCount;
 	}
 
 	inline int GetEntityCount()

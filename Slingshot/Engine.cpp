@@ -42,18 +42,18 @@ bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 		pipeline_desc.shadingModel = ShadingModel::FinalGathering;
 		pipeline_desc.VS_filename = "FinalGatheringVS.cso";
 		pipeline_desc.PS_filename = "FinalGatheringPS.cso";
-		m_isRunning = m_pRenderer->Initialize(pipeline_desc);
-		EditScene(*m_pScene);
+		m_isRunning = m_pRenderer->Initialize(pipeline_desc);	
+		GEOMETRY_DESC geo_desc = SetupScene(*m_pScene, 10);
+		m_pRenderer->SetupPhotonMap(geo_desc);
 		m_pTimer = new Timer();
 	}
 
 	return m_isRunning;
 }
 
-void Engine::EditScene(Scene& scene)
+GEOMETRY_DESC Engine::SetupScene(Scene& scene, const int entityCount)
 {
-	const int ENTITY_COUNT = 10;
-	Entity* entityCollection = new Entity[ENTITY_COUNT];
+	Entity* entityCollection = new Entity[entityCount];
 
 	//	MAIN CAMERA
 	//------------------------------
@@ -75,7 +75,7 @@ void Engine::EditScene(Scene& scene)
 	LIGHT_DESC entity1_light_desc;
 	entityCollection[1].SetLight(entity1_light_desc);
 	TRANSFORM_DESC entity1_transform_desc;
-	entity1_transform_desc.position = DirectX::XMFLOAT4(5.0f, 12.5f, 10.0f, 1.0f);
+	entity1_transform_desc.position = DirectX::XMFLOAT4(0.0f, 12.5f, 10.0f, 1.0f);
 	entityCollection[1].SetTransform(entity1_transform_desc);
 	//------------------------------
 
@@ -85,55 +85,70 @@ void Engine::EditScene(Scene& scene)
 	TRANSFORM_DESC entity2_transform_desc;
 	entity2_transform_desc.position = DirectX::XMFLOAT4(0.0f, -5.0f, 10.0f, 1.0f);
 	entityCollection[2].SetTransform(entity2_transform_desc);
-	MATERIAL_DESC entity2_material_desc;
-	entity2_material_desc.shadingModel = ShadingModel::FinalGathering;
-	entity2_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	entity2_material_desc.roughness = 1.0f;
-	CreatePlane(*(entityCollection + 2), 10.0f, 10.0f, entity2_material_desc);
+	MATERIAL_DESC mat_desc0;
+	mat_desc0.shadingModel = ShadingModel::FinalGathering;
+	mat_desc0.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mat_desc0.roughness = 1.0f;
+	PLANE_DESC plane_desc0;
+	plane_desc0.length = 10.0f;
+	plane_desc0.width = 10.0f;
+	CreatePlane(*(entityCollection + 2), plane_desc0, mat_desc0);
 
 	//Front
 	TRANSFORM_DESC entity3_transform_desc;
 	entity3_transform_desc.position = DirectX::XMFLOAT4(0.0f, 5.0f, 20.0f, 1.0f);
 	entity3_transform_desc.rotation = DirectX::XMFLOAT4(-90.0f, 0.0f, 0.0f, 0.0f);
 	entityCollection[3].SetTransform(entity3_transform_desc);
-	MATERIAL_DESC entity3_material_desc;
-	entity3_material_desc.shadingModel = ShadingModel::FinalGathering;
-	entity3_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	entity3_material_desc.roughness = 1.0f;
-	CreatePlane(*(entityCollection + 3), 10.0f, 10.0f, entity3_material_desc);
+	MATERIAL_DESC mat_desc1;
+	mat_desc1.shadingModel = ShadingModel::FinalGathering;
+	mat_desc1.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mat_desc1.roughness = 1.0f;
+	PLANE_DESC plane_desc1;
+	plane_desc1.length = 10.0f;
+	plane_desc1.width = 10.0f;
+	CreatePlane(*(entityCollection + 3), plane_desc1, mat_desc1);
 
 	//Left
 	TRANSFORM_DESC entity4_transform_desc;
 	entity4_transform_desc.position = DirectX::XMFLOAT4(-10.0f, 5.0f, 10.0f, 1.0f);
 	entity4_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 0.0f, -90.0f, 0.0f);
 	entityCollection[4].SetTransform(entity4_transform_desc);
-	MATERIAL_DESC entity4_material_desc;
-	entity4_material_desc.shadingModel = ShadingModel::FinalGathering;
-	entity4_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	entity4_material_desc.roughness = 1.0f;
-	CreatePlane(*(entityCollection + 4), 10.0f, 10.0f, entity4_material_desc);
+	MATERIAL_DESC mat_desc2;
+	mat_desc2.shadingModel = ShadingModel::FinalGathering;
+	mat_desc2.surfaceColor = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	mat_desc2.roughness = 1.0f;
+	PLANE_DESC plane_desc2;
+	plane_desc2.length = 10.0f;
+	plane_desc2.width = 10.0f;
+	CreatePlane(*(entityCollection + 4), plane_desc2, mat_desc2);
 
 	//Right
 	TRANSFORM_DESC entity5_transform_desc;
 	entity5_transform_desc.position = DirectX::XMFLOAT4(10.0f, 5.0f, 10.0f, 1.0f);
 	entity5_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 0.0f, 90.0f, 0.0f);
 	entityCollection[5].SetTransform(entity5_transform_desc);
-	MATERIAL_DESC entity5_material_desc;
-	entity5_material_desc.shadingModel = ShadingModel::FinalGathering;
-	entity5_material_desc.surfaceColor = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	entity5_material_desc.roughness = 1.0f;
-	CreatePlane(*(entityCollection + 5), 10.0f, 10.0f, entity5_material_desc);
+	MATERIAL_DESC mat_desc3;
+	mat_desc3.shadingModel = ShadingModel::FinalGathering;
+	mat_desc3.surfaceColor = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	mat_desc3.roughness = 1.0f;
+	PLANE_DESC plane_desc3;
+	plane_desc3.length = 10.0f;
+	plane_desc3.width = 10.0f;
+	CreatePlane(*(entityCollection + 5), plane_desc3, mat_desc3);
 
 	//Top
 	TRANSFORM_DESC entity6_transform_desc;
 	entity6_transform_desc.position = DirectX::XMFLOAT4(0.0f, 15.0f, 10.0f, 1.0f);
 	entity6_transform_desc.rotation = DirectX::XMFLOAT4(-180.0f, 0.0f, 0.0f, 0.0f);
 	entityCollection[6].SetTransform(entity6_transform_desc);
-	MATERIAL_DESC entity6_material_desc;
-	entity6_material_desc.shadingModel = ShadingModel::FinalGathering;
-	entity6_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	entity6_material_desc.roughness = 1.0f;
-	CreatePlane(*(entityCollection + 6), 10.0f, 10.0f, entity6_material_desc);
+	MATERIAL_DESC mat_desc4;
+	mat_desc4.shadingModel = ShadingModel::FinalGathering;
+	mat_desc4.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mat_desc4.roughness = 1.0f;
+	PLANE_DESC plane_desc4;
+	plane_desc4.length = 10.0f;
+	plane_desc4.width = 10.0f;
+	CreatePlane(*(entityCollection + 6), plane_desc4, mat_desc4);
 	//------------------------------
 
 	//	DECOR
@@ -142,21 +157,29 @@ void Engine::EditScene(Scene& scene)
 	TRANSFORM_DESC entity7_transform_desc;
 	entity7_transform_desc.position = DirectX::XMFLOAT4(0.0f, 1.0f, 13.5f, 1.0f);
 	entityCollection[7].SetTransform(entity7_transform_desc);
-	MATERIAL_DESC entity7_material_desc;
-	entity7_material_desc.shadingModel = ShadingModel::FinalGathering;
-	entity7_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
-	entity7_material_desc.roughness = 1.0f;
-	CreateSphere(*(entityCollection + 7), 50, 50, 5.5f, entity7_material_desc);
+	MATERIAL_DESC mat_desc5;
+	mat_desc5.shadingModel = ShadingModel::FinalGathering;
+	mat_desc5.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+	mat_desc5.roughness = 1.0f;
+	SPHERE_DESC sphere_desc0;
+	sphere_desc0.slices = 50;
+	sphere_desc0.stacks = 50;
+	sphere_desc0.radius = 5.5f;
+	CreateSphere(*(entityCollection + 7), sphere_desc0, mat_desc5);
 
 	//Teal ball
 	TRANSFORM_DESC entity8_transform_desc;
 	entity8_transform_desc.position = DirectX::XMFLOAT4(6.5f, 0.0f, 7.5f, 1.0f);
 	entityCollection[8].SetTransform(entity8_transform_desc);
-	MATERIAL_DESC entity8_material_desc;
-	entity8_material_desc.shadingModel = ShadingModel::FinalGathering;
-	entity8_material_desc.surfaceColor = DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
-	entity8_material_desc.roughness = 1.0f;
-	CreateSphere(*(entityCollection + 8), 50, 50, 3.5f, entity8_material_desc);
+	MATERIAL_DESC mat_desc6;
+	mat_desc6.shadingModel = ShadingModel::FinalGathering;
+	mat_desc6.surfaceColor = DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
+	mat_desc6.roughness = 1.0f;
+	SPHERE_DESC sphere_desc1;
+	sphere_desc1.slices = 50;
+	sphere_desc1.stacks = 50;
+	sphere_desc1.radius = 3.5f;
+	CreateSphere(*(entityCollection + 8), sphere_desc1, mat_desc6);
 	//------------------------------
 
 	//Purple Cube 
@@ -164,21 +187,90 @@ void Engine::EditScene(Scene& scene)
 	entity9_transform_desc.position = DirectX::XMFLOAT4(-5.0f, -0.0f, 5.5f, 1.0f);
 	entity9_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 12.5f, 0.0f, 0.0f);
 	entityCollection[9].SetTransform(entity9_transform_desc);
-	MATERIAL_DESC entity9_material_desc;
-	entity9_material_desc.shadingModel = ShadingModel::FinalGathering;
-	entity9_material_desc.surfaceColor = DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
-	entity9_material_desc.roughness = 1.0f;
-	CreateCube(*(entityCollection + 9), 2.75f, 4.0f, 2.75f, entity9_material_desc);
+	MATERIAL_DESC mat_desc7;
+	mat_desc7.shadingModel = ShadingModel::FinalGathering;
+	mat_desc7.surfaceColor = DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
+	mat_desc7.roughness = 1.0f;
+	CUBE_DESC cube_desc0;
+	cube_desc0.width = 2.75f;
+	cube_desc0.height = 4.0f;
+	cube_desc0.length = 2.75f;
+	CreateCube(*(entityCollection + 9), cube_desc0, mat_desc7);
 	//------------------------------
 
 	SCENE_DESC scene_desc;
-	scene_desc.entityCollection = new Entity[ENTITY_COUNT];
-	memcpy(scene_desc.entityCollection, entityCollection, sizeof(Entity) * ENTITY_COUNT);
-	scene_desc.entityCount = ENTITY_COUNT;
+	scene_desc.entityCollection = new Entity[entityCount];
+	memcpy(scene_desc.entityCollection, entityCollection, sizeof(Entity) * entityCount);
+	scene_desc.entityCount = entityCount;
 	scene_desc.mainCameraId = 0;
+	scene_desc.startLightId = 1;
+	scene_desc.lightCount = 1;
 	m_pScene = Scene::Create(0, scene_desc);
 
 	SAFE_DELETE_ARRAY(entityCollection);
+
+	GEOMETRY_DESC geo_desc{};
+	geo_desc.fragmentCollection;
+	geo_desc.fragmentCollection[0] = Plane(
+		DirectX::XMVectorSet(
+			entity2_transform_desc.position.x, 
+			entity2_transform_desc.position.y, 
+			entity2_transform_desc.position.z, 
+			entity2_transform_desc.position.w), 
+		plane_desc0, mat_desc0);
+	geo_desc.fragmentCollection[1] = Plane(
+		DirectX::XMVectorSet(
+			entity3_transform_desc.position.x,
+			entity3_transform_desc.position.y,
+			entity3_transform_desc.position.z,
+			entity3_transform_desc.position.w),
+		plane_desc1, mat_desc1);
+	geo_desc.fragmentCollection[2] = Plane(
+		DirectX::XMVectorSet(
+			entity4_transform_desc.position.x,
+			entity4_transform_desc.position.y,
+			entity4_transform_desc.position.z,
+			entity4_transform_desc.position.w),
+		plane_desc2, mat_desc2);
+	geo_desc.fragmentCollection[3] = Plane(
+		DirectX::XMVectorSet(
+			entity5_transform_desc.position.x,
+			entity5_transform_desc.position.y,
+			entity5_transform_desc.position.z,
+			entity5_transform_desc.position.w),
+		plane_desc3, mat_desc3);
+	geo_desc.fragmentCollection[4] = Plane(
+		DirectX::XMVectorSet(
+			entity6_transform_desc.position.x,
+			entity6_transform_desc.position.y,
+			entity6_transform_desc.position.z,
+			entity6_transform_desc.position.w),
+		plane_desc4, mat_desc4);
+
+	geo_desc.fragmentCollection[5] = Sphere(
+		DirectX::XMVectorSet(
+			entity7_transform_desc.position.x,
+			entity7_transform_desc.position.y,
+			entity7_transform_desc.position.z,
+			entity7_transform_desc.position.w),
+		sphere_desc0, mat_desc5);
+	geo_desc.fragmentCollection[6] = Sphere(
+		DirectX::XMVectorSet(
+			entity8_transform_desc.position.x,
+			entity8_transform_desc.position.y,
+			entity8_transform_desc.position.z,
+			entity8_transform_desc.position.w),
+		sphere_desc1, mat_desc6);
+	geo_desc.fragmentCollection[7] = Cube(
+		DirectX::XMVectorSet(
+			entity9_transform_desc.position.x,
+			entity9_transform_desc.position.y,
+			entity9_transform_desc.position.z,
+			entity9_transform_desc.position.w),
+		cube_desc0, mat_desc7);
+
+	geo_desc.fragmentCount = 8;
+	return geo_desc;
 }
 
 int Engine::Run()
@@ -207,7 +299,7 @@ void Engine::Shutdown()
 	SAFE_DELETE(m_pTimer);
 }
 
-void Engine::CreatePlane(Entity& entity, float width, float length, MATERIAL_DESC& material_desc)
+void Engine::CreatePlane(Entity& entity, PLANE_DESC& plane_desc, MATERIAL_DESC& material_desc)
 {
 	//Plane Object
 	//------------------------------
@@ -222,19 +314,19 @@ void Engine::CreatePlane(Entity& entity, float width, float length, MATERIAL_DES
 	{
 		GoochShadingVertex* entityV_collection = new GoochShadingVertex[VERTEX_COUNT];
 
-		entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, -1.0f * length, 1.0f);
+		entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * plane_desc.width, 0.0f, -1.0f * plane_desc.length, 1.0f);
 		entityV_collection[0].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
-		entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, 1.0f * length, 1.0f);
+		entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * plane_desc.width, 0.0f, 1.0f * plane_desc.length, 1.0f);
 		entityV_collection[1].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
-		entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, -1.0f * length, 1.0f);
+		entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * plane_desc.width, 0.0f, -1.0f * plane_desc.length, 1.0f);
 		entityV_collection[2].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
-		entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, 1.0f * length, 1.0f);
+		entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * plane_desc.width, 0.0f, 1.0f * plane_desc.length, 1.0f);
 		entityV_collection[3].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
-		unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
+		int* entityI_collection = new int[INDEX_COUNT];
 		entityI_collection[0] = 0;
 		entityI_collection[1] = 1;
 		entityI_collection[2] = 2;
@@ -247,8 +339,8 @@ void Engine::CreatePlane(Entity& entity, float width, float length, MATERIAL_DES
 		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 		
 		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
+		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
 		index_buffer_desc.indexCount = INDEX_COUNT;
 		
 		planeM_desc.vertex_buffer_desc = vertex_buffer_desc;
@@ -262,19 +354,19 @@ void Engine::CreatePlane(Entity& entity, float width, float length, MATERIAL_DES
 	{
 		OrenNayarVertex* entityV_collection = new OrenNayarVertex[VERTEX_COUNT];
 
-		entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, -1.0f * length, 1.0f);
+		entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * plane_desc.width, 0.0f, -1.0f * plane_desc.length, 1.0f);
 		entityV_collection[0].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
-		entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, 1.0f * length, 1.0f);
+		entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * plane_desc.width, 0.0f, 1.0f * plane_desc.length, 1.0f);
 		entityV_collection[1].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
-		entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, -1.0f * length, 1.0f);
+		entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * plane_desc.width, 0.0f, -1.0f * plane_desc.length, 1.0f);
 		entityV_collection[2].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
-		entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, 1.0f * length, 1.0f);
+		entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * plane_desc.width, 0.0f, 1.0f * plane_desc.length, 1.0f);
 		entityV_collection[3].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
-		unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
+		int* entityI_collection = new int[INDEX_COUNT];
 		entityI_collection[0] = 0;
 		entityI_collection[1] = 1;
 		entityI_collection[2] = 2;
@@ -287,8 +379,8 @@ void Engine::CreatePlane(Entity& entity, float width, float length, MATERIAL_DES
 		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
 		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
+		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
 		index_buffer_desc.indexCount = INDEX_COUNT;
 
 		planeM_desc.vertex_buffer_desc = vertex_buffer_desc;
@@ -302,19 +394,23 @@ void Engine::CreatePlane(Entity& entity, float width, float length, MATERIAL_DES
 	{
 		FinalGatheringVertex* entityV_collection = new FinalGatheringVertex[VERTEX_COUNT];
 
-		entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, -1.0f * length, 1.0f);
+		entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * plane_desc.width, 0.0f, -1.0f * plane_desc.length, 1.0f);
 		entityV_collection[0].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
+		entityV_collection[0].uv = DirectX::XMFLOAT2(0.0f, 0.0f);
 
-		entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 0.0f, 1.0f * length, 1.0f);
+		entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * plane_desc.width, 0.0f, 1.0f * plane_desc.length, 1.0f);
 		entityV_collection[1].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
+		entityV_collection[1].uv = DirectX::XMFLOAT2(0.0f, 1.0f);
 
-		entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, -1.0f * length, 1.0f);
+		entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * plane_desc.width, 0.0f, -1.0f * plane_desc.length, 1.0f);
 		entityV_collection[2].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
+		entityV_collection[2].uv = DirectX::XMFLOAT2(1.0f, 0.0f);
 
-		entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * width, 0.0f, 1.0f * length, 1.0f);
+		entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * plane_desc.width, 0.0f, 1.0f * plane_desc.length, 1.0f);
 		entityV_collection[3].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
+		entityV_collection[3].uv = DirectX::XMFLOAT2(1.0f, 1.0f);
 
-		unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
+		int* entityI_collection = new int[INDEX_COUNT];
 		entityI_collection[0] = 0;
 		entityI_collection[1] = 1;
 		entityI_collection[2] = 2;
@@ -327,8 +423,8 @@ void Engine::CreatePlane(Entity& entity, float width, float length, MATERIAL_DES
 		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
 		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
+		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
 		index_buffer_desc.indexCount = INDEX_COUNT;
 
 		planeM_desc.vertex_buffer_desc = vertex_buffer_desc;
@@ -344,7 +440,7 @@ void Engine::CreatePlane(Entity& entity, float width, float length, MATERIAL_DES
 		*m_pRenderer->GetGraphicsContext(), planeM_desc, material_desc);
 }
 
-void Engine::CreateCube(Entity& entity, float width, float height, float length, MATERIAL_DESC& material_desc)
+void Engine::CreateCube(Entity& entity, CUBE_DESC& cube_desc, MATERIAL_DESC& material_desc)
 {
 	//Cube Object - Interpolated Normals (pending alternative implementation)
 	//------------------------------
@@ -358,31 +454,31 @@ void Engine::CreateCube(Entity& entity, float width, float height, float length,
 	case ShadingModel::GoochShading:
 	{
 		GoochShadingVertex* entityV_collection = new GoochShadingVertex[VERTEX_COUNT];
-		entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
+		entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * cube_desc.width, -1.0f * cube_desc.height, -1.0f * cube_desc.length, 1.0f);
 		entityV_collection[0].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, -1.0f, 0.0f);
 
-		entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
+		entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * cube_desc.width, 1.0f * cube_desc.height, -1.0f * cube_desc.length, 1.0f);
 		entityV_collection[1].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, -1.0f, 0.0f);
 
-		entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
+		entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * cube_desc.width, -1.0f * cube_desc.height, -1.0f * cube_desc.length, 1.0f);
 		entityV_collection[2].normal = DirectX::XMFLOAT4(1.0f, -1.0f, -1.0f, 0.0f);
 
-		entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
+		entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * cube_desc.width, 1.0f * cube_desc.height, -1.0f * cube_desc.length, 1.0f);
 		entityV_collection[3].normal = DirectX::XMFLOAT4(1.0f, 1.0f, -1.0f, 0.0f);
 
-		entityV_collection[4].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
+		entityV_collection[4].position = DirectX::XMFLOAT4(-1.0f * cube_desc.width, -1.0f * cube_desc.height, 1.0f * cube_desc.length, 1.0f);
 		entityV_collection[4].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, 1.0f, 0.0f);
 
-		entityV_collection[5].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
+		entityV_collection[5].position = DirectX::XMFLOAT4(-1.0f * cube_desc.width, 1.0f * cube_desc.height, 1.0f * cube_desc.length, 1.0f);
 		entityV_collection[5].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, 1.0f, 0.0f);
 
-		entityV_collection[6].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
+		entityV_collection[6].position = DirectX::XMFLOAT4(1.0f * cube_desc.width, -1.0f * cube_desc.height, 1.0f * cube_desc.length, 1.0f);
 		entityV_collection[6].normal = DirectX::XMFLOAT4(1.0f, -1.0f, 1.0f, 0.0f);
 
-		entityV_collection[7].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
+		entityV_collection[7].position = DirectX::XMFLOAT4(1.0f * cube_desc.width, 1.0f * cube_desc.height, 1.0f * cube_desc.length, 1.0f);
 		entityV_collection[7].normal = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f);
 
-		unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
+		int* entityI_collection = new int[INDEX_COUNT];
 
 		//Front
 		entityI_collection[0] = 0;
@@ -412,8 +508,8 @@ void Engine::CreateCube(Entity& entity, float width, float height, float length,
 		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
 		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
+		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
 		index_buffer_desc.indexCount = INDEX_COUNT;
 
 		cubeM_desc.vertex_buffer_desc = vertex_buffer_desc;
@@ -426,31 +522,31 @@ void Engine::CreateCube(Entity& entity, float width, float height, float length,
 	case ShadingModel::OrenNayarShading:
 	{
 		OrenNayarVertex* entityV_collection = new OrenNayarVertex[VERTEX_COUNT];
-		entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
+		entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * cube_desc.width, -1.0f * cube_desc.height, -1.0f * cube_desc.length, 1.0f);
 		entityV_collection[0].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, -1.0f, 0.0f);
 
-		entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
+		entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * cube_desc.width, 1.0f * cube_desc.height, -1.0f * cube_desc.length, 1.0f);
 		entityV_collection[1].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, -1.0f, 0.0f);
 
-		entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
+		entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * cube_desc.width, -1.0f * cube_desc.height, -1.0f * cube_desc.length, 1.0f);
 		entityV_collection[2].normal = DirectX::XMFLOAT4(1.0f, -1.0f, -1.0f, 0.0f);
 
-		entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
+		entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * cube_desc.width, 1.0f * cube_desc.height, -1.0f * cube_desc.length, 1.0f);
 		entityV_collection[3].normal = DirectX::XMFLOAT4(1.0f, 1.0f, -1.0f, 0.0f);
 
-		entityV_collection[4].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
+		entityV_collection[4].position = DirectX::XMFLOAT4(-1.0f * cube_desc.width, -1.0f * cube_desc.height, 1.0f * cube_desc.length, 1.0f);
 		entityV_collection[4].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, 1.0f, 0.0f);
 
-		entityV_collection[5].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
+		entityV_collection[5].position = DirectX::XMFLOAT4(-1.0f * cube_desc.width, 1.0f * cube_desc.height, 1.0f * cube_desc.length, 1.0f);
 		entityV_collection[5].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, 1.0f, 0.0f);
 
-		entityV_collection[6].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
+		entityV_collection[6].position = DirectX::XMFLOAT4(1.0f * cube_desc.width, -1.0f * cube_desc.height, 1.0f * cube_desc.length, 1.0f);
 		entityV_collection[6].normal = DirectX::XMFLOAT4(1.0f, -1.0f, 1.0f, 0.0f);
 
-		entityV_collection[7].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
+		entityV_collection[7].position = DirectX::XMFLOAT4(1.0f * cube_desc.width, 1.0f * cube_desc.height, 1.0f * cube_desc.length, 1.0f);
 		entityV_collection[7].normal = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f);
 
-		unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
+		int* entityI_collection = new int[INDEX_COUNT];
 
 		//Front
 		entityI_collection[0] = 0;
@@ -480,8 +576,8 @@ void Engine::CreateCube(Entity& entity, float width, float height, float length,
 		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
 		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int)* INDEX_COUNT);
+		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int)* INDEX_COUNT);
 		index_buffer_desc.indexCount = INDEX_COUNT;
 
 		cubeM_desc.vertex_buffer_desc = vertex_buffer_desc;
@@ -494,31 +590,39 @@ void Engine::CreateCube(Entity& entity, float width, float height, float length,
 	case ShadingModel::FinalGathering:
 	{
 		FinalGatheringVertex* entityV_collection = new FinalGatheringVertex[VERTEX_COUNT];
-		entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
+		entityV_collection[0].position = DirectX::XMFLOAT4(-1.0f * cube_desc.width, -1.0f * cube_desc.height, -1.0f * cube_desc.length, 1.0f);
 		entityV_collection[0].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, -1.0f, 0.0f);
+		entityV_collection[0].uv = DirectX::XMFLOAT2(0.0f, 0.0f);
 
-		entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
+		entityV_collection[1].position = DirectX::XMFLOAT4(-1.0f * cube_desc.width, 1.0f * cube_desc.height, -1.0f * cube_desc.length, 1.0f);
 		entityV_collection[1].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, -1.0f, 0.0f);
+		entityV_collection[1].uv = DirectX::XMFLOAT2(0.0f, 1.0f);
 
-		entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, -1.0f * length, 1.0f);
+		entityV_collection[2].position = DirectX::XMFLOAT4(1.0f * cube_desc.width, -1.0f * cube_desc.height, -1.0f * cube_desc.length, 1.0f);
 		entityV_collection[2].normal = DirectX::XMFLOAT4(1.0f, -1.0f, -1.0f, 0.0f);
+		entityV_collection[2].uv = DirectX::XMFLOAT2(1.0f, 0.0f);
 
-		entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, -1.0f * length, 1.0f);
+		entityV_collection[3].position = DirectX::XMFLOAT4(1.0f * cube_desc.width, 1.0f * cube_desc.height, -1.0f * cube_desc.length, 1.0f);
 		entityV_collection[3].normal = DirectX::XMFLOAT4(1.0f, 1.0f, -1.0f, 0.0f);
+		entityV_collection[3].uv = DirectX::XMFLOAT2(1.0f, 1.0f);
 
-		entityV_collection[4].position = DirectX::XMFLOAT4(-1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
+		entityV_collection[4].position = DirectX::XMFLOAT4(-1.0f * cube_desc.width, -1.0f * cube_desc.height, 1.0f * cube_desc.length, 1.0f);
 		entityV_collection[4].normal = DirectX::XMFLOAT4(-1.0f, -1.0f, 1.0f, 0.0f);
+		entityV_collection[4].uv = DirectX::XMFLOAT2(0.0f, 0.0f);
 
-		entityV_collection[5].position = DirectX::XMFLOAT4(-1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
+		entityV_collection[5].position = DirectX::XMFLOAT4(-1.0f * cube_desc.width, 1.0f * cube_desc.height, 1.0f * cube_desc.length, 1.0f);
 		entityV_collection[5].normal = DirectX::XMFLOAT4(-1.0f, 1.0f, 1.0f, 0.0f);
+		entityV_collection[5].uv = DirectX::XMFLOAT2(0.0f, 1.0f);
 
-		entityV_collection[6].position = DirectX::XMFLOAT4(1.0f * width, -1.0f * height, 1.0f * length, 1.0f);
+		entityV_collection[6].position = DirectX::XMFLOAT4(1.0f * cube_desc.width, -1.0f * cube_desc.height, 1.0f * cube_desc.length, 1.0f);
 		entityV_collection[6].normal = DirectX::XMFLOAT4(1.0f, -1.0f, 1.0f, 0.0f);
+		entityV_collection[6].uv = DirectX::XMFLOAT2(1.0f, 0.0f);
 
-		entityV_collection[7].position = DirectX::XMFLOAT4(1.0f * width, 1.0f * height, 1.0f * length, 1.0f);
+		entityV_collection[7].position = DirectX::XMFLOAT4(1.0f * cube_desc.width, 1.0f * cube_desc.height, 1.0f * cube_desc.length, 1.0f);
 		entityV_collection[7].normal = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f);
+		entityV_collection[7].uv = DirectX::XMFLOAT2(1.0f, 1.0f);
 
-		unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
+		int* entityI_collection = new int[INDEX_COUNT];
 
 		//Front
 		entityI_collection[0] = 0;
@@ -548,8 +652,8 @@ void Engine::CreateCube(Entity& entity, float width, float height, float length,
 		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
 		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int)* INDEX_COUNT);
+		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int)* INDEX_COUNT);
 		index_buffer_desc.indexCount = INDEX_COUNT;
 
 		cubeM_desc.vertex_buffer_desc = vertex_buffer_desc;
@@ -565,10 +669,10 @@ void Engine::CreateCube(Entity& entity, float width, float height, float length,
 		*m_pRenderer->GetGraphicsContext(), cubeM_desc, material_desc);
 }
 
-void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stacks, float radius, MATERIAL_DESC& material_desc)
+void Engine::CreateSphere(Entity& entity, SPHERE_DESC& sphere_desc, MATERIAL_DESC& material_desc) 
 {
-	const int VERTEX_COUNT = (stacks + 1) * (slices + 1);
-	const int INDEX_COUNT = (slices * stacks + slices) * 6;
+	const int VERTEX_COUNT = (sphere_desc.stacks + 1) * (sphere_desc.slices + 1);
+	const int INDEX_COUNT = (sphere_desc.slices * sphere_desc.stacks + sphere_desc.slices) * 6;
 
 	MESH_DESC sphereM_desc;
 
@@ -577,17 +681,17 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 	case ShadingModel::GoochShading:
 	{
 		GoochShadingVertex* entityV_collection = new GoochShadingVertex[VERTEX_COUNT];
-		unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
+		int* entityI_collection = new int[INDEX_COUNT];
 
-		float slicesF = static_cast<float>(slices);
-		float stacksF = static_cast<float>(stacks);
+		float slicesF = static_cast<float>(sphere_desc.slices);
+		float stacksF = static_cast<float>(sphere_desc.stacks);
 
-		for (unsigned int i = 0; i < stacks + 1; ++i)
+		for (int i = 0; i < sphere_desc.stacks + 1; ++i)
 		{
 			float V = i / stacksF;
 			float phi = V * 3.14f;
 
-			for (unsigned int j = 0; j < slices + 1; ++j) {
+			for (int j = 0; j < sphere_desc.slices + 1; ++j) {
 
 				float U = j / slicesF;
 				float theta = U * 6.28f;
@@ -598,21 +702,19 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 				float y = cosf(phi);
 				float z = sinf(theta) * sinPhi;
 
-				int index = j + i * (slices + 1);
-				entityV_collection[index].position = DirectX::XMFLOAT4(x * radius, y * radius, z * radius, 1.0f);
+				int index = j + i * (sphere_desc.slices + 1);
+				entityV_collection[index].position = DirectX::XMFLOAT4(x * sphere_desc.radius, y * sphere_desc.radius, z * sphere_desc.radius, 1.0f);
 				entityV_collection[index].normal = DirectX::XMFLOAT4(x, y, z, 0.0f);
-
-				//vert.uv = glm::vec2((glm::asin(vert.normal.x) / piVal + 0.5f), (glm::asin(vert.normal.y) / piVal + 0.5f));
 			}
 		}
 
 		int index = 0;
-		for (unsigned int i = 0; i < slices * stacks + slices; ++i)
+		for (int i = 0; i < sphere_desc.slices * sphere_desc.stacks + sphere_desc.slices; ++i)
 		{
 			entityI_collection[index] = i;
-			entityI_collection[index + 1] = i + slices + 1;
-			entityI_collection[index + 2] = i + slices;
-			entityI_collection[index + 3] = i + slices + 1;
+			entityI_collection[index + 1] = i + sphere_desc.slices + 1;
+			entityI_collection[index + 2] = i + sphere_desc.slices;
+			entityI_collection[index + 3] = i + sphere_desc.slices + 1;
 			entityI_collection[index + 4] = i;
 			entityI_collection[index + 5] = i + 1;
 
@@ -626,8 +728,8 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
 		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
+		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
 		index_buffer_desc.indexCount = INDEX_COUNT;
 
 		sphereM_desc.vertex_buffer_desc = vertex_buffer_desc;
@@ -640,17 +742,17 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 	case ShadingModel::OrenNayarShading:
 	{
 		OrenNayarVertex* entityV_collection = new OrenNayarVertex[VERTEX_COUNT];
-		unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
+		int* entityI_collection = new int[INDEX_COUNT];
 
-		float slicesF = static_cast<float>(slices);
-		float stacksF = static_cast<float>(stacks);
+		float slicesF = static_cast<float>(sphere_desc.slices);
+		float stacksF = static_cast<float>(sphere_desc.stacks);
 
-		for (unsigned int i = 0; i < stacks + 1; ++i)
+		for (int i = 0; i < sphere_desc.stacks + 1; ++i)
 		{
 			float V = i / stacksF;
 			float phi = V * 3.14f;
 
-			for (unsigned int j = 0; j < slices + 1; ++j) {
+			for (int j = 0; j < sphere_desc.slices + 1; ++j) {
 
 				float U = j / slicesF;
 				float theta = U * 6.28f;
@@ -661,21 +763,19 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 				float y = cosf(phi);
 				float z = sinf(theta) * sinPhi;
 
-				int index = j + i * (slices + 1);
-				entityV_collection[index].position = DirectX::XMFLOAT4(x * radius, y * radius, z * radius, 1.0f);
+				int index = j + i * (sphere_desc.slices + 1);
+				entityV_collection[index].position = DirectX::XMFLOAT4(x * sphere_desc.radius, y * sphere_desc.radius, z * sphere_desc.radius, 1.0f);
 				entityV_collection[index].normal = DirectX::XMFLOAT4(x, y, z, 0.0f);
-
-				//vert.uv = glm::vec2((glm::asin(vert.normal.x) / piVal + 0.5f), (glm::asin(vert.normal.y) / piVal + 0.5f));
 			}
 		}
 
 		int index = 0;
-		for (unsigned int i = 0; i < slices * stacks + slices; ++i)
+		for (int i = 0; i < sphere_desc.slices * sphere_desc.stacks + sphere_desc.slices; ++i)
 		{
 			entityI_collection[index] = i;
-			entityI_collection[index + 1] = i + slices + 1;
-			entityI_collection[index + 2] = i + slices;
-			entityI_collection[index + 3] = i + slices + 1;
+			entityI_collection[index + 1] = i + sphere_desc.slices + 1;
+			entityI_collection[index + 2] = i + sphere_desc.slices;
+			entityI_collection[index + 3] = i + sphere_desc.slices + 1;
 			entityI_collection[index + 4] = i;
 			entityI_collection[index + 5] = i + 1;
 
@@ -689,8 +789,8 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
 		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int)* INDEX_COUNT);
+		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int)* INDEX_COUNT);
 		index_buffer_desc.indexCount = INDEX_COUNT;
 
 		sphereM_desc.vertex_buffer_desc = vertex_buffer_desc;
@@ -702,18 +802,18 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 	break;
 	case ShadingModel::FinalGathering:
 	{
-		OrenNayarVertex* entityV_collection = new OrenNayarVertex[VERTEX_COUNT];
-		unsigned int* entityI_collection = new unsigned int[INDEX_COUNT];
+		FinalGatheringVertex* entityV_collection = new FinalGatheringVertex[VERTEX_COUNT];
+		int* entityI_collection = new int[INDEX_COUNT];
 
-		float slicesF = static_cast<float>(slices);
-		float stacksF = static_cast<float>(stacks);
+		float slicesF = static_cast<float>(sphere_desc.slices);
+		float stacksF = static_cast<float>(sphere_desc.stacks);
 
-		for (unsigned int i = 0; i < stacks + 1; ++i)
+		for (int i = 0; i < sphere_desc.stacks + 1; ++i)
 		{
 			float V = i / stacksF;
 			float phi = V * 3.14f;
 
-			for (unsigned int j = 0; j < slices + 1; ++j) {
+			for (int j = 0; j < sphere_desc.slices + 1; ++j) {
 
 				float U = j / slicesF;
 				float theta = U * 6.28f;
@@ -724,21 +824,20 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 				float y = cosf(phi);
 				float z = sinf(theta) * sinPhi;
 
-				int index = j + i * (slices + 1);
-				entityV_collection[index].position = DirectX::XMFLOAT4(x * radius, y * radius, z * radius, 1.0f);
+				int index = j + i * (sphere_desc.slices + 1);
+				entityV_collection[index].position = DirectX::XMFLOAT4(x * sphere_desc.radius, y * sphere_desc.radius, z * sphere_desc.radius, 1.0f);
 				entityV_collection[index].normal = DirectX::XMFLOAT4(x, y, z, 0.0f);
-
-				//vert.uv = glm::vec2((glm::asin(vert.normal.x) / piVal + 0.5f), (glm::asin(vert.normal.y) / piVal + 0.5f));
+				entityV_collection[index].uv = DirectX::XMFLOAT2((asin(entityV_collection[index].normal.x) / DirectX::XM_PI + 0.5f), (asin(entityV_collection[index].normal.y) / DirectX::XM_PI + 0.5f));
 			}
 		}
 
 		int index = 0;
-		for (unsigned int i = 0; i < slices * stacks + slices; ++i)
+		for (int i = 0; i < sphere_desc.slices * sphere_desc.stacks + sphere_desc.slices; ++i)
 		{
 			entityI_collection[index] = i;
-			entityI_collection[index + 1] = i + slices + 1;
-			entityI_collection[index + 2] = i + slices;
-			entityI_collection[index + 3] = i + slices + 1;
+			entityI_collection[index + 1] = i + sphere_desc.slices + 1;
+			entityI_collection[index + 2] = i + sphere_desc.slices;
+			entityI_collection[index + 3] = i + sphere_desc.slices + 1;
 			entityI_collection[index + 4] = i;
 			entityI_collection[index + 5] = i + 1;
 
@@ -746,14 +845,14 @@ void Engine::CreateSphere(Entity& entity, unsigned int slices, unsigned int stac
 		}
 
 		VERTEX_BUFFER_DESC vertex_buffer_desc;
-		vertex_buffer_desc.vertexCollection = new OrenNayarVertex[VERTEX_COUNT];
-		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(OrenNayarVertex) * VERTEX_COUNT);
+		vertex_buffer_desc.vertexCollection = new FinalGatheringVertex[VERTEX_COUNT];
+		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(FinalGatheringVertex) * VERTEX_COUNT);
 		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
 		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
 		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new unsigned int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(unsigned int) * INDEX_COUNT);
+		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
 		index_buffer_desc.indexCount = INDEX_COUNT;
 
 		sphereM_desc.vertex_buffer_desc = vertex_buffer_desc;

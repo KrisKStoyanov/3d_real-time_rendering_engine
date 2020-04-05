@@ -14,7 +14,8 @@ public:
 	virtual bool Initialize() override;
 	virtual void Shutdown() override;
 
-	void StartFrameRender(D3D11PipelineState& pipelineState);
+	void SetShadowMapRender(D3D11PipelineState& pipelineState);
+	void SetBackBufferRender(D3D11PipelineState& pipelineState);
 	void EndFrameRender();
 	
 	void BindMeshBuffers(
@@ -24,17 +25,8 @@ public:
 	void BindPipelineState(
 		D3D11PipelineState& pipelineState);
 
-	//Temporary solution
 	void BindConstantBuffers(
 		D3D11PipelineState& pipelineState);
-
-	void BindConstantBuffer(
-		D3D11ConstantBuffer& constantBuffer, void* data);
-
-	void Dispatch(
-		unsigned int nX, 
-		unsigned int nY, 
-		unsigned int nZ);
 
 	virtual void DrawIndexed(
 		unsigned int indexCount, 

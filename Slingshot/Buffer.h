@@ -6,33 +6,33 @@
 struct VERTEX_BUFFER_DESC
 {
 	Vertex* vertexCollection;
-	unsigned int vertexCount;
+	int vertexCount;
 	Topology topology;
-	unsigned int stride;
-	unsigned int offset;
+	int stride;
+	int offset;
 };
 
 struct INDEX_BUFFER_DESC
 {
-	unsigned int* indexCollection;
-	unsigned int indexCount;
+	int* indexCollection;
+	int indexCount;
 };
 
 struct CONSTANT_BUFFER_DESC
 {
 	void* cbufferData;
-	unsigned int cbufferSize;
+	int cbufferSize;
 	ShaderType shaderType;
-	unsigned int registerSlot;
+	int registerSlot;
 };
 
 struct STRUCTURED_BUFFER_DESC
 {
-	unsigned int structureSize;
-	unsigned int byteStride; //<- size of largest struct element
-	unsigned int registerSlot;
-	unsigned int numStructs;
-	unsigned int numElementsPerStruct;
+	int structureSize;
+	int byteStride; //<- size of largest struct element
+	int registerSlot;
+	int numStructs;
+	int numElementsPerStruct;
 };
 
 class Buffer

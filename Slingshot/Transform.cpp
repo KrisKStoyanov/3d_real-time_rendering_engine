@@ -127,6 +127,16 @@ DirectX::XMVECTOR Transform::GetUpDir()
 	return m_upDir;
 }
 
+DirectX::XMMATRIX Transform::GetViewMatrix()
+{
+	return m_viewMatrix;
+}
+
+DirectX::XMMATRIX Transform::GetProjectionMatrix()
+{
+	return m_projectionMatrix;
+}
+
 void Transform::Update()
 {
 	m_worldMatrix = DirectX::XMMatrixIdentity();
@@ -136,6 +146,22 @@ void Transform::Update()
 	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_rotationMatrix);
 	m_translatioMatrix = DirectX::XMMatrixTranslationFromVector(m_position);
 	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_translatioMatrix);
+}
+
+void Transform::SetViewMatrix()
+{
+	m_viewMatrix = DirectX::XMMatrixLookAtLH(
+		m_position,
+		DirectX::XMVectorAdd(m_position, m_forwardDir),
+		m_upDir);
+}
+
+void Transform::SetProjectionMatrix(float nearZ, float farZ)
+{
+	float fov = DirectX::XM_PIDIV2;
+	float aspectRatio = 1.0f;
+
+	m_projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(fov, aspectRatio, nearZ, farZ);
 }
 
 void Transform::Translate(DirectX::XMVECTOR translation)

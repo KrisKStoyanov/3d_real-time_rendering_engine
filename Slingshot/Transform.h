@@ -27,7 +27,13 @@ public:
 	DirectX::XMVECTOR GetRightDir();
 	DirectX::XMVECTOR GetUpDir();
 
+	DirectX::XMMATRIX GetViewMatrix();
+	DirectX::XMMATRIX GetProjectionMatrix();
+
 	void Update();
+
+	void SetViewMatrix();
+	void SetProjectionMatrix(float nearZ, float farZ);
 
 	void Translate(DirectX::XMVECTOR translation);
 	void RotateEulerAngles(float eulerX, float eulerY, float eulerZ);
@@ -37,6 +43,8 @@ private:
 	Transform(TRANSFORM_DESC& transform_desc);
 
 	DirectX::XMMATRIX m_worldMatrix;
+	DirectX::XMMATRIX m_viewMatrix;
+	DirectX::XMMATRIX m_projectionMatrix;
 
 	DirectX::XMMATRIX m_translatioMatrix;
 	DirectX::XMMATRIX m_rotationMatrix;

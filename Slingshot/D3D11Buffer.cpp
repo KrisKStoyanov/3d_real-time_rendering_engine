@@ -136,8 +136,9 @@ D3D11ConstantBuffer* D3D11ConstantBuffer::Create(
 
 D3D11ConstantBuffer::D3D11ConstantBuffer(
 	ID3D11Device& device, 
-	CONSTANT_BUFFER_DESC desc)
-	: m_shaderType(desc.shaderType), m_registerSlot(desc.registerSlot)
+	CONSTANT_BUFFER_DESC desc) : 
+	m_shaderType(desc.shaderType), 
+	m_registerSlot(desc.registerSlot)
 {
 	//Ensure size is valid (multiple of 16 bytes)
 	desc.cbufferSize = ((desc.cbufferSize - 1) | 15) + 1;
@@ -179,10 +180,6 @@ void D3D11ConstantBuffer::Bind(ID3D11DeviceContext& deviceContext, void* data)
 	{
 		deviceContext.PSSetConstantBuffers(m_registerSlot, 1, &m_pBuffer);
 	}
-	case ShaderType::COMPUTE_SHADER:
-	{
-		deviceContext.CSSetConstantBuffers(m_registerSlot, 1, &m_pBuffer);
-	}
 	break;
 	}
 }
@@ -217,7 +214,7 @@ D3D11StructuredBuffer::D3D11StructuredBuffer(ID3D11Device& device, STRUCTURED_BU
 	ZeroMemory(&sb_desc, sizeof(sb_desc));
 	sb_desc.Usage = D3D11_USAGE_DEFAULT;
 	sb_desc.ByteWidth = desc.structureSize * desc.numStructs;
-	sb_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE; //provides CS (read/write) & PS (read) functionality
+	sb_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
 	sb_desc.CPUAccessFlags = 0;
 	sb_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	sb_desc.StructureByteStride = desc.byteStride;

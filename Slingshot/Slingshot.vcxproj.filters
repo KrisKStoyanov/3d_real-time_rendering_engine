@@ -22,6 +22,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Graphics\PhotonMapping">
+      <UniqueIdentifier>{bd02c022-731e-4391-b90a-001879a6a574}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -80,6 +83,21 @@
     </ClCompile>
     <ClCompile Include="D3D11PipelineState.cpp">
       <Filter>Graphics\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="LightMap.cpp">
+      <Filter>Graphics\PhotonMapping</Filter>
+    </ClCompile>
+    <ClCompile Include="PhotonMap.cpp">
+      <Filter>Graphics\PhotonMapping</Filter>
+    </ClCompile>
+    <ClCompile Include="Fragment.cpp">
+      <Filter>Graphics\PhotonMapping</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D11RenderTexture.cpp">
+      <Filter>Graphics\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -152,6 +170,21 @@
     <ClInclude Include="PipelineState.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="PhotonMap.h">
+      <Filter>Graphics\PhotonMapping</Filter>
+    </ClInclude>
+    <ClInclude Include="LightMap.h">
+      <Filter>Graphics\PhotonMapping</Filter>
+    </ClInclude>
+    <ClInclude Include="Fragment.h">
+      <Filter>Graphics\PhotonMapping</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D11RenderTexture.h">
+      <Filter>Graphics\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -162,6 +195,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="FinalGathering.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="DirectIllumination.hlsli">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
@@ -182,6 +218,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="FinalGatheringPS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectIlluminationPS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectIlluminationVS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
