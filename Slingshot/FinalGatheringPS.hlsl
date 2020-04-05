@@ -1,6 +1,5 @@
 #include "FinalGathering.hlsli"
-Texture2D shaderTexture : register(t0);
-Texture2D depthMapTexture : register(t1);
+Texture2D depthMapTexture : register(t0);
 
 SamplerState sampleTypeClamp : register(s0);
 SamplerState sampleTypeWrap : register(s1);
@@ -24,7 +23,6 @@ float4 main(PS_INPUT ps_input) : SV_Target
     float depthValue;
     float lightDepthValue;
     float lightIntensity;
-    float4 textureColor;
     
     float4 normal = normalize(ps_input.normalWorld);
     
@@ -46,8 +44,8 @@ float4 main(PS_INPUT ps_input) : SV_Target
             }
         }
     }
-    textureColor = shaderTexture.Sample(sampleTypeWrap, ps_input.uv);
-    color *= textureColor;
+    //float4 textureColor = shaderTexture.Sample(sampleTypeWrap, ps_input.uv);
+    //color *= textureColor;
 
     return surfaceColor;
 }

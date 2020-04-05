@@ -40,14 +40,15 @@ public:
 	void SetShadowMapRender(ID3D11DeviceContext& deviceContext);
 	void SetBackBufferRender(ID3D11DeviceContext& deviceContext);
 
+	void UpdatePerConfig(ID3D11DeviceContext& deviceContext);
+	void UpdatePerFrame(ID3D11DeviceContext& deviceContext);
+
 	void UpdateVSPerFrame(PerFrameDataVS& data);
 	void UpdateVSPerDrawCall(PerDrawCallDataVS& data);
 	void UpdatePSPerFrame(PerFrameDataPS& data);
 	void UpdatePSPerDrawCall(PerDrawCallDataPS& data);
 
-	void Bind(ID3D11DeviceContext& deviceContext);
 	void BindConstantBuffers(ID3D11DeviceContext& deviceContext);
-
 private:
 	D3D11PipelineState(
 		ID3D11Device& device,
@@ -88,7 +89,6 @@ private:
 	// Direct Illumination
 	D3D11RenderTexture* m_pShadowMap;
 	ID3D11SamplerState* m_pSampleStateWrap;
-	ID3D11SamplerState* m_pSampleStateClamp;
 
 	// Indirect Illumination (Final Gathering)
 	ID3D11Texture2D* m_pBufferA;

@@ -33,15 +33,14 @@ bool Renderer::Initialize(PIPELINE_DESC pipeline_desc)
 	{
 		return false;
 	}
-	//m_pPipelineState = PipelineState::Create(*m_pGraphicsContext, pipeline_desc); //alternative abstraction
 	m_pPipelineState = m_pGraphicsContext->CreatePipelineState(pipeline_desc);
+	m_pGraphicsContext->UpdatePerConfig(*m_pPipelineState);
 	return (m_pPipelineState != nullptr);
 }
 
 void Renderer::Draw(Scene& scene)
 {
-	m_pGraphicsContext->BindPipelineState(*m_pPipelineState);
-
+	m_pGraphicsContext->UpdatePerFrame(*m_pPipelineState);
 	m_pGraphicsContext->SetBackBufferRender(*m_pPipelineState);
 	//m_pGraphicsContext->SetShadowMapRender(*m_pPipelineState);
 

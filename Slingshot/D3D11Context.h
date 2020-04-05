@@ -14,6 +14,9 @@ public:
 	virtual bool Initialize() override;
 	virtual void Shutdown() override;
 
+	void UpdatePerConfig(D3D11PipelineState& pipelineState);
+	void UpdatePerFrame(D3D11PipelineState& pipelineState);
+
 	void SetShadowMapRender(D3D11PipelineState& pipelineState);
 	void SetBackBufferRender(D3D11PipelineState& pipelineState);
 	void EndFrameRender();
@@ -21,9 +24,6 @@ public:
 	void BindMeshBuffers(
 		D3D11VertexBuffer& vertexBuffer, 
 		D3D11IndexBuffer& indexBuffer);
-
-	void BindPipelineState(
-		D3D11PipelineState& pipelineState);
 
 	void BindConstantBuffers(
 		D3D11PipelineState& pipelineState);

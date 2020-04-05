@@ -184,11 +184,6 @@ void D3D11Context::BindMeshBuffers(D3D11VertexBuffer& vertexBuffer, D3D11IndexBu
 	indexBuffer.Bind(*m_pImmediateContext.Get());
 }
 
-void D3D11Context::BindPipelineState(D3D11PipelineState& pipelineState)
-{
-	pipelineState.Bind(*m_pImmediateContext.Get());
-}
-
 void D3D11Context::BindConstantBuffers(D3D11PipelineState& pipelineState)
 {
 	pipelineState.BindConstantBuffers(*m_pImmediateContext.Get());
@@ -225,6 +220,16 @@ void D3D11Context::Shutdown()
 	m_pSwapChain->Release();
 	m_pDevice->Release();
 	m_pImmediateContext->Release();
+}
+
+void D3D11Context::UpdatePerConfig(D3D11PipelineState& pipelineState)
+{
+	pipelineState.UpdatePerConfig(*m_pImmediateContext.Get());
+}
+
+void D3D11Context::UpdatePerFrame(D3D11PipelineState& pipelineState)
+{
+	pipelineState.UpdatePerFrame(*m_pImmediateContext.Get());
 }
 
 D3D11VertexBuffer* D3D11Context::CreateVertexBuffer(VERTEX_BUFFER_DESC desc)

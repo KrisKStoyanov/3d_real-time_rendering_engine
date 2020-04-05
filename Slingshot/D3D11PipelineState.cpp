@@ -21,7 +21,7 @@ D3D11PipelineState::D3D11PipelineState(
 	m_perFrameDataVS(), m_perDrawCallDataVS(), m_perFrameDataPS(), m_perDrawCallDataPS(),
 	m_pPerFrameCBufferVS(nullptr), m_pPerDrawCallCBufferVS(nullptr),
 	m_pPerFrameCBufferPS(nullptr), m_pPerDrawCallCBufferPS(nullptr),
-	m_pSampleStateClamp(nullptr), m_pSampleStateWrap(nullptr)
+	 m_pSampleStateWrap(nullptr)
 {
 
 	m_clearColor[0] = 0.0f;
@@ -234,8 +234,6 @@ D3D11PipelineState::D3D11PipelineState(
 	m_pShadowMap = D3D11RenderTexture::Create(device, renderTextureDesc);
 	m_texturePSRegCounter++;
 
-	//m_pShadowMap->SetShaderResource(context);
-
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -253,13 +251,6 @@ D3D11PipelineState::D3D11PipelineState(
 
 	DX::ThrowIfFailed(
 		device.CreateSamplerState(&samplerDesc, &m_pSampleStateWrap));
-
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-
-	DX::ThrowIfFailed(
-		device.CreateSamplerState(&samplerDesc, &m_pSampleStateClamp));
 }
 
 void D3D11PipelineState::Shutdown()
@@ -270,7 +261,6 @@ void D3D11PipelineState::Shutdown()
 	SAFE_RELEASE(m_pRasterizerState);
 	SAFE_RELEASE(m_pDepthStencilState);
 
-	SAFE_RELEASE(m_pSampleStateClamp);
 	SAFE_RELEASE(m_pSampleStateWrap);
 	SAFE_RELEASE(m_pDepthStencilView);
 
@@ -293,6 +283,22 @@ void D3D11PipelineState::SetBackBufferRender(ID3D11DeviceContext& deviceContext)
 	deviceContext.OMSetRenderTargets(1,
 		&m_pRenderTargetView,
 		m_pDepthStencilView);
+}
+
+void D3D11PipelineState::UpdatePerConfig(ID3D11DeviceContext& deviceContext)
+{
+	deviceContext.IASetInputLayout(m_pIL);
+	deviceContext.VSSetShader(m_pVS, nullptr, 0);
+	deviceContext.PSSetShader(m_pPS, nullptr, 0);
+	m_pShadowMap->SetShaderResource(deviceContext);
+	deviceContext.PSSetSamplers(0, 1, &m_pSampleStateWrap);
+	deviceContext.OMSetDepthStencilState(m_pDepthStencilState, 1);
+	deviceContext.RSSetState(m_pRasterizerState);
+}
+
+void D3D11PipelineState::UpdatePerFrame(ID3D11DeviceContext& deviceContext)
+{
+
 }
 
 void D3D11PipelineState::UpdateVSPerFrame(PerFrameDataVS& data)
@@ -318,18 +324,6 @@ void D3D11PipelineState::UpdatePSPerFrame(PerFrameDataPS& data)
 void D3D11PipelineState::UpdatePSPerDrawCall(PerDrawCallDataPS& data)
 {
 	m_perDrawCallDataPS.surfaceColor = data.surfaceColor;
-}
-
-void D3D11PipelineState::Bind(ID3D11DeviceContext& deviceContext)
-{
-	deviceContext.IASetInputLayout(m_pIL);
-	deviceContext.VSSetShader(m_pVS, nullptr, 0);
-	deviceContext.PSSetShader(m_pPS, nullptr, 0);
-	
-	//deviceContext.PSSetSamplers(0, 1, &m_pSampleStateClamp);
-	//deviceContext.PSSetSamplers(1, 1, &m_pSampleStateWrap);
-	//deviceContext.OMSetDepthStencilState(m_pDepthStencilState, 1);
-	deviceContext.RSSetState(m_pRasterizerState);
 }
 
 void D3D11PipelineState::BindConstantBuffers(ID3D11DeviceContext& deviceContext)
