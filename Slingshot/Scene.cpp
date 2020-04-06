@@ -7,7 +7,6 @@ void Scene::OnUpdate()
 		Entity& entity = *(m_pEntityCollection + i);
 		entity.GetTransform()->Update();
 	}
-	UpdateCamera(m_mainCameraId);
 }
 
 void Scene::Shutdown()

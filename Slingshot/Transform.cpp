@@ -23,33 +23,33 @@ Transform::Transform(TRANSFORM_DESC& transform_desc) :
 		transform_desc.position.z,
 		transform_desc.position.w);
 
-	//Used in Radians
-	m_rotation = DirectX::XMVectorSet(
-		DirectX::XMConvertToRadians(transform_desc.rotation.x),
-		DirectX::XMConvertToRadians(transform_desc.rotation.y),
-		DirectX::XMConvertToRadians(transform_desc.rotation.z),
-		0.0f);
-
 	m_positionDynamic = DirectX::XMFLOAT4(
 		transform_desc.position.x,
 		transform_desc.position.y,
 		transform_desc.position.z,
 		transform_desc.position.w);
 
-	//Used in Degrees
-	m_rotationDynamic = DirectX::XMFLOAT4(
-		transform_desc.rotation.x,
-		transform_desc.rotation.y,
-		transform_desc.rotation.z,
+	//Used in Radians
+	m_rotation = DirectX::XMVectorSet(
+		0.0f,
+		0.0f,
+		0.0f,
 		0.0f);
 
-	m_scaleDynamic = DirectX::XMFLOAT4(
+	//Used in Degrees
+	m_rotationDynamic = DirectX::XMFLOAT4(
+		0.0f,
+		0.0f,
+		0.0f,
+		0.0f);
+
+	m_scale = DirectX::XMVectorSet(
 		transform_desc.scale.x,
 		transform_desc.scale.y,
 		transform_desc.scale.z,
 		transform_desc.scale.w);
 
-	m_scale = DirectX::XMVectorSet(
+	m_scaleDynamic = DirectX::XMFLOAT4(
 		transform_desc.scale.x,
 		transform_desc.scale.y,
 		transform_desc.scale.z,
@@ -90,6 +90,9 @@ Transform::Transform(TRANSFORM_DESC& transform_desc) :
 		1.0f,
 		0.0f,
 		0.0f);
+
+	RotateEulerAngles(transform_desc.rotation.x, transform_desc.rotation.y, transform_desc.rotation.z);
+	Update();
 
 	m_viewMatrix = DirectX::XMMatrixLookAtLH(
 		m_position,
@@ -147,10 +150,18 @@ void Transform::Update()
 	m_translatioMatrix = DirectX::XMMatrixTranslationFromVector(m_position);
 	m_worldMatrix = DirectX::XMMatrixMultiply(m_worldMatrix, m_translatioMatrix);
 
+	m_forwardDir = DirectX::XMVector3Normalize(DirectX::XMVector3Transform(m_defaultForwardDir, m_rotationMatrix));
+	m_rightDir = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(m_forwardDir, m_defaultUpDir));
+	m_upDir = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(m_rightDir, m_forwardDir));
+
 	m_viewMatrix = DirectX::XMMatrixLookAtLH(
 		m_position,
 		DirectX::XMVectorAdd(m_position, m_forwardDir),
 		m_upDir);
+
+	//Currently incorrect X-Axis alignment after rotation
+	using namespace DirectX;
+	m_rightDir *= -1.0f;
 }
 
 void Transform::Translate(DirectX::XMVECTOR translation)
@@ -168,27 +179,27 @@ void Transform::RotateEulerAngles(float pitch, float head, float roll)
 		0.0f);
 
 	if (m_rotationDynamic.x > 360.0f) {
-		m_rotationDynamic.x -= 360;
+		m_rotationDynamic.x -= 360.0f;
 	}
 
 	if (m_rotationDynamic.x < -360.0f) {
-		m_rotationDynamic.x += 360;
+		m_rotationDynamic.x += 360.0f;
 	}
 
 	if (m_rotationDynamic.y > 360.0f) {
-		m_rotationDynamic.y -= 360;
+		m_rotationDynamic.y -= 360.0f;
 	}
 
 	if (m_rotationDynamic.y < -360.0f) {
-		m_rotationDynamic.y += 360;
+		m_rotationDynamic.y += 360.0f;
 	}
 
 	if (m_rotationDynamic.z > 360.0f) {
-		m_rotationDynamic.z -= 360;
+		m_rotationDynamic.z -= 360.0f;
 	}
 
 	if (m_rotationDynamic.z < -360.0f) {
-		m_rotationDynamic.z += 360;
+		m_rotationDynamic.z += 360.0f;
 	}
 
 	m_rotation = DirectX::XMVectorSet(
@@ -196,14 +207,6 @@ void Transform::RotateEulerAngles(float pitch, float head, float roll)
 		DirectX::XMConvertToRadians(m_rotationDynamic.y),
 		DirectX::XMConvertToRadians(m_rotationDynamic.z),
 			0.0f);
-
-	m_forwardDir = DirectX::XMVector3Normalize(DirectX::XMVector3Transform(m_defaultForwardDir, m_rotationMatrix));	
-	m_rightDir = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(m_forwardDir, m_defaultUpDir));
-	m_upDir = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(m_rightDir, m_forwardDir));
-	
-	//Currently incorrect X-Axis alignment after rotation
-	using namespace DirectX;
-	m_rightDir *= -1.0f;
 }
 
 void Transform::Scale(DirectX::XMVECTOR scale)

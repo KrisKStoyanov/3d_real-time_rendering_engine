@@ -28,7 +28,7 @@ void Entity::SetModel(GraphicsContext& graphicsContext, MESH_DESC& mesh_desc, MA
 
 void Entity::SetCamera(CAMERA_DESC& camera_desc)
 {
-	m_pCamera = Camera::Create(camera_desc, *m_pTransform);
+	m_pCamera = Camera::Create(camera_desc);
 }
 
 void Entity::SetLight(LIGHT_DESC& light_desc)

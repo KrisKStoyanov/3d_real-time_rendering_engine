@@ -42,7 +42,7 @@ bool Renderer::Initialize(PIPELINE_DESC pipeline_desc)
 void Renderer::Draw(Scene& scene)
 {
 	DirectX::XMMATRIX lightViewMatrix = DirectX::XMMatrixTranspose(scene.GetLights()->GetTransform()->GetViewMatrix());
-	DirectX::XMMATRIX cameraViewMatrix = DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetViewMatrix());
+	DirectX::XMMATRIX cameraViewMatrix = DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetTransform()->GetViewMatrix());
 	DirectX::XMMATRIX cameraProjMatrix = DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetProjectionMatrix());
 
 	// Depth Pre-pass

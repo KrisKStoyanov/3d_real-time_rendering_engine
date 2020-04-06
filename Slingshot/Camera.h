@@ -15,10 +15,8 @@ class Camera
 {
 public:
 	static Camera* Create(
-		CAMERA_DESC& camera_desc, 
-		Transform& transform);
+		CAMERA_DESC& camera_desc);
 
-	DirectX::XMMATRIX GetViewMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix();
 
 	void GetMouseCoord(int& mouseX, int& mouseY);
@@ -30,14 +28,9 @@ public:
 	void SetRotateStatus(bool rotate);
 
 	float GetTranslationSpeed();
-
-	void Update(Transform& transform);
 private:
-	Camera(
-		CAMERA_DESC& camera_desc,
-		Transform& transform);
+	Camera(CAMERA_DESC& camera_desc);
 
-	DirectX::XMMATRIX m_viewMatrix;
 	DirectX::XMMATRIX m_projectionMatrix;
 
 	int m_lastMouseX;

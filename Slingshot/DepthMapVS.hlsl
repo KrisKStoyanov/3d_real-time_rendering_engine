@@ -16,7 +16,7 @@ PS_INPUT main(VS_INPUT vs_input)
     PS_INPUT vs_output;
  
     float4x4 wvpMatrix = mul(worldMatrix, mul(viewMatrix, projectionMatrix));
-    vs_input.position.w = 1.0f;
+
     vs_output.position = mul(vs_input.position, wvpMatrix);
     vs_output.depthPos = vs_output.position;
     

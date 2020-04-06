@@ -1,35 +1,23 @@
 #include "Camera.h"
 
 Camera* Camera::Create(
-	CAMERA_DESC& camera_desc,
-	Transform& transform)
+	CAMERA_DESC& camera_desc)
 {
-	return new Camera(camera_desc, transform);
+	return new Camera(camera_desc);
 }
 
 Camera::Camera(
-	CAMERA_DESC& camera_desc,
-	Transform& transform) :
-	m_viewMatrix(), m_projectionMatrix(),
+	CAMERA_DESC& camera_desc) :
+	m_projectionMatrix(),
 	m_lastMouseX(0), m_lastMouseY(0),
 	m_rotationSpeed(camera_desc.rotationSpeed),
 	m_rotate(false), m_translationSpeed(camera_desc.translationSpeed)
 {
-	m_viewMatrix = DirectX::XMMatrixLookAtLH(
-		transform.GetPosition(),
-		DirectX::XMVectorAdd(transform.GetPosition(), transform.GetForwardDir()),
-		transform.GetUpDir());
-
 	m_projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(
 		DirectX::XMConvertToRadians(camera_desc.verticalFovAngle),
 		camera_desc.lenseWidth / camera_desc.lenseHeight,
 		camera_desc.nearClipDist,
 		camera_desc.farClipDist);
-}
-
-DirectX::XMMATRIX Camera::GetViewMatrix()
-{
-	return m_viewMatrix;
 }
 
 DirectX::XMMATRIX Camera::GetProjectionMatrix()
@@ -67,12 +55,4 @@ void Camera::SetRotateStatus(bool rotate)
 float Camera::GetTranslationSpeed()
 {
 	return m_translationSpeed;
-}
-
-void Camera::Update(Transform& transform)
-{
-	m_viewMatrix = DirectX::XMMatrixLookAtLH(
-		transform.GetPosition(),
-		DirectX::XMVectorAdd(transform.GetPosition(), transform.GetForwardDir()),
-		transform.GetUpDir());
 }

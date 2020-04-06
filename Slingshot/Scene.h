@@ -26,11 +26,6 @@ public:
 		return m_id; 
 	}
 
-	inline void UpdateCamera(int cameraId)
-	{
-		(m_pEntityCollection + cameraId)->GetCamera()->Update(*(m_pEntityCollection + cameraId)->GetTransform());
-	}
-
 	inline Entity* GetCamera(int cameraId)
 	{
 		return (m_pEntityCollection + cameraId);
