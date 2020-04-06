@@ -22,7 +22,7 @@ public:
 	void UnbindShaderResources(D3D11PipelineState& pipelineState);
 
 	void SetDepthMapRender(D3D11PipelineState& pipelineState);
-	void SetBackBufferRender(D3D11PipelineState& pipelineState);
+	void SetBackBufferRender();
 	void EndFrameRender();
 	
 	void BindMeshBuffers(
@@ -53,6 +53,11 @@ public:
 	inline IDXGISwapChain1* GetSwapChain()
 	{
 		return m_pSwapChain.Get();
+	}
+
+	inline ID3D11DeviceContext* GetContext()
+	{
+		return m_pImmediateContext.Get();
 	}
 
 	void SetVRS(bool enable);

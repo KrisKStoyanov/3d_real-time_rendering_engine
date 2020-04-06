@@ -218,7 +218,7 @@ void D3D11Context::SetDepthMapRender(D3D11PipelineState& pipelineState)
 	pipelineState.SetDepthMapRender(*m_pImmediateContext.Get());
 }
 
-void D3D11Context::SetBackBufferRender(D3D11PipelineState& pipelineState)
+void D3D11Context::SetBackBufferRender()
 {
 	m_pImmediateContext->ClearRenderTargetView(m_pBackBufferRTV.Get(), m_clearColor);
 	m_pImmediateContext->ClearDepthStencilView(m_pDepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);

@@ -243,3 +243,9 @@ void D3D11DirectIllumination::BindConstantBuffers(ID3D11DeviceContext& deviceCon
 	m_pPerFrameCBufferPS->Bind(deviceContext, &m_perFrameDataPS);
 	m_pPerDrawCallCBufferPS->Bind(deviceContext, &m_perDrawCallDataPS);
 }
+
+void D3D11DirectIllumination::EndFrameRender(ID3D11DeviceContext& deviceContext)
+{
+	ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+	deviceContext.PSSetShaderResources(0, 1, nullSRV);
+}

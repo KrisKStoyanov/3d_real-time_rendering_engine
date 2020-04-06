@@ -1,6 +1,7 @@
 #pragma once
 #include "Scene.h"
-#include "D3D11Context.h"
+#include "D3D11DepthMap.h"
+#include "D3D11DirectIllumination.h"
 #include "PhotonMap.h"
 
 struct RENDERER_DESC 
@@ -22,6 +23,9 @@ private:
 	Renderer(HWND hWnd, RENDERER_DESC& renderer_desc);	
 	D3D11Context* m_pGraphicsContext;
 	D3D11PipelineState* m_pPipelineState;
+
+	D3D11DepthMap* m_pDepthMap;
+	D3D11DirectIllumination* m_pDirectIllumination;
 
 	PhotonMap* m_pPhotonMap;
 };

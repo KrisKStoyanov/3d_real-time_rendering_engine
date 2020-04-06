@@ -15,6 +15,8 @@ public:
 	void UpdateBuffersPerDrawCall(PerDrawCallDataVS_DI& dataVS, PerDrawCallDataPS_DI& dataPS);
 	void BindConstantBuffers(ID3D11DeviceContext& deviceContext);
 
+	void EndFrameRender(ID3D11DeviceContext& deviceContext);
+
 private:
 	D3D11DirectIllumination(D3D11Context& context);
 

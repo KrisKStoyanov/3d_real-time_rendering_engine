@@ -3,6 +3,7 @@
 
 class D3D11DepthMap //: public D3D11PipelineState
 {
+public:
 	static D3D11DepthMap* Create(D3D11Context& context);
 	void Shutdown();
 
