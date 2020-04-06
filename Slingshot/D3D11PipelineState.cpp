@@ -14,14 +14,19 @@ D3D11PipelineState::D3D11PipelineState(
 	ID3D11DeviceContext& context,
 	IDXGISwapChain1& swapChain, 
 	const PIPELINE_DESC& desc) :
-	m_pVS(nullptr), m_pPS(nullptr), m_pIL(nullptr), 
-	m_cbufferVSRegCounter(0), m_cbufferPSRegCounter(0),
-	m_samplerVSRegCounter(0), m_samplerPSRegCounter(0),
-	m_textureVSRegCounter(0), m_texturePSRegCounter(0),
-	m_perFrameDataVS(), m_perDrawCallDataVS(), m_perFrameDataPS(), m_perDrawCallDataPS(),
-	m_pPerFrameCBufferVS(nullptr), m_pPerDrawCallCBufferVS(nullptr),
-	m_pPerFrameCBufferPS(nullptr), m_pPerDrawCallCBufferPS(nullptr),
-	 m_pSampleStateWrap(nullptr)
+	m_pVS_DirectIllumination(nullptr), m_pPS_DirectIllumination(nullptr), m_pIL_DirectIllumination(nullptr), 
+	m_pVS_DepthMap(nullptr), m_pPS_DepthMap(nullptr), m_pIL_DepthMap(nullptr),
+	m_cbufferVSRegCounter_DI(0), m_cbufferPSRegCounter_DI(0),
+	m_samplerVSRegCounter_DI(0), m_samplerPSRegCounter_DI(0),
+	m_textureVSRegCounter_DI(0), m_texturePSRegCounter_DI(0),
+	m_cbufferVSRegCounter_DM(0),
+	m_perFrameDataVS_DI(), m_perDrawCallDataVS_DI(), m_perFrameDataPS_DI(), m_perDrawCallDataPS_DI(),
+	m_perFrameDataVS_DM(), m_perDrawCallDataVS_DM(),
+	m_pPerFrameCBufferVS_DI(nullptr), m_pPerDrawCallCBufferVS_DI(nullptr),
+	m_pPerFrameCBufferPS_DI(nullptr), m_pPerDrawCallCBufferPS_DI(nullptr),
+	m_pPerFrameCBufferVS_DM(nullptr), m_pPerDrawCallCBufferVS_DM(nullptr),
+	 m_pSampleStateWrap(nullptr), m_pDepthStencilState(nullptr), m_pDepthStencilView(nullptr),
+	m_pRasterizerState(nullptr), m_pRenderTargetView(nullptr)
 {
 
 	m_clearColor[0] = 0.0f;
@@ -29,95 +34,70 @@ D3D11PipelineState::D3D11PipelineState(
 	m_clearColor[2] = 0.0f;
 	m_clearColor[3] = 1.0f;
 
-	char* VS_bytecode = nullptr, * PS_bytecode = nullptr;
-	size_t VS_size, PS_size;
-	VS_bytecode = GetFileBytecode(desc.VS_filename, VS_size);
-	PS_bytecode = GetFileBytecode(desc.PS_filename, PS_size);
+	char* VS_bytecode_DI = nullptr, * PS_bytecode_DI = nullptr;
+	size_t VS_size_DI, PS_size_DI;
+	VS_bytecode_DI = GetFileBytecode(desc.VS_filename_DI, VS_size_DI);
+	PS_bytecode_DI = GetFileBytecode(desc.PS_filename_DI, PS_size_DI);
 
-	device.CreateVertexShader(VS_bytecode, VS_size, nullptr, &m_pVS);
-	device.CreatePixelShader(PS_bytecode, PS_size, nullptr, &m_pPS);
+	device.CreateVertexShader(VS_bytecode_DI, VS_size_DI, nullptr, &m_pVS_DirectIllumination);
+	device.CreatePixelShader(PS_bytecode_DI, PS_size_DI, nullptr, &m_pPS_DirectIllumination);
 
-	switch (desc.shadingModel)
-	{
-	case ShadingModel::GoochShading:
-	{
-		D3D11_INPUT_ELEMENT_DESC VS_inputLayout[2];
+	D3D11_INPUT_ELEMENT_DESC IL_desc_DI[3];
 
-		VS_inputLayout[0].SemanticName = "POSITION";
-		VS_inputLayout[0].SemanticIndex = 0;
-		VS_inputLayout[0].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
-		VS_inputLayout[0].InputSlot = 0;
-		VS_inputLayout[0].AlignedByteOffset = 0;
-		VS_inputLayout[0].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
-		VS_inputLayout[0].InstanceDataStepRate = 0;
+	IL_desc_DI[0].SemanticName = "POSITION";
+	IL_desc_DI[0].SemanticIndex = 0;
+	IL_desc_DI[0].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+	IL_desc_DI[0].InputSlot = 0;
+	IL_desc_DI[0].AlignedByteOffset = 0;
+	IL_desc_DI[0].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+	IL_desc_DI[0].InstanceDataStepRate = 0;
 
-		VS_inputLayout[1].SemanticName = "NORMAL";
-		VS_inputLayout[1].SemanticIndex = 0;
-		VS_inputLayout[1].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
-		VS_inputLayout[1].InputSlot = 0;
-		VS_inputLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-		VS_inputLayout[1].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
-		VS_inputLayout[1].InstanceDataStepRate = 0;
+	IL_desc_DI[1].SemanticName = "NORMAL";
+	IL_desc_DI[1].SemanticIndex = 0;
+	IL_desc_DI[1].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+	IL_desc_DI[1].InputSlot = 0;
+	IL_desc_DI[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	IL_desc_DI[1].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+	IL_desc_DI[1].InstanceDataStepRate = 0;
 
-		device.CreateInputLayout(VS_inputLayout, 2, VS_bytecode, VS_size, &m_pIL);
-	}
-	break;
-	case ShadingModel::OrenNayarShading:
-	{
-		D3D11_INPUT_ELEMENT_DESC VS_inputLayout[2];
+	IL_desc_DI[2].SemanticName = "TEXCOORD";
+	IL_desc_DI[2].SemanticIndex = 0;
+	IL_desc_DI[2].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT;
+	IL_desc_DI[2].InputSlot = 0;
+	IL_desc_DI[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	IL_desc_DI[2].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+	IL_desc_DI[2].InstanceDataStepRate = 0;
 
-		VS_inputLayout[0].SemanticName = "POSITION";
-		VS_inputLayout[0].SemanticIndex = 0;
-		VS_inputLayout[0].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
-		VS_inputLayout[0].InputSlot = 0;
-		VS_inputLayout[0].AlignedByteOffset = 0;
-		VS_inputLayout[0].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
-		VS_inputLayout[0].InstanceDataStepRate = 0;
+	device.CreateInputLayout(IL_desc_DI, 3, VS_bytecode_DI, VS_size_DI, &m_pIL_DirectIllumination);
 
-		VS_inputLayout[1].SemanticName = "NORMAL";
-		VS_inputLayout[1].SemanticIndex = 0;
-		VS_inputLayout[1].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
-		VS_inputLayout[1].InputSlot = 0;
-		VS_inputLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-		VS_inputLayout[1].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
-		VS_inputLayout[1].InstanceDataStepRate = 0;
+	SAFE_DELETE_ARRAY(VS_bytecode_DI);
+	SAFE_DELETE_ARRAY(PS_bytecode_DI);
 
-		device.CreateInputLayout(VS_inputLayout, 2, VS_bytecode, VS_size, &m_pIL);
-	}
-	case ShadingModel::FinalGathering:
-	{
-		D3D11_INPUT_ELEMENT_DESC VS_inputLayout[3];
+	//-----------
 
-		VS_inputLayout[0].SemanticName = "POSITION";
-		VS_inputLayout[0].SemanticIndex = 0;
-		VS_inputLayout[0].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
-		VS_inputLayout[0].InputSlot = 0;
-		VS_inputLayout[0].AlignedByteOffset = 0;
-		VS_inputLayout[0].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
-		VS_inputLayout[0].InstanceDataStepRate = 0;
+	char* VS_bytecode_DM = nullptr, * PS_bytecode_DM = nullptr;
+	size_t VS_size_DM, PS_size_DM;
+	VS_bytecode_DM = GetFileBytecode(desc.VS_filename_DM, VS_size_DM);
+	PS_bytecode_DM = GetFileBytecode(desc.PS_filename_DM, PS_size_DM);
 
-		VS_inputLayout[1].SemanticName = "NORMAL";
-		VS_inputLayout[1].SemanticIndex = 0;
-		VS_inputLayout[1].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
-		VS_inputLayout[1].InputSlot = 0;
-		VS_inputLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-		VS_inputLayout[1].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
-		VS_inputLayout[1].InstanceDataStepRate = 0;
+	device.CreateVertexShader(VS_bytecode_DM, VS_size_DM, nullptr, &m_pVS_DepthMap);
+	device.CreatePixelShader(PS_bytecode_DM, PS_size_DM, nullptr, &m_pPS_DepthMap);
 
-		VS_inputLayout[2].SemanticName = "TEXCOORD";
-		VS_inputLayout[2].SemanticIndex = 0;
-		VS_inputLayout[2].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT;
-		VS_inputLayout[2].InputSlot = 0;
-		VS_inputLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-		VS_inputLayout[2].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
-		VS_inputLayout[2].InstanceDataStepRate = 0;
+	D3D11_INPUT_ELEMENT_DESC IL_desc_DM[1];
 
-		device.CreateInputLayout(VS_inputLayout, 3, VS_bytecode, VS_size, &m_pIL);
-	}
-	break;
-	}
-	SAFE_DELETE_ARRAY(VS_bytecode);
-	SAFE_DELETE_ARRAY(PS_bytecode);
+	IL_desc_DM[0].SemanticName = "POSITION";
+	IL_desc_DM[0].SemanticIndex = 0;
+	IL_desc_DM[0].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT;
+	IL_desc_DM[0].InputSlot = 0;
+	IL_desc_DM[0].AlignedByteOffset = 0;
+	IL_desc_DM[0].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+	IL_desc_DM[0].InstanceDataStepRate = 0;
+
+	device.CreateInputLayout(IL_desc_DM, 1, VS_bytecode_DM, VS_size_DM, &m_pIL_DepthMap);
+
+	SAFE_DELETE_ARRAY(VS_bytecode_DM);
+	SAFE_DELETE_ARRAY(PS_bytecode_DM);
+
 	SetShadingModel(desc.shadingModel);
 
 	ID3D11Texture2D* pBackBuffer;
@@ -195,44 +175,60 @@ D3D11PipelineState::D3D11PipelineState(
 	device.CreateRasterizerState(&rasterizer_desc, &m_pRasterizerState);
 
 	CONSTANT_BUFFER_DESC desc0;
-	desc0.cbufferData = &m_perFrameDataVS;
-	desc0.cbufferSize = sizeof(m_perFrameDataVS);
+	desc0.cbufferData = &m_perFrameDataVS_DI;
+	desc0.cbufferSize = sizeof(m_perFrameDataVS_DI);
 	desc0.shaderType = ShaderType::VERTEX_SHADER;
-	desc0.registerSlot = m_cbufferVSRegCounter;
-	m_pPerFrameCBufferVS = D3D11ConstantBuffer::Create(device, desc0);
-	m_cbufferVSRegCounter++;
+	desc0.registerSlot = m_cbufferVSRegCounter_DI;
+	m_pPerFrameCBufferVS_DI = D3D11ConstantBuffer::Create(device, desc0);
+	m_cbufferVSRegCounter_DI++;
 
 	CONSTANT_BUFFER_DESC desc1;
-	desc1.cbufferData = &m_perDrawCallDataVS;
-	desc1.cbufferSize = sizeof(m_perDrawCallDataVS);
+	desc1.cbufferData = &m_perDrawCallDataVS_DI;
+	desc1.cbufferSize = sizeof(m_perDrawCallDataVS_DI);
 	desc1.shaderType = ShaderType::VERTEX_SHADER;
-	desc1.registerSlot = m_cbufferVSRegCounter;
-	m_pPerDrawCallCBufferVS = D3D11ConstantBuffer::Create(device, desc1);
-	m_cbufferVSRegCounter++;
+	desc1.registerSlot = m_cbufferVSRegCounter_DI;
+	m_pPerDrawCallCBufferVS_DI = D3D11ConstantBuffer::Create(device, desc1);
+	m_cbufferVSRegCounter_DI++;
 
 	CONSTANT_BUFFER_DESC desc2;
-	desc2.cbufferData = &m_perFrameDataPS;
-	desc2.cbufferSize = sizeof(m_perFrameDataPS);
+	desc2.cbufferData = &m_perFrameDataPS_DI;
+	desc2.cbufferSize = sizeof(m_perFrameDataPS_DI);
 	desc2.shaderType = ShaderType::PIXEL_SHADER;
-	desc2.registerSlot = m_cbufferPSRegCounter;
-	m_pPerFrameCBufferPS = D3D11ConstantBuffer::Create(device, desc2);
-	m_cbufferPSRegCounter++;
+	desc2.registerSlot = m_cbufferPSRegCounter_DI;
+	m_pPerFrameCBufferPS_DI = D3D11ConstantBuffer::Create(device, desc2);
+	m_cbufferPSRegCounter_DI++;
 
 	CONSTANT_BUFFER_DESC desc3;
-	desc3.cbufferData = &m_perDrawCallDataPS;
-	desc3.cbufferSize = sizeof(m_perDrawCallDataPS);
+	desc3.cbufferData = &m_perDrawCallDataPS_DI;
+	desc3.cbufferSize = sizeof(m_perDrawCallDataPS_DI);
 	desc3.shaderType = ShaderType::PIXEL_SHADER;
-	desc3.registerSlot = m_cbufferPSRegCounter;
-	m_pPerDrawCallCBufferPS = D3D11ConstantBuffer::Create(device, desc3);
-	m_cbufferPSRegCounter++;
+	desc3.registerSlot = m_cbufferPSRegCounter_DI;
+	m_pPerDrawCallCBufferPS_DI = D3D11ConstantBuffer::Create(device, desc3);
+	m_cbufferPSRegCounter_DI++;
+
+	CONSTANT_BUFFER_DESC desc4;
+	desc4.cbufferData = &m_perFrameDataVS_DM;
+	desc4.cbufferSize = sizeof(m_perFrameDataVS_DM);
+	desc4.shaderType = ShaderType::VERTEX_SHADER;
+	desc4.registerSlot = m_cbufferVSRegCounter_DM;
+	m_pPerFrameCBufferVS_DM = D3D11ConstantBuffer::Create(device, desc4);
+	m_cbufferVSRegCounter_DM++;
+
+	CONSTANT_BUFFER_DESC desc5;
+	desc5.cbufferData = &m_perDrawCallDataVS_DM;
+	desc5.cbufferSize = sizeof(m_perDrawCallDataVS_DM);
+	desc5.shaderType = ShaderType::VERTEX_SHADER;
+	desc5.registerSlot = m_cbufferVSRegCounter_DM;
+	m_pPerDrawCallCBufferVS_DM = D3D11ConstantBuffer::Create(device, desc5);
+	m_cbufferVSRegCounter_DM++;
 
 	RENDER_TEXTURE_DESC renderTextureDesc;
 	renderTextureDesc.textureWidth = swapChainDesc.Width;
 	renderTextureDesc.textureHeight = swapChainDesc.Height;
 	renderTextureDesc.shaderType = ShaderType::PIXEL_SHADER;
-	renderTextureDesc.registerSlot = m_texturePSRegCounter;
-	m_pShadowMap = D3D11RenderTexture::Create(device, renderTextureDesc);
-	m_texturePSRegCounter++;
+	renderTextureDesc.registerSlot = m_texturePSRegCounter_DI;
+	m_pDepthMap = D3D11RenderTexture::Create(device, renderTextureDesc);
+	m_texturePSRegCounter_DI++;
 
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -255,25 +251,30 @@ D3D11PipelineState::D3D11PipelineState(
 
 void D3D11PipelineState::Shutdown()
 {
-	SAFE_RELEASE(m_pVS);
-	SAFE_RELEASE(m_pPS);
-	SAFE_RELEASE(m_pIL);
+	SAFE_RELEASE(m_pVS_DirectIllumination);
+	SAFE_RELEASE(m_pPS_DirectIllumination);
+	SAFE_RELEASE(m_pIL_DirectIllumination);
+
+	SAFE_RELEASE(m_pVS_DepthMap);
+	SAFE_RELEASE(m_pPS_DepthMap);
+	SAFE_RELEASE(m_pIL_DepthMap);
+
 	SAFE_RELEASE(m_pRasterizerState);
 	SAFE_RELEASE(m_pDepthStencilState);
 
 	SAFE_RELEASE(m_pSampleStateWrap);
 	SAFE_RELEASE(m_pDepthStencilView);
 
-	SAFE_DESTROY(m_pPerFrameCBufferVS);
-	SAFE_DESTROY(m_pPerDrawCallCBufferVS);
-	SAFE_DESTROY(m_pPerFrameCBufferPS);
-	SAFE_DESTROY(m_pPerDrawCallCBufferPS);
+	SAFE_DESTROY(m_pPerFrameCBufferVS_DI);
+	SAFE_DESTROY(m_pPerDrawCallCBufferVS_DI);
+	SAFE_DESTROY(m_pPerFrameCBufferPS_DI);
+	SAFE_DESTROY(m_pPerDrawCallCBufferPS_DI);
 }
 
-void D3D11PipelineState::SetShadowMapRender(ID3D11DeviceContext& deviceContext)
+void D3D11PipelineState::SetDepthMapRender(ID3D11DeviceContext& deviceContext)
 {
-	m_pShadowMap->ClearRenderTarget(deviceContext, *m_pDepthStencilView);
-	m_pShadowMap->SetRenderTarget(deviceContext, *m_pDepthStencilView);
+	m_pDepthMap->ClearRenderTarget(deviceContext, *m_pDepthStencilView);
+	m_pDepthMap->SetRenderTarget(deviceContext, *m_pDepthStencilView);
 }
 
 void D3D11PipelineState::SetBackBufferRender(ID3D11DeviceContext& deviceContext)
@@ -287,49 +288,89 @@ void D3D11PipelineState::SetBackBufferRender(ID3D11DeviceContext& deviceContext)
 
 void D3D11PipelineState::UpdatePerConfig(ID3D11DeviceContext& deviceContext)
 {
-	deviceContext.IASetInputLayout(m_pIL);
-	deviceContext.VSSetShader(m_pVS, nullptr, 0);
-	deviceContext.PSSetShader(m_pPS, nullptr, 0);
-	m_pShadowMap->SetShaderResource(deviceContext);
+	//deviceContext.IASetInputLayout(m_pIL);
+	//deviceContext.VSSetShader(m_pVS, nullptr, 0);
+	//deviceContext.PSSetShader(m_pPS, nullptr, 0);
+	//m_pShadowMap->SetShaderResource(deviceContext);
+	//deviceContext.PSSetSamplers(0, 1, &m_pSampleStateWrap);
+	//deviceContext.OMSetDepthStencilState(m_pDepthStencilState, 1);
+	//deviceContext.RSSetState(m_pRasterizerState);
+}
+
+void D3D11PipelineState::UpdatePerFrame_DM(ID3D11DeviceContext& deviceContext)
+{
+	deviceContext.IASetInputLayout(m_pIL_DepthMap);
+	deviceContext.VSSetShader(m_pVS_DepthMap, nullptr, 0);
+	deviceContext.PSSetShader(m_pPS_DepthMap, nullptr, 0);
+	deviceContext.OMSetDepthStencilState(m_pDepthStencilState, 1);
+	deviceContext.RSSetState(m_pRasterizerState);
+}
+
+void D3D11PipelineState::UpdatePerFrame_DI(ID3D11DeviceContext& deviceContext)
+{
+	deviceContext.IASetInputLayout(m_pIL_DirectIllumination);
+	deviceContext.VSSetShader(m_pVS_DirectIllumination, nullptr, 0);
+	deviceContext.PSSetShader(m_pPS_DirectIllumination, nullptr, 0);
 	deviceContext.PSSetSamplers(0, 1, &m_pSampleStateWrap);
 	deviceContext.OMSetDepthStencilState(m_pDepthStencilState, 1);
 	deviceContext.RSSetState(m_pRasterizerState);
 }
 
-void D3D11PipelineState::UpdatePerFrame(ID3D11DeviceContext& deviceContext)
+void D3D11PipelineState::BindShaderResources(ID3D11DeviceContext& deviceContext)
 {
-
+	m_pDepthMap->SetShaderResource(deviceContext);
 }
 
-void D3D11PipelineState::UpdateVSPerFrame(PerFrameDataVS& data)
+void D3D11PipelineState::UnbindShaderResources(ID3D11DeviceContext& deviceContext)
 {
-	m_perFrameDataVS.lightPos = data.lightPos;
-	m_perFrameDataVS.cameraViewMatrix = data.cameraViewMatrix;
-	m_perFrameDataVS.cameraProjMatrix = data.cameraProjMatrix;
-	m_perFrameDataVS.lightViewMatrix = data.lightViewMatrix;
-	m_perFrameDataVS.lightProjMatrix = data.lightProjMatrix;
+	m_pDepthMap->UnsetShaderResource(deviceContext);
 }
 
-void D3D11PipelineState::UpdateVSPerDrawCall(PerDrawCallDataVS& data)
+void D3D11PipelineState::UpdateVSPerFrame_DM(PerFrameDataVS_DM& data)
 {
-	m_perDrawCallDataVS.worldMatrix = data.worldMatrix;
+	m_perFrameDataVS_DM = data;
 }
 
-void D3D11PipelineState::UpdatePSPerFrame(PerFrameDataPS& data)
+void D3D11PipelineState::UpdateVSPerDrawCall_DM(PerDrawCallDataVS_DM& data)
 {
-	m_perFrameDataPS.ambientColor = data.ambientColor;
-	m_perFrameDataPS.diffuseColor = data.diffuseColor;
+	m_perDrawCallDataVS_DM = data;
 }
 
-void D3D11PipelineState::UpdatePSPerDrawCall(PerDrawCallDataPS& data)
+void D3D11PipelineState::UpdateVSPerFrame_DI(PerFrameDataVS_DI& data)
 {
-	m_perDrawCallDataPS.surfaceColor = data.surfaceColor;
+	m_perFrameDataVS_DI.lightPos = data.lightPos;
+	m_perFrameDataVS_DI.cameraViewMatrix = data.cameraViewMatrix;
+	m_perFrameDataVS_DI.cameraProjMatrix = data.cameraProjMatrix;
+	m_perFrameDataVS_DI.lightViewMatrix = data.lightViewMatrix;
+	m_perFrameDataVS_DI.lightProjMatrix = data.lightProjMatrix;
 }
 
-void D3D11PipelineState::BindConstantBuffers(ID3D11DeviceContext& deviceContext)
+void D3D11PipelineState::UpdateVSPerDrawCall_DI(PerDrawCallDataVS_DI& data)
 {
-	m_pPerFrameCBufferVS->Bind(deviceContext, &m_perFrameDataVS);
-	m_pPerDrawCallCBufferVS->Bind(deviceContext, &m_perDrawCallDataVS);
-	m_pPerFrameCBufferPS->Bind(deviceContext, &m_perFrameDataPS);
-	m_pPerDrawCallCBufferPS->Bind(deviceContext, &m_perDrawCallDataPS);
+	m_perDrawCallDataVS_DI.worldMatrix = data.worldMatrix;
+}
+
+void D3D11PipelineState::UpdatePSPerFrame_DI(PerFrameDataPS_DI& data)
+{
+	m_perFrameDataPS_DI.ambientColor = data.ambientColor;
+	m_perFrameDataPS_DI.diffuseColor = data.diffuseColor;
+}
+
+void D3D11PipelineState::UpdatePSPerDrawCall_DI(PerDrawCallDataPS_DI& data)
+{
+	m_perDrawCallDataPS_DI.surfaceColor = data.surfaceColor;
+}
+
+void D3D11PipelineState::BindConstantBuffers_DI(ID3D11DeviceContext& deviceContext)
+{
+	m_pPerFrameCBufferVS_DI->Bind(deviceContext, &m_perFrameDataVS_DI);
+	m_pPerDrawCallCBufferVS_DI->Bind(deviceContext, &m_perDrawCallDataVS_DI);
+	m_pPerFrameCBufferPS_DI->Bind(deviceContext, &m_perFrameDataPS_DI);
+	m_pPerDrawCallCBufferPS_DI->Bind(deviceContext, &m_perDrawCallDataPS_DI);
+}
+
+void D3D11PipelineState::BindConstantBuffers_DM(ID3D11DeviceContext& deviceContext)
+{
+	m_pPerFrameCBufferVS_DM->Bind(deviceContext, &m_perFrameDataVS_DM);
+	m_pPerDrawCallCBufferVS_DM->Bind(deviceContext, &m_perDrawCallDataVS_DM);
 }

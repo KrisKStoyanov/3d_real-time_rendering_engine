@@ -13,6 +13,12 @@ struct PIPELINE_DESC
 	const char* DS_filename;
 	const char* GS_filename;
 	const char* PS_filename;
+
+	const char* VS_filename_DI;
+	const char* VS_filename_DM;
+
+	const char* PS_filename_DI;
+	const char* PS_filename_DM;
 };
 
 class PipelineState 

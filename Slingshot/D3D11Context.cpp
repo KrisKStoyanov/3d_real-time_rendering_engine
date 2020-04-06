@@ -168,9 +168,9 @@ bool D3D11Context::Initialize()
 	return true;
 }
 
-void D3D11Context::SetShadowMapRender(D3D11PipelineState& pipelineState)
+void D3D11Context::SetDepthMapRender(D3D11PipelineState& pipelineState)
 {
-	pipelineState.SetShadowMapRender(*m_pImmediateContext.Get());
+	pipelineState.SetDepthMapRender(*m_pImmediateContext.Get());
 }
 
 void D3D11Context::SetBackBufferRender(D3D11PipelineState& pipelineState)
@@ -184,9 +184,14 @@ void D3D11Context::BindMeshBuffers(D3D11VertexBuffer& vertexBuffer, D3D11IndexBu
 	indexBuffer.Bind(*m_pImmediateContext.Get());
 }
 
-void D3D11Context::BindConstantBuffers(D3D11PipelineState& pipelineState)
+void D3D11Context::BindConstantBuffers_DI(D3D11PipelineState& pipelineState)
 {
-	pipelineState.BindConstantBuffers(*m_pImmediateContext.Get());
+	pipelineState.BindConstantBuffers_DI(*m_pImmediateContext.Get());
+}
+
+void D3D11Context::BindConstantBuffers_DM(D3D11PipelineState& pipelineState)
+{
+	pipelineState.BindConstantBuffers_DM(*m_pImmediateContext.Get());
 }
 
 void D3D11Context::DrawIndexed(unsigned int indexCount, unsigned int startIndexLocation, unsigned int baseVertexLocation)
@@ -227,9 +232,24 @@ void D3D11Context::UpdatePerConfig(D3D11PipelineState& pipelineState)
 	pipelineState.UpdatePerConfig(*m_pImmediateContext.Get());
 }
 
-void D3D11Context::UpdatePerFrame(D3D11PipelineState& pipelineState)
+void D3D11Context::UpdatePerFrame_DI(D3D11PipelineState& pipelineState)
 {
-	pipelineState.UpdatePerFrame(*m_pImmediateContext.Get());
+	pipelineState.UpdatePerFrame_DI(*m_pImmediateContext.Get());
+}
+
+void D3D11Context::UpdatePerFrame_DM(D3D11PipelineState& pipelineState)
+{
+	pipelineState.UpdatePerFrame_DM(*m_pImmediateContext.Get());
+}
+
+void D3D11Context::BindShaderResources(D3D11PipelineState& pipelineState)
+{
+	pipelineState.BindShaderResources(*m_pImmediateContext.Get());
+}
+
+void D3D11Context::UnbindShaderResources(D3D11PipelineState& pipelineState)
+{
+	pipelineState.UnbindShaderResources(*m_pImmediateContext.Get());
 }
 
 D3D11VertexBuffer* D3D11Context::CreateVertexBuffer(VERTEX_BUFFER_DESC desc)

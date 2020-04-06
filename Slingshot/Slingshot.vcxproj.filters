@@ -200,6 +200,9 @@
     <None Include="DirectIllumination.hlsli">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="DepthMap.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="GoochPS.hlsl">
@@ -224,6 +227,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="DirectIlluminationVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="DepthMapPS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="DepthMapVS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

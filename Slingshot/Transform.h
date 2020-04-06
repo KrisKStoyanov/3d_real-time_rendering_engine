@@ -28,12 +28,8 @@ public:
 	DirectX::XMVECTOR GetUpDir();
 
 	DirectX::XMMATRIX GetViewMatrix();
-	DirectX::XMMATRIX GetProjectionMatrix();
 
 	void Update();
-
-	void SetViewMatrix();
-	void SetProjectionMatrix(float nearZ, float farZ);
 
 	void Translate(DirectX::XMVECTOR translation);
 	void RotateEulerAngles(float eulerX, float eulerY, float eulerZ);

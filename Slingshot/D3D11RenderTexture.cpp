@@ -83,3 +83,21 @@ void D3D11RenderTexture::SetShaderResource(ID3D11DeviceContext& deviceContext)
 	break;
 	}
 }
+
+void D3D11RenderTexture::UnsetShaderResource(ID3D11DeviceContext& deviceContext)
+{
+	ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+	switch (m_shaderType)
+	{
+	case ShaderType::PIXEL_SHADER:
+	{
+		deviceContext.PSSetShaderResources(m_registerSlot, 1, nullSRV);
+	}
+	break;
+	case ShaderType::VERTEX_SHADER:
+	{
+		deviceContext.VSSetShaderResources(m_registerSlot, 1, nullSRV);
+	}
+	break;
+	}
+}

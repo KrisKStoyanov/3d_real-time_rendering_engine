@@ -34,30 +34,66 @@ bool Renderer::Initialize(PIPELINE_DESC pipeline_desc)
 		return false;
 	}
 	m_pPipelineState = m_pGraphicsContext->CreatePipelineState(pipeline_desc);
+
 	m_pGraphicsContext->UpdatePerConfig(*m_pPipelineState);
 	return (m_pPipelineState != nullptr);
 }
 
 void Renderer::Draw(Scene& scene)
 {
-	m_pGraphicsContext->UpdatePerFrame(*m_pPipelineState);
-	m_pGraphicsContext->SetBackBufferRender(*m_pPipelineState);
-	//m_pGraphicsContext->SetShadowMapRender(*m_pPipelineState);
+	DirectX::XMMATRIX lightViewMatrix = DirectX::XMMatrixTranspose(scene.GetLights()->GetTransform()->GetViewMatrix());
+	DirectX::XMMATRIX cameraViewMatrix = DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetViewMatrix());
+	DirectX::XMMATRIX cameraProjMatrix = DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetProjectionMatrix());
 
-	PerFrameDataVS perFrameDataVS;
-	perFrameDataVS.cameraViewMatrix = DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetViewMatrix());
-	perFrameDataVS.cameraProjMatrix = DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetProjectionMatrix());
-	perFrameDataVS.lightViewMatrix = scene.GetLights()->GetTransform()->GetViewMatrix();
-	perFrameDataVS.lightProjMatrix = scene.GetLights()->GetTransform()->GetProjectionMatrix();
+	// Depth Pre-pass
+	//m_pGraphicsContext->SetBackBufferRender(*m_pPipelineState); //test depth perspective
+	m_pGraphicsContext->SetDepthMapRender(*m_pPipelineState);
+	m_pGraphicsContext->UpdatePerFrame_DM(*m_pPipelineState);
+
+	PerFrameDataVS_DM perFrameDataVS_DM;
+	perFrameDataVS_DM.viewMatrix = lightViewMatrix;
+	perFrameDataVS_DM.projectionMatrix = cameraProjMatrix;
+
+	m_pPipelineState->UpdateVSPerFrame_DM(perFrameDataVS_DM);
+
+	for (int i = 0; i < scene.GetEntityCount(); ++i)
+	{
+		Entity& entity = *(scene.GetEntityCollection() + i);
+		if (entity.GetModel())
+		{
+			m_pGraphicsContext->BindMeshBuffers(
+				*static_cast<D3D11VertexBuffer*>(entity.GetModel()->GetMesh()->GetVertexBuffer()),
+				*static_cast<D3D11IndexBuffer*>(entity.GetModel()->GetMesh()->GetIndexBuffer()));
+
+			PerDrawCallDataVS_DM perDrawCallDataVS;
+			perDrawCallDataVS.worldMatrix = DirectX::XMMatrixTranspose(entity.GetTransform()->GetWorldMatrix());
+			m_pPipelineState->UpdateVSPerDrawCall_DM(perDrawCallDataVS);
+
+			m_pGraphicsContext->BindConstantBuffers_DM(*m_pPipelineState);
+
+			m_pGraphicsContext->DrawIndexed(entity.GetModel()->GetMesh()->GetIndexBuffer()->GetElementCount(), 0, 0);
+		}
+	}
+
+	// Direct Illumination
+	m_pGraphicsContext->SetBackBufferRender(*m_pPipelineState);
+	m_pGraphicsContext->UpdatePerFrame_DI(*m_pPipelineState);
+	m_pGraphicsContext->BindShaderResources(*m_pPipelineState);
+
+	PerFrameDataVS_DI perFrameDataVS;
+	perFrameDataVS.cameraViewMatrix = cameraViewMatrix;
+	perFrameDataVS.cameraProjMatrix = cameraProjMatrix;
+	perFrameDataVS.lightViewMatrix = lightViewMatrix;
+	perFrameDataVS.lightProjMatrix = cameraProjMatrix;
 	perFrameDataVS.lightPos = scene.GetLights()->GetTransform()->GetPosition();
 
-	m_pPipelineState->UpdateVSPerFrame(perFrameDataVS);
+	m_pPipelineState->UpdateVSPerFrame_DI(perFrameDataVS);
 
-	PerFrameDataPS perFrameDataPS;
+	PerFrameDataPS_DI perFrameDataPS;
 	perFrameDataPS.ambientColor = DirectX::XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	perFrameDataPS.diffuseColor = scene.GetLights()->GetLight()->GetColor();
 
-	m_pPipelineState->UpdatePSPerFrame(perFrameDataPS);
+	m_pPipelineState->UpdatePSPerFrame_DI(perFrameDataPS);
 
 	for (int i = 0; i < scene.GetEntityCount(); ++i)
 	{
@@ -68,21 +104,21 @@ void Renderer::Draw(Scene& scene)
 				*static_cast<D3D11VertexBuffer*>(entity.GetModel()->GetMesh()->GetVertexBuffer()),
 				*static_cast<D3D11IndexBuffer*>(entity.GetModel()->GetMesh()->GetIndexBuffer()));
 
-			PerDrawCallDataVS perDrawCallDataVS;
+			PerDrawCallDataVS_DI perDrawCallDataVS;
 			perDrawCallDataVS.worldMatrix = DirectX::XMMatrixTranspose(entity.GetTransform()->GetWorldMatrix());			
-			m_pPipelineState->UpdateVSPerDrawCall(perDrawCallDataVS);
+			m_pPipelineState->UpdateVSPerDrawCall_DI(perDrawCallDataVS);
 
-			PerDrawCallDataPS perDrawCallDataPS;
+			PerDrawCallDataPS_DI perDrawCallDataPS;
 			perDrawCallDataPS.surfaceColor = entity.GetModel()->GetMesh()->GetMaterial()->GetSurfaceColor();
-			m_pPipelineState->UpdatePSPerDrawCall(perDrawCallDataPS);
+			m_pPipelineState->UpdatePSPerDrawCall_DI(perDrawCallDataPS);
 			
-			m_pGraphicsContext->BindConstantBuffers(*m_pPipelineState);
+			m_pGraphicsContext->BindConstantBuffers_DI(*m_pPipelineState);
 
 			m_pGraphicsContext->DrawIndexed(entity.GetModel()->GetMesh()->GetIndexBuffer()->GetElementCount(), 0, 0);
 		}
 	}
 
-	//m_pGraphicsContext->SetBackBufferRender(*m_pPipelineState);
+	m_pGraphicsContext->UnbindShaderResources(*m_pPipelineState);
 
 	m_pGraphicsContext->EndFrameRender();
 }

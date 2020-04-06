@@ -6,11 +6,6 @@ void Scene::OnUpdate()
 	{
 		Entity& entity = *(m_pEntityCollection + i);
 		entity.GetTransform()->Update();
-		if (entity.GetLight())
-		{
-			entity.GetTransform()->SetViewMatrix();
-			entity.GetTransform()->SetProjectionMatrix(1.0f, 100.0f);
-		}
 	}
 	UpdateCamera(m_mainCameraId);
 }

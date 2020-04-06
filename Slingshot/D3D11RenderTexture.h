@@ -18,6 +18,7 @@ public:
 	void SetRenderTarget(ID3D11DeviceContext& deviceContext, ID3D11DepthStencilView& depthStencilView);
 	void ClearRenderTarget(ID3D11DeviceContext& deviceContext, ID3D11DepthStencilView& depthStencilView);
 	void SetShaderResource(ID3D11DeviceContext& deviceContext);
+	void UnsetShaderResource(ID3D11DeviceContext& deviceContext);
 	inline ID3D11ShaderResourceView* const GetShaderResourceView()
 	{
 		return m_pShaderResourceView;

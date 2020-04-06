@@ -40,8 +40,10 @@ bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 	{
 		PIPELINE_DESC pipeline_desc;
 		pipeline_desc.shadingModel = ShadingModel::FinalGathering;
-		pipeline_desc.VS_filename = "FinalGatheringVS.cso";
-		pipeline_desc.PS_filename = "FinalGatheringPS.cso";
+		pipeline_desc.VS_filename_DI = "DirectIlluminationVS.cso";
+		pipeline_desc.PS_filename_DI = "DirectIlluminationPS.cso";
+		pipeline_desc.VS_filename_DM = "DepthMapVS.cso";
+		pipeline_desc.PS_filename_DM = "DepthMapPS.cso";
 		m_isRunning = m_pRenderer->Initialize(pipeline_desc);	
 		GEOMETRY_DESC geo_desc = SetupScene(*m_pScene, 10);
 		m_pRenderer->SetupPhotonMap(geo_desc);
@@ -61,10 +63,10 @@ GEOMETRY_DESC Engine::SetupScene(Scene& scene, const int entityCount)
 	GetWindowRect(m_pWindow->GetHandle(), &winRect);
 	float resX = static_cast<float>(winRect.right - winRect.left);
 	float resY = static_cast<float>(winRect.bottom - winRect.top);
-	CAMERA_DESC entity0_camera_desc;
-	entity0_camera_desc.lenseWidth = resX;
-	entity0_camera_desc.lenseHeight = resY;
-	entityCollection[0].SetCamera(entity0_camera_desc);
+	CAMERA_DESC mainCameraDesc;
+	mainCameraDesc.lenseWidth = resX;
+	mainCameraDesc.lenseHeight = resY;
+	entityCollection[0].SetCamera(mainCameraDesc);
 	TRANSFORM_DESC entity0_transform_desc;
 	entity0_transform_desc.position = DirectX::XMFLOAT4(0.0f, 5.0f, -15.0f, 1.0f);
 	entityCollection[0].SetTransform(entity0_transform_desc);
@@ -76,6 +78,7 @@ GEOMETRY_DESC Engine::SetupScene(Scene& scene, const int entityCount)
 	entityCollection[1].SetLight(entity1_light_desc);
 	TRANSFORM_DESC entity1_transform_desc;
 	entity1_transform_desc.position = DirectX::XMFLOAT4(0.0f, 12.5f, 10.0f, 1.0f);
+	entity1_transform_desc.rotation = DirectX::XMFLOAT4(180.0f, 180.0f, 0.0f, 1.0f);
 	entityCollection[1].SetTransform(entity1_transform_desc);
 	//------------------------------
 

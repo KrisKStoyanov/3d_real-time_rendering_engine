@@ -19,24 +19,20 @@ float4 main(PS_INPUT ps_input) : SV_Target
 {
     float bias = 0.01f;
     float4 color = ambientColor;
-    float2 projectTexCoord;
-    float depthValue;
-    float lightDepthValue;
-    float lightIntensity;
-    
     float4 normal = normalize(ps_input.normalWorld);
     
+    float2 projectTexCoord;
     projectTexCoord.x = ps_input.lightViewPos.x / ps_input.lightViewPos.w / 2.0f + 0.5f;
     projectTexCoord.y = -ps_input.lightViewPos.y / ps_input.lightViewPos.w / 2.0f + 0.5f;
     
-    if (saturate(projectTexCoord.x) == projectTexCoord.x && saturate(projectTexCoord.y) == projectTexCoord.y)
+    if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
     {
-        depthValue = depthMapTexture.Sample(sampleTypeClamp, projectTexCoord).r;
-        lightDepthValue = (ps_input.lightViewPos.z / ps_input.lightViewPos.w) - bias;
+        float depthValue = depthMapTexture.Sample(sampleTypeClamp, projectTexCoord).r;
+        float lightDepthValue = (ps_input.lightViewPos.z / ps_input.lightViewPos.w) - bias;
         
         if (lightDepthValue < depthValue)
         {
-            lightIntensity = saturate(dot(normal, ps_input.lightDir));
+            float lightIntensity = saturate(dot(normal, ps_input.lightDir));
             if (lightIntensity > 0.0f)
             {
                 color += (diffuseColor * lightIntensity);
