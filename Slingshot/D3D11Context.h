@@ -45,6 +45,16 @@ public:
 	virtual D3D11IndexBuffer* CreateIndexBuffer(INDEX_BUFFER_DESC desc) override;
 	virtual D3D11ConstantBuffer* CreateConstantBuffer(CONSTANT_BUFFER_DESC desc) override;
 
+	inline ID3D11Device* GetDevice()
+	{
+		return m_pDevice.Get();
+	}
+
+	inline IDXGISwapChain1* GetSwapChain()
+	{
+		return m_pSwapChain.Get();
+	}
+
 	void SetVRS(bool enable);
 	bool GetVRS();
 
@@ -61,14 +71,19 @@ private:
 	void CreateDeviceAndContext();
 	void CreateSwapChain(
 		HWND hWnd, UINT winWidth, UINT winHeight);
-
+	void CreatePrimaryResources();
 
 	void SetupViewport(UINT winWidth, UINT winHeight);
 	void SetupDebugLayer();
 
+	float m_clearColor[4];
+
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pImmediateContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> m_pSwapChain;
+
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_pBackBufferRTV;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_pDepthBufferDSV;
 
 	D3D11_VIEWPORT m_viewport;
 

@@ -17,6 +17,8 @@ D3D11Context::D3D11Context(HWND hWnd)
 	CreateSwapChain(
 		hWnd, winWidth, winHeight);
 
+	CreatePrimaryResources();
+
 	SetupViewport(winWidth, winHeight);
 }
 
@@ -121,6 +123,51 @@ void D3D11Context::CreateSwapChain(
 	SAFE_RELEASE(pFactory);
 }
 
+void D3D11Context::CreatePrimaryResources()
+{
+	ID3D11Texture2D* pBackBuffer;
+	DX::ThrowIfFailed(m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
+	if (pBackBuffer != nullptr) {
+		DX::ThrowIfFailed(m_pDevice->CreateRenderTargetView(pBackBuffer, nullptr, m_pBackBufferRTV.GetAddressOf()));
+		SAFE_RELEASE(pBackBuffer);
+	}
+
+	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
+	DX::ThrowIfFailed(
+		m_pSwapChain->GetDesc1(&swapChainDesc));
+
+	ID3D11Texture2D* depthStencilBuffer;
+	D3D11_TEXTURE2D_DESC depthStencilBufferDesc;
+	ZeroMemory(&depthStencilBufferDesc, sizeof(depthStencilBufferDesc));
+	depthStencilBufferDesc.Width = swapChainDesc.Width;
+	depthStencilBufferDesc.Height = swapChainDesc.Height;
+	depthStencilBufferDesc.MipLevels = 1;
+	depthStencilBufferDesc.ArraySize = 1;
+	depthStencilBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilBufferDesc.SampleDesc.Count = 1;
+	depthStencilBufferDesc.SampleDesc.Quality = 0;
+	depthStencilBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthStencilBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthStencilBufferDesc.CPUAccessFlags = 0;
+	depthStencilBufferDesc.MiscFlags = 0;
+	DX::ThrowIfFailed(
+		m_pDevice->CreateTexture2D(&depthStencilBufferDesc, nullptr, &depthStencilBuffer));
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	DX::ThrowIfFailed(
+		m_pDevice->CreateDepthStencilView(
+			depthStencilBuffer,
+			&depthStencilViewDesc,
+			&m_pDepthBufferDSV));
+
+	SAFE_RELEASE(depthStencilBuffer);
+}
+
 void D3D11Context::SetupViewport(UINT winWidth, UINT winHeight)
 {
 	ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
@@ -157,8 +204,6 @@ bool D3D11Context::Initialize()
 {
 	m_pImmediateContext->RSSetViewports(1, &m_viewport);
 
-	//m_pPipelineState = D3D11PipelineState::Create(*m_pDevice.Get(), pipeline_desc);
-
 	InitializeNvAPI();
 	if (m_gfxCaps.bVariablePixelRateShadingSupported) 
 	{
@@ -175,7 +220,11 @@ void D3D11Context::SetDepthMapRender(D3D11PipelineState& pipelineState)
 
 void D3D11Context::SetBackBufferRender(D3D11PipelineState& pipelineState)
 {
-	pipelineState.SetBackBufferRender(*m_pImmediateContext.Get());
+	m_pImmediateContext->ClearRenderTargetView(m_pBackBufferRTV.Get(), m_clearColor);
+	m_pImmediateContext->ClearDepthStencilView(m_pDepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	m_pImmediateContext->OMSetRenderTargets(1,
+		m_pBackBufferRTV.GetAddressOf(),
+		m_pDepthBufferDSV.Get());
 }
 
 void D3D11Context::BindMeshBuffers(D3D11VertexBuffer& vertexBuffer, D3D11IndexBuffer& indexBuffer)
@@ -264,24 +313,7 @@ D3D11IndexBuffer* D3D11Context::CreateIndexBuffer(INDEX_BUFFER_DESC desc)
 
 D3D11ConstantBuffer* D3D11Context::CreateConstantBuffer(CONSTANT_BUFFER_DESC desc)
 {
-	switch (desc.shaderType)
-	{
-	case ShaderType::VERTEX_SHADER:
-	{
-		return D3D11ConstantBuffer::Create(*m_pDevice.Get(), desc);
-	}
-	break;
-	case ShaderType::PIXEL_SHADER:
-	{
-		return D3D11ConstantBuffer::Create(*m_pDevice.Get(), desc);
-	}
-	break;
-	default:
-	{
-		return nullptr;
-	}
-	break;
-	}
+	return D3D11ConstantBuffer::Create(*m_pDevice.Get(), desc);
 }
 
 void D3D11Context::InitializeNvAPI()

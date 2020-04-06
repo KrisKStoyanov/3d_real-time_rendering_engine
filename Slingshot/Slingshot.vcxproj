@@ -182,6 +182,8 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="D3D11Buffer.cpp" />
     <ClCompile Include="D3D11Context.cpp" />
+    <ClCompile Include="D3D11DepthMap.cpp" />
+    <ClCompile Include="D3D11DirectIllumination.cpp" />
     <ClCompile Include="D3D11PipelineState.cpp" />
     <ClCompile Include="D3D11RenderTexture.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -208,6 +210,8 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="D3D11Buffer.h" />
     <ClInclude Include="D3D11Context.h" />
+    <ClInclude Include="D3D11DepthMap.h" />
+    <ClInclude Include="D3D11DirectIllumination.h" />
     <ClInclude Include="D3D11PipelineState.h" />
     <ClInclude Include="D3D11RenderTexture.h" />
     <ClInclude Include="Engine.h" />

@@ -2,7 +2,6 @@
 Texture2D depthMapTexture : register(t0);
 
 SamplerState sampleTypeClamp : register(s0);
-SamplerState sampleTypeWrap : register(s1);
 
 cbuffer PerFrameBuffer : register(b0)
 {

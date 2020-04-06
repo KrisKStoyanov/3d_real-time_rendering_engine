@@ -29,7 +29,6 @@ private:
 
 	float m_clearColor[4];
 
-	ID3D11Texture2D* m_pRenderTargetTexture;
 	ID3D11RenderTargetView* m_pRenderTargetView;
 	ID3D11ShaderResourceView* m_pShaderResourceView;
 

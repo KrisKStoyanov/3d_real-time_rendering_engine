@@ -6,7 +6,6 @@ D3D11RenderTexture* D3D11RenderTexture::Create(ID3D11Device& device, RENDER_TEXT
 }
 
 D3D11RenderTexture::D3D11RenderTexture(ID3D11Device& device, RENDER_TEXTURE_DESC& desc) :
-	m_pRenderTargetTexture(nullptr),
 	m_pRenderTargetView(nullptr),
 	m_pShaderResourceView(nullptr),
 	m_clearColor(), 
@@ -17,6 +16,8 @@ D3D11RenderTexture::D3D11RenderTexture(ID3D11Device& device, RENDER_TEXTURE_DESC
 	m_clearColor[1] = 0.0f;
 	m_clearColor[2] = 0.0f;
 	m_clearColor[3] = 1.0f;
+
+	ID3D11Texture2D* renderTexture;
 
 	D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
@@ -31,14 +32,14 @@ D3D11RenderTexture::D3D11RenderTexture(ID3D11Device& device, RENDER_TEXTURE_DESC
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = 0;
 	DX::ThrowIfFailed(
-		device.CreateTexture2D(&textureDesc, nullptr, &m_pRenderTargetTexture));
+		device.CreateTexture2D(&textureDesc, nullptr, &renderTexture));
 
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
 	rtvDesc.Format = textureDesc.Format;
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	rtvDesc.Texture2D.MipSlice = 0;
 	DX::ThrowIfFailed(
-		device.CreateRenderTargetView(m_pRenderTargetTexture, &rtvDesc, &m_pRenderTargetView));
+		device.CreateRenderTargetView(renderTexture, &rtvDesc, &m_pRenderTargetView));
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	srvDesc.Format = textureDesc.Format;
@@ -46,12 +47,13 @@ D3D11RenderTexture::D3D11RenderTexture(ID3D11Device& device, RENDER_TEXTURE_DESC
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = 1;
 	DX::ThrowIfFailed(
-		device.CreateShaderResourceView(m_pRenderTargetTexture, &srvDesc, &m_pShaderResourceView));
+		device.CreateShaderResourceView(renderTexture, &srvDesc, &m_pShaderResourceView));
+
+	SAFE_RELEASE(renderTexture);
 }
 
 void D3D11RenderTexture::Shutdown()
 {
-	SAFE_RELEASE(m_pRenderTargetTexture);
 	SAFE_RELEASE(m_pRenderTargetView);
 	SAFE_RELEASE(m_pShaderResourceView);
 }

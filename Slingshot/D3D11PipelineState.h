@@ -49,7 +49,6 @@ public:
 	void Shutdown();
 
 	void SetDepthMapRender(ID3D11DeviceContext& deviceContext);
-	void SetBackBufferRender(ID3D11DeviceContext& deviceContext);
 
 	void UpdatePerConfig(ID3D11DeviceContext& deviceContext);
 	void UpdatePerFrame_DM(ID3D11DeviceContext& deviceContext);
@@ -79,8 +78,6 @@ private:
 
 	ID3D11RasterizerState* m_pRasterizerState;
 	ID3D11DepthStencilState* m_pDepthStencilState;
-
-	ID3D11RenderTargetView* m_pRenderTargetView;
 	ID3D11DepthStencilView* m_pDepthStencilView;
 
 	// Depth

@@ -1,6 +1,6 @@
 #include "FileParsing.h"
 
-char* GetFileBytecode(const char* filename, size_t& filesize)
+char* GetBytecode(const char* filename, size_t& filesize)
 {
 	std::ifstream shaderFileStream;
 	shaderFileStream.open(filename, std::ios::in | std::ios::binary | std::ios::ate);

@@ -25,8 +25,8 @@ D3D11PipelineState::D3D11PipelineState(
 	m_pPerFrameCBufferVS_DI(nullptr), m_pPerDrawCallCBufferVS_DI(nullptr),
 	m_pPerFrameCBufferPS_DI(nullptr), m_pPerDrawCallCBufferPS_DI(nullptr),
 	m_pPerFrameCBufferVS_DM(nullptr), m_pPerDrawCallCBufferVS_DM(nullptr),
-	 m_pSampleStateWrap(nullptr), m_pDepthStencilState(nullptr), m_pDepthStencilView(nullptr),
-	m_pRasterizerState(nullptr), m_pRenderTargetView(nullptr)
+	 m_pSampleStateWrap(nullptr), m_pDepthStencilState(nullptr),
+	m_pRasterizerState(nullptr)
 {
 
 	m_clearColor[0] = 0.0f;
@@ -36,8 +36,8 @@ D3D11PipelineState::D3D11PipelineState(
 
 	char* VS_bytecode_DI = nullptr, * PS_bytecode_DI = nullptr;
 	size_t VS_size_DI, PS_size_DI;
-	VS_bytecode_DI = GetFileBytecode(desc.VS_filename_DI, VS_size_DI);
-	PS_bytecode_DI = GetFileBytecode(desc.PS_filename_DI, PS_size_DI);
+	VS_bytecode_DI = GetBytecode(desc.VS_filename_DI, VS_size_DI);
+	PS_bytecode_DI = GetBytecode(desc.PS_filename_DI, PS_size_DI);
 
 	device.CreateVertexShader(VS_bytecode_DI, VS_size_DI, nullptr, &m_pVS_DirectIllumination);
 	device.CreatePixelShader(PS_bytecode_DI, PS_size_DI, nullptr, &m_pPS_DirectIllumination);
@@ -77,8 +77,8 @@ D3D11PipelineState::D3D11PipelineState(
 
 	char* VS_bytecode_DM = nullptr, * PS_bytecode_DM = nullptr;
 	size_t VS_size_DM, PS_size_DM;
-	VS_bytecode_DM = GetFileBytecode(desc.VS_filename_DM, VS_size_DM);
-	PS_bytecode_DM = GetFileBytecode(desc.PS_filename_DM, PS_size_DM);
+	VS_bytecode_DM = GetBytecode(desc.VS_filename_DM, VS_size_DM);
+	PS_bytecode_DM = GetBytecode(desc.PS_filename_DM, PS_size_DM);
 
 	device.CreateVertexShader(VS_bytecode_DM, VS_size_DM, nullptr, &m_pVS_DepthMap);
 	device.CreatePixelShader(PS_bytecode_DM, PS_size_DM, nullptr, &m_pPS_DepthMap);
@@ -99,13 +99,6 @@ D3D11PipelineState::D3D11PipelineState(
 	SAFE_DELETE_ARRAY(PS_bytecode_DM);
 
 	SetShadingModel(desc.shadingModel);
-
-	ID3D11Texture2D* pBackBuffer;
-	DX::ThrowIfFailed(swapChain.GetBuffer(0, IID_PPV_ARGS(&pBackBuffer)));
-	if (pBackBuffer != nullptr) {
-		DX::ThrowIfFailed(device.CreateRenderTargetView(pBackBuffer, nullptr, &m_pRenderTargetView));
-		SAFE_RELEASE(pBackBuffer);
-	}
 
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
 	swapChain.GetDesc1(&swapChainDesc);
@@ -277,24 +270,9 @@ void D3D11PipelineState::SetDepthMapRender(ID3D11DeviceContext& deviceContext)
 	m_pDepthMap->SetRenderTarget(deviceContext, *m_pDepthStencilView);
 }
 
-void D3D11PipelineState::SetBackBufferRender(ID3D11DeviceContext& deviceContext)
-{
-	deviceContext.ClearRenderTargetView(m_pRenderTargetView, m_clearColor);
-	deviceContext.ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	deviceContext.OMSetRenderTargets(1,
-		&m_pRenderTargetView,
-		m_pDepthStencilView);
-}
-
 void D3D11PipelineState::UpdatePerConfig(ID3D11DeviceContext& deviceContext)
 {
-	//deviceContext.IASetInputLayout(m_pIL);
-	//deviceContext.VSSetShader(m_pVS, nullptr, 0);
-	//deviceContext.PSSetShader(m_pPS, nullptr, 0);
-	//m_pShadowMap->SetShaderResource(deviceContext);
-	//deviceContext.PSSetSamplers(0, 1, &m_pSampleStateWrap);
-	//deviceContext.OMSetDepthStencilState(m_pDepthStencilState, 1);
-	//deviceContext.RSSetState(m_pRasterizerState);
+
 }
 
 void D3D11PipelineState::UpdatePerFrame_DM(ID3D11DeviceContext& deviceContext)
@@ -338,27 +316,22 @@ void D3D11PipelineState::UpdateVSPerDrawCall_DM(PerDrawCallDataVS_DM& data)
 
 void D3D11PipelineState::UpdateVSPerFrame_DI(PerFrameDataVS_DI& data)
 {
-	m_perFrameDataVS_DI.lightPos = data.lightPos;
-	m_perFrameDataVS_DI.cameraViewMatrix = data.cameraViewMatrix;
-	m_perFrameDataVS_DI.cameraProjMatrix = data.cameraProjMatrix;
-	m_perFrameDataVS_DI.lightViewMatrix = data.lightViewMatrix;
-	m_perFrameDataVS_DI.lightProjMatrix = data.lightProjMatrix;
+	m_perFrameDataVS_DI = data;
 }
 
 void D3D11PipelineState::UpdateVSPerDrawCall_DI(PerDrawCallDataVS_DI& data)
 {
-	m_perDrawCallDataVS_DI.worldMatrix = data.worldMatrix;
+	m_perDrawCallDataVS_DI = data;
 }
 
 void D3D11PipelineState::UpdatePSPerFrame_DI(PerFrameDataPS_DI& data)
 {
-	m_perFrameDataPS_DI.ambientColor = data.ambientColor;
-	m_perFrameDataPS_DI.diffuseColor = data.diffuseColor;
+	m_perFrameDataPS_DI = data;
 }
 
 void D3D11PipelineState::UpdatePSPerDrawCall_DI(PerDrawCallDataPS_DI& data)
 {
-	m_perDrawCallDataPS_DI.surfaceColor = data.surfaceColor;
+	m_perDrawCallDataPS_DI = data;
 }
 
 void D3D11PipelineState::BindConstantBuffers_DI(ID3D11DeviceContext& deviceContext)
