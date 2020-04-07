@@ -42,6 +42,7 @@ struct FinalGatheringVertex : public Vertex
 enum class ShaderType : unsigned int
 {
 	VERTEX_SHADER = 0,
+	GEOMETRY_SHADER,
 	PIXEL_SHADER
 };
 

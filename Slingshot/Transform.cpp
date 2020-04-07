@@ -140,6 +140,28 @@ DirectX::XMMATRIX Transform::GetViewMatrix()
 	return m_viewMatrix;
 }
 
+void Transform::GeneratePanoramicView(
+	DirectX::XMMATRIX& frontView, 
+	DirectX::XMMATRIX& backView, 
+	DirectX::XMMATRIX& leftView, 
+	DirectX::XMMATRIX& rightView, 
+	DirectX::XMMATRIX& topView, 
+	DirectX::XMMATRIX& bottomView)
+{
+	frontView = m_viewMatrix;
+	backView = DirectX::XMMatrixInverse(nullptr, frontView);
+	rightView = DirectX::XMMatrixLookAtLH(
+		m_position,
+		DirectX::XMVectorAdd(m_position, m_rightDir),
+		m_upDir);
+	leftView = DirectX::XMMatrixInverse(nullptr, rightView);
+	topView = DirectX::XMMatrixLookAtLH(
+		m_position,
+		DirectX::XMVectorAdd(m_position, m_upDir),
+		DirectX::XMVectorNegate(m_forwardDir));
+	bottomView = DirectX::XMMatrixInverse(nullptr, topView);
+}
+
 void Transform::Update()
 {
 	m_worldMatrix = DirectX::XMMatrixIdentity();
@@ -160,8 +182,7 @@ void Transform::Update()
 		m_upDir);
 
 	//Currently incorrect X-Axis alignment after rotation
-	using namespace DirectX;
-	m_rightDir *= -1.0f;
+	m_rightDir = DirectX::XMVectorNegate(m_rightDir);
 }
 
 void Transform::Translate(DirectX::XMVECTOR translation)

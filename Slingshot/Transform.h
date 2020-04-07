@@ -29,6 +29,14 @@ public:
 
 	DirectX::XMMATRIX GetViewMatrix();
 
+	void GeneratePanoramicView(
+		DirectX::XMMATRIX& frontView,
+		DirectX::XMMATRIX& backView,
+		DirectX::XMMATRIX& leftView,
+		DirectX::XMMATRIX& rightView,
+		DirectX::XMMATRIX& topView,
+		DirectX::XMMATRIX& bottomView);
+
 	void Update();
 
 	void Translate(DirectX::XMVECTOR translation);

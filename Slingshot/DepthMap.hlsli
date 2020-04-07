@@ -8,3 +8,9 @@ struct PS_INPUT
     float4 position : SV_Position;
     float4 depthPos : TEXCOORD0;
 };
+
+struct GS_COALESCENT
+{
+    float4 position : SV_Position;
+    float4 depthPos : TEXCOORD0;
+};

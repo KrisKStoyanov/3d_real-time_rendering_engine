@@ -126,7 +126,6 @@ D3D11DirectIllumination::D3D11DirectIllumination(D3D11Context& context) :
 	rasterizer_desc.ScissorEnable = false;
 	rasterizer_desc.MultisampleEnable = false;
 	rasterizer_desc.AntialiasedLineEnable = false;
-	//rasterizer_desc.ForcedSampleCount = 0; <-featured in D3D11_RASTERIZER_DESC1 (requires device1), future update consideration
 
 	DX::ThrowIfFailed(
 		context.GetDevice()->CreateRasterizerState(&rasterizer_desc, &m_pRasterizerState));
@@ -210,6 +209,7 @@ void D3D11DirectIllumination::UpdatePerFrame(ID3D11DeviceContext& deviceContext,
 {
 	deviceContext.IASetInputLayout(m_pIL);
 	deviceContext.VSSetShader(m_pVS, nullptr, 0);
+	deviceContext.GSSetShader(nullptr, nullptr, 0);
 	deviceContext.PSSetShader(m_pPS, nullptr, 0);
 	deviceContext.PSSetSamplers(0, 1, &m_pSampleStateWrap);
 	deviceContext.OMSetDepthStencilState(m_pDepthStencilState, 1);

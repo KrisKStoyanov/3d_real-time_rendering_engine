@@ -176,6 +176,11 @@ void D3D11ConstantBuffer::Bind(ID3D11DeviceContext& deviceContext, void* data)
 		deviceContext.VSSetConstantBuffers(m_registerSlot, 1, &m_pBuffer);
 	}
 	break;
+	case ShaderType::GEOMETRY_SHADER:
+	{
+		deviceContext.GSSetConstantBuffers(m_registerSlot, 1, &m_pBuffer);
+	}
+	break;
 	case ShaderType::PIXEL_SHADER:
 	{
 		deviceContext.PSSetConstantBuffers(m_registerSlot, 1, &m_pBuffer);
