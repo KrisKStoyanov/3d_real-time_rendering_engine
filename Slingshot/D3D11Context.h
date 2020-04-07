@@ -14,14 +14,6 @@ public:
 	virtual bool Initialize() override;
 	virtual void Shutdown() override;
 
-	void UpdatePerConfig(D3D11PipelineState& pipelineState);
-	void UpdatePerFrame_DI(D3D11PipelineState& pipelineState);
-	void UpdatePerFrame_DM(D3D11PipelineState& pipelineState);
-
-	void BindShaderResources(D3D11PipelineState& pipelineState);
-	void UnbindShaderResources(D3D11PipelineState& pipelineState);
-
-	void SetDepthMapRender(D3D11PipelineState& pipelineState);
 	void SetBackBufferRender();
 	void EndFrameRender();
 	
@@ -29,11 +21,7 @@ public:
 		D3D11VertexBuffer& vertexBuffer, 
 		D3D11IndexBuffer& indexBuffer);
 
-	void BindConstantBuffers_DI(
-		D3D11PipelineState& pipelineState);
-
-	void BindConstantBuffers_DM(
-		D3D11PipelineState& pipelineState);
+	void Draw(unsigned int vertexCount, unsigned int startVertexLocation);
 
 	virtual void DrawIndexed(
 		unsigned int indexCount, 

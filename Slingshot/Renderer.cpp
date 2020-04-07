@@ -33,14 +33,10 @@ bool Renderer::Initialize(PIPELINE_DESC pipeline_desc)
 	{
 		return false;
 	}
-	m_pPipelineState = m_pGraphicsContext->CreatePipelineState(pipeline_desc);
-
-	m_pGraphicsContext->UpdatePerConfig(*m_pPipelineState);
-
 	m_pDepthMap = D3D11DepthMap::Create(*m_pGraphicsContext);
 	m_pDirectIllumination = D3D11DirectIllumination::Create(*m_pGraphicsContext);
 
-	return (m_pPipelineState != nullptr);
+	return (m_pDepthMap != nullptr && m_pDirectIllumination != nullptr);
 }
 
 void Renderer::Draw(Scene& scene)
@@ -124,7 +120,8 @@ void Renderer::Draw(Scene& scene)
 
 void Renderer::Shutdown()
 {
-	m_pPipelineState->Shutdown();
+	SAFE_SHUTDOWN(m_pDepthMap);
+	SAFE_SHUTDOWN(m_pDirectIllumination);
 	m_pGraphicsContext->Shutdown();
 }
 

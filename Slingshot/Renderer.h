@@ -22,7 +22,6 @@ public:
 private:
 	Renderer(HWND hWnd, RENDERER_DESC& renderer_desc);	
 	D3D11Context* m_pGraphicsContext;
-	D3D11PipelineState* m_pPipelineState;
 
 	D3D11DepthMap* m_pDepthMap;
 	D3D11DirectIllumination* m_pDirectIllumination;

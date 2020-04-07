@@ -1,8 +1,32 @@
 #pragma once
 #include "D3D11Context.h"
 
-// Holds BackBuffer RTV - might be more optimal to store in D3D11Context for accessibility
-class D3D11DirectIllumination //: public D3D11PipelineState
+struct PerFrameDataVS_DI
+{
+	DirectX::XMMATRIX cameraViewMatrix;
+	DirectX::XMMATRIX cameraProjMatrix;
+	DirectX::XMMATRIX lightViewMatrix;
+	DirectX::XMMATRIX lightProjMatrix;
+	DirectX::XMVECTOR lightPos;
+};
+
+struct PerDrawCallDataVS_DI
+{
+	DirectX::XMMATRIX worldMatrix;
+};
+
+struct PerFrameDataPS_DI
+{
+	DirectX::XMFLOAT4 ambientColor;
+	DirectX::XMFLOAT4 diffuseColor;
+};
+
+struct PerDrawCallDataPS_DI
+{
+	DirectX::XMFLOAT4 surfaceColor;
+};
+
+class D3D11DirectIllumination : public D3D11PipelineState
 {
 public:
 	static D3D11DirectIllumination* Create(D3D11Context& context);

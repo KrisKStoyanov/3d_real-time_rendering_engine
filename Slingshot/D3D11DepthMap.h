@@ -1,7 +1,18 @@
 #pragma once
 #include "D3D11Context.h"
 
-class D3D11DepthMap //: public D3D11PipelineState
+struct PerFrameDataVS_DM
+{
+	DirectX::XMMATRIX viewMatrix;
+	DirectX::XMMATRIX projectionMatrix;
+};
+
+struct PerDrawCallDataVS_DM
+{
+	DirectX::XMMATRIX worldMatrix;
+};
+
+class D3D11DepthMap : public D3D11PipelineState
 {
 public:
 	static D3D11DepthMap* Create(D3D11Context& context);

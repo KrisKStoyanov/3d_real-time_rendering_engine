@@ -45,7 +45,7 @@ bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 		pipeline_desc.VS_filename_DM = "DepthMapVS.cso";
 		pipeline_desc.PS_filename_DM = "DepthMapPS.cso";
 		m_isRunning = m_pRenderer->Initialize(pipeline_desc);	
-		GEOMETRY_DESC geo_desc = SetupScene(*m_pScene, 10);
+		GEOMETRY_DESC geo_desc = SetupScene(*m_pScene, 11);
 		m_pRenderer->SetupPhotonMap(geo_desc);
 		m_pTimer = new Timer();
 	}
@@ -153,53 +153,67 @@ GEOMETRY_DESC Engine::SetupScene(Scene& scene, const int entityCount)
 	plane_desc4.length = 10.0f;
 	plane_desc4.width = 10.0f;
 	CreatePlane(*(entityCollection + 6), plane_desc4, mat_desc4);
+
+	//Back
+	TRANSFORM_DESC entity7_transform_desc;
+	entity7_transform_desc.position = DirectX::XMFLOAT4(0.0f, 5.0f, 0.0f, 1.0f);
+	entity7_transform_desc.rotation = DirectX::XMFLOAT4(90.0f, 0.0f, 0.0f, 0.0f);
+	entityCollection[7].SetTransform(entity7_transform_desc);
+	MATERIAL_DESC mat_desc5;
+	mat_desc5.shadingModel = ShadingModel::FinalGathering;
+	mat_desc5.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	mat_desc5.roughness = 1.0f;
+	PLANE_DESC plane_desc5;
+	plane_desc5.length = 10.0f;
+	plane_desc5.width = 10.0f;
+	CreatePlane(*(entityCollection + 7), plane_desc5, mat_desc5);
 	//------------------------------
 
 	//	DECOR
 	//------------------------------
 	//Yellow ball
-	TRANSFORM_DESC entity7_transform_desc;
-	entity7_transform_desc.position = DirectX::XMFLOAT4(0.0f, 1.0f, 13.5f, 1.0f);
-	entityCollection[7].SetTransform(entity7_transform_desc);
-	MATERIAL_DESC mat_desc5;
-	mat_desc5.shadingModel = ShadingModel::FinalGathering;
-	mat_desc5.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
-	mat_desc5.roughness = 1.0f;
+	TRANSFORM_DESC entity8_transform_desc;
+	entity8_transform_desc.position = DirectX::XMFLOAT4(0.0f, 1.0f, 13.5f, 1.0f);
+	entityCollection[8].SetTransform(entity8_transform_desc);
+	MATERIAL_DESC mat_desc6;
+	mat_desc6.shadingModel = ShadingModel::FinalGathering;
+	mat_desc6.surfaceColor = DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+	mat_desc6.roughness = 1.0f;
 	SPHERE_DESC sphere_desc0;
 	sphere_desc0.slices = 50;
 	sphere_desc0.stacks = 50;
 	sphere_desc0.radius = 5.5f;
-	CreateSphere(*(entityCollection + 7), sphere_desc0, mat_desc5);
+	CreateSphere(*(entityCollection + 8), sphere_desc0, mat_desc6);
 
 	//Teal ball
-	TRANSFORM_DESC entity8_transform_desc;
-	entity8_transform_desc.position = DirectX::XMFLOAT4(6.5f, 0.0f, 7.5f, 1.0f);
-	entityCollection[8].SetTransform(entity8_transform_desc);
-	MATERIAL_DESC mat_desc6;
-	mat_desc6.shadingModel = ShadingModel::FinalGathering;
-	mat_desc6.surfaceColor = DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
-	mat_desc6.roughness = 1.0f;
+	TRANSFORM_DESC entity9_transform_desc;
+	entity9_transform_desc.position = DirectX::XMFLOAT4(6.5f, 0.0f, 7.5f, 1.0f);
+	entityCollection[9].SetTransform(entity9_transform_desc);
+	MATERIAL_DESC mat_desc7;
+	mat_desc7.shadingModel = ShadingModel::FinalGathering;
+	mat_desc7.surfaceColor = DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
+	mat_desc7.roughness = 1.0f;
 	SPHERE_DESC sphere_desc1;
 	sphere_desc1.slices = 50;
 	sphere_desc1.stacks = 50;
 	sphere_desc1.radius = 3.5f;
-	CreateSphere(*(entityCollection + 8), sphere_desc1, mat_desc6);
+	CreateSphere(*(entityCollection + 9), sphere_desc1, mat_desc7);
 	//------------------------------
 
 	//Purple Cube 
-	TRANSFORM_DESC entity9_transform_desc;
-	entity9_transform_desc.position = DirectX::XMFLOAT4(-5.0f, -0.0f, 5.5f, 1.0f);
-	entity9_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 12.5f, 0.0f, 0.0f);
-	entityCollection[9].SetTransform(entity9_transform_desc);
-	MATERIAL_DESC mat_desc7;
-	mat_desc7.shadingModel = ShadingModel::FinalGathering;
-	mat_desc7.surfaceColor = DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
-	mat_desc7.roughness = 1.0f;
+	TRANSFORM_DESC entity10_transform_desc;
+	entity10_transform_desc.position = DirectX::XMFLOAT4(-5.0f, -0.0f, 5.5f, 1.0f);
+	entity10_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 12.5f, 0.0f, 0.0f);
+	entityCollection[10].SetTransform(entity10_transform_desc);
+	MATERIAL_DESC mat_desc8;
+	mat_desc8.shadingModel = ShadingModel::FinalGathering;
+	mat_desc8.surfaceColor = DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
+	mat_desc8.roughness = 1.0f;
 	CUBE_DESC cube_desc0;
 	cube_desc0.width = 2.75f;
 	cube_desc0.height = 4.0f;
 	cube_desc0.length = 2.75f;
-	CreateCube(*(entityCollection + 9), cube_desc0, mat_desc7);
+	CreateCube(*(entityCollection + 10), cube_desc0, mat_desc8);
 	//------------------------------
 
 	SCENE_DESC scene_desc;
@@ -310,7 +324,7 @@ void Engine::CreatePlane(Entity& entity, PLANE_DESC& plane_desc, MATERIAL_DESC& 
 	const int VERTEX_COUNT = 4;
 	const int INDEX_COUNT = 4;
 
-	MESH_DESC planeM_desc;
+	MESH_DESC meshDesc;
 
 	switch (material_desc.shadingModel)
 	{
@@ -336,19 +350,14 @@ void Engine::CreatePlane(Entity& entity, PLANE_DESC& plane_desc, MATERIAL_DESC& 
 		entityI_collection[2] = 2;
 		entityI_collection[3] = 3;
 
-		VERTEX_BUFFER_DESC vertex_buffer_desc;
-		vertex_buffer_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
-		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
-		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
-		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
+		meshDesc.vertex_buffer_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
+		memcpy(meshDesc.vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
+		meshDesc.vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		meshDesc.vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 		
-		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
-		index_buffer_desc.indexCount = INDEX_COUNT;
-		
-		planeM_desc.vertex_buffer_desc = vertex_buffer_desc;
-		planeM_desc.index_buffer_desc = index_buffer_desc;
+		meshDesc.index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(meshDesc.index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
+		meshDesc.index_buffer_desc.indexCount = INDEX_COUNT;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
 		SAFE_DELETE_ARRAY(entityI_collection);
@@ -376,19 +385,14 @@ void Engine::CreatePlane(Entity& entity, PLANE_DESC& plane_desc, MATERIAL_DESC& 
 		entityI_collection[2] = 2;
 		entityI_collection[3] = 3;
 
-		VERTEX_BUFFER_DESC vertex_buffer_desc;
-		vertex_buffer_desc.vertexCollection = new OrenNayarVertex[VERTEX_COUNT];
-		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(OrenNayarVertex) * VERTEX_COUNT);
-		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
-		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
+		meshDesc.vertex_buffer_desc.vertexCollection = new OrenNayarVertex[VERTEX_COUNT];
+		memcpy(meshDesc.vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(OrenNayarVertex) * VERTEX_COUNT);
+		meshDesc.vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		meshDesc.vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
-		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
-		index_buffer_desc.indexCount = INDEX_COUNT;
-
-		planeM_desc.vertex_buffer_desc = vertex_buffer_desc;
-		planeM_desc.index_buffer_desc = index_buffer_desc;
+		meshDesc.index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(meshDesc.index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
+		meshDesc.index_buffer_desc.indexCount = INDEX_COUNT;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
 		SAFE_DELETE_ARRAY(entityI_collection);
@@ -420,19 +424,14 @@ void Engine::CreatePlane(Entity& entity, PLANE_DESC& plane_desc, MATERIAL_DESC& 
 		entityI_collection[2] = 2;
 		entityI_collection[3] = 3;
 
-		VERTEX_BUFFER_DESC vertex_buffer_desc;
-		vertex_buffer_desc.vertexCollection = new FinalGatheringVertex[VERTEX_COUNT];
-		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(FinalGatheringVertex) * VERTEX_COUNT);
-		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
-		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
+		meshDesc.vertex_buffer_desc.vertexCollection = new FinalGatheringVertex[VERTEX_COUNT];
+		memcpy(meshDesc.vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(FinalGatheringVertex) * VERTEX_COUNT);
+		meshDesc.vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		meshDesc.vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
-		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
-		index_buffer_desc.indexCount = INDEX_COUNT;
-
-		planeM_desc.vertex_buffer_desc = vertex_buffer_desc;
-		planeM_desc.index_buffer_desc = index_buffer_desc;
+		meshDesc.index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(meshDesc.index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
+		meshDesc.index_buffer_desc.indexCount = INDEX_COUNT;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
 		SAFE_DELETE_ARRAY(entityI_collection);
@@ -441,17 +440,17 @@ void Engine::CreatePlane(Entity& entity, PLANE_DESC& plane_desc, MATERIAL_DESC& 
 	}
 
 	entity.SetModel(
-		*m_pRenderer->GetGraphicsContext(), planeM_desc, material_desc);
+		*m_pRenderer->GetGraphicsContext(), meshDesc, material_desc);
 }
 
 void Engine::CreateCube(Entity& entity, CUBE_DESC& cube_desc, MATERIAL_DESC& material_desc)
 {
-	//Cube Object - Interpolated Normals (pending alternative implementation)
+	//Cube Object - Interpolated Normals
 	//------------------------------
 	const int VERTEX_COUNT = 8;
 	const int INDEX_COUNT = 14;
 
-	MESH_DESC cubeM_desc;
+	MESH_DESC meshDesc;
 
 	switch (material_desc.shadingModel)
 	{
@@ -505,19 +504,14 @@ void Engine::CreateCube(Entity& entity, CUBE_DESC& cube_desc, MATERIAL_DESC& mat
 		entityI_collection[12] = 4;
 		entityI_collection[13] = 5;
 
-		VERTEX_BUFFER_DESC vertex_buffer_desc;
-		vertex_buffer_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
-		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
-		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
-		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
+		meshDesc.vertex_buffer_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
+		memcpy(meshDesc.vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
+		meshDesc.vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		meshDesc.vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
-		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
-		index_buffer_desc.indexCount = INDEX_COUNT;
-
-		cubeM_desc.vertex_buffer_desc = vertex_buffer_desc;
-		cubeM_desc.index_buffer_desc = index_buffer_desc;
+		meshDesc.index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(meshDesc.index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
+		meshDesc.index_buffer_desc.indexCount = INDEX_COUNT;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
 		SAFE_DELETE_ARRAY(entityI_collection);
@@ -573,19 +567,14 @@ void Engine::CreateCube(Entity& entity, CUBE_DESC& cube_desc, MATERIAL_DESC& mat
 		entityI_collection[12] = 4;
 		entityI_collection[13] = 5;
 
-		VERTEX_BUFFER_DESC vertex_buffer_desc;
-		vertex_buffer_desc.vertexCollection = new OrenNayarVertex[VERTEX_COUNT];
-		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(OrenNayarVertex)* VERTEX_COUNT);
-		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
-		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
+		meshDesc.vertex_buffer_desc.vertexCollection = new OrenNayarVertex[VERTEX_COUNT];
+		memcpy(meshDesc.vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(OrenNayarVertex)* VERTEX_COUNT);
+		meshDesc.vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		meshDesc.vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
-		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int)* INDEX_COUNT);
-		index_buffer_desc.indexCount = INDEX_COUNT;
-
-		cubeM_desc.vertex_buffer_desc = vertex_buffer_desc;
-		cubeM_desc.index_buffer_desc = index_buffer_desc;
+		meshDesc.index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(meshDesc.index_buffer_desc.indexCollection, entityI_collection, sizeof(int)* INDEX_COUNT);
+		meshDesc.index_buffer_desc.indexCount = INDEX_COUNT;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
 		SAFE_DELETE_ARRAY(entityI_collection);
@@ -649,19 +638,14 @@ void Engine::CreateCube(Entity& entity, CUBE_DESC& cube_desc, MATERIAL_DESC& mat
 		entityI_collection[12] = 4;
 		entityI_collection[13] = 5;
 
-		VERTEX_BUFFER_DESC vertex_buffer_desc;
-		vertex_buffer_desc.vertexCollection = new FinalGatheringVertex[VERTEX_COUNT];
-		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(FinalGatheringVertex)* VERTEX_COUNT);
-		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
-		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
+		meshDesc.vertex_buffer_desc.vertexCollection = new FinalGatheringVertex[VERTEX_COUNT] ;
+		memcpy(meshDesc.vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(FinalGatheringVertex)* VERTEX_COUNT);
+		meshDesc.vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		meshDesc.vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
-		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int)* INDEX_COUNT);
-		index_buffer_desc.indexCount = INDEX_COUNT;
-
-		cubeM_desc.vertex_buffer_desc = vertex_buffer_desc;
-		cubeM_desc.index_buffer_desc = index_buffer_desc;
+		meshDesc.index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+		memcpy(meshDesc.index_buffer_desc.indexCollection, entityI_collection, sizeof(int)* INDEX_COUNT);
+		meshDesc.index_buffer_desc.indexCount = INDEX_COUNT;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
 		SAFE_DELETE_ARRAY(entityI_collection);
@@ -670,7 +654,7 @@ void Engine::CreateCube(Entity& entity, CUBE_DESC& cube_desc, MATERIAL_DESC& mat
 	}
 
 	entity.SetModel(
-		*m_pRenderer->GetGraphicsContext(), cubeM_desc, material_desc);
+		*m_pRenderer->GetGraphicsContext(), meshDesc, material_desc);
 }
 
 void Engine::CreateSphere(Entity& entity, SPHERE_DESC& sphere_desc, MATERIAL_DESC& material_desc) 
@@ -678,17 +662,18 @@ void Engine::CreateSphere(Entity& entity, SPHERE_DESC& sphere_desc, MATERIAL_DES
 	const int VERTEX_COUNT = (sphere_desc.stacks + 1) * (sphere_desc.slices + 1);
 	const int INDEX_COUNT = (sphere_desc.slices * sphere_desc.stacks + sphere_desc.slices) * 6;
 
-	MESH_DESC sphereM_desc;
+	MESH_DESC meshDesc;
+
+	int* entityI_collection = new int[INDEX_COUNT];
+
+	float slicesF = static_cast<float>(sphere_desc.slices);
+	float stacksF = static_cast<float>(sphere_desc.stacks);
 
 	switch (material_desc.shadingModel)
 	{
 	case ShadingModel::GoochShading:
 	{
 		GoochShadingVertex* entityV_collection = new GoochShadingVertex[VERTEX_COUNT];
-		int* entityI_collection = new int[INDEX_COUNT];
-
-		float slicesF = static_cast<float>(sphere_desc.slices);
-		float stacksF = static_cast<float>(sphere_desc.stacks);
 
 		for (int i = 0; i < sphere_desc.stacks + 1; ++i)
 		{
@@ -702,9 +687,9 @@ void Engine::CreateSphere(Entity& entity, SPHERE_DESC& sphere_desc, MATERIAL_DES
 
 				float sinPhi = sinf(phi);
 
-				float x = cosf(theta) * sinPhi;
+				float z = cosf(theta) * sinPhi; //reverse x/z formula to fit drawing order
 				float y = cosf(phi);
-				float z = sinf(theta) * sinPhi;
+				float x = sinf(theta) * sinPhi;
 
 				int index = j + i * (sphere_desc.slices + 1);
 				entityV_collection[index].position = DirectX::XMFLOAT4(x * sphere_desc.radius, y * sphere_desc.radius, z * sphere_desc.radius, 1.0f);
@@ -712,44 +697,17 @@ void Engine::CreateSphere(Entity& entity, SPHERE_DESC& sphere_desc, MATERIAL_DES
 			}
 		}
 
-		int index = 0;
-		for (int i = 0; i < sphere_desc.slices * sphere_desc.stacks + sphere_desc.slices; ++i)
-		{
-			entityI_collection[index] = i;
-			entityI_collection[index + 1] = i + sphere_desc.slices + 1;
-			entityI_collection[index + 2] = i + sphere_desc.slices;
-			entityI_collection[index + 3] = i + sphere_desc.slices + 1;
-			entityI_collection[index + 4] = i;
-			entityI_collection[index + 5] = i + 1;
-
-			index += 6;
-		}
-
-		VERTEX_BUFFER_DESC vertex_buffer_desc;
-		vertex_buffer_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
-		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
-		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
-		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
-
-		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
-		index_buffer_desc.indexCount = INDEX_COUNT;
-
-		sphereM_desc.vertex_buffer_desc = vertex_buffer_desc;
-		sphereM_desc.index_buffer_desc = index_buffer_desc;
+		meshDesc.vertex_buffer_desc.vertexCollection = new GoochShadingVertex[VERTEX_COUNT];
+		memcpy(meshDesc.vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(GoochShadingVertex) * VERTEX_COUNT);
+		meshDesc.vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		meshDesc.vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
-		SAFE_DELETE_ARRAY(entityI_collection);
 	}
 	break;
 	case ShadingModel::OrenNayarShading:
 	{
 		OrenNayarVertex* entityV_collection = new OrenNayarVertex[VERTEX_COUNT];
-		int* entityI_collection = new int[INDEX_COUNT];
-
-		float slicesF = static_cast<float>(sphere_desc.slices);
-		float stacksF = static_cast<float>(sphere_desc.stacks);
 
 		for (int i = 0; i < sphere_desc.stacks + 1; ++i)
 		{
@@ -763,9 +721,9 @@ void Engine::CreateSphere(Entity& entity, SPHERE_DESC& sphere_desc, MATERIAL_DES
 
 				float sinPhi = sinf(phi);
 
-				float x = cosf(theta) * sinPhi;
+				float z = cosf(theta) * sinPhi; //reverse x/z formula to fit drawing order
 				float y = cosf(phi);
-				float z = sinf(theta) * sinPhi;
+				float x = sinf(theta) * sinPhi;
 
 				int index = j + i * (sphere_desc.slices + 1);
 				entityV_collection[index].position = DirectX::XMFLOAT4(x * sphere_desc.radius, y * sphere_desc.radius, z * sphere_desc.radius, 1.0f);
@@ -773,44 +731,17 @@ void Engine::CreateSphere(Entity& entity, SPHERE_DESC& sphere_desc, MATERIAL_DES
 			}
 		}
 
-		int index = 0;
-		for (int i = 0; i < sphere_desc.slices * sphere_desc.stacks + sphere_desc.slices; ++i)
-		{
-			entityI_collection[index] = i;
-			entityI_collection[index + 1] = i + sphere_desc.slices + 1;
-			entityI_collection[index + 2] = i + sphere_desc.slices;
-			entityI_collection[index + 3] = i + sphere_desc.slices + 1;
-			entityI_collection[index + 4] = i;
-			entityI_collection[index + 5] = i + 1;
-
-			index += 6;
-		}
-
-		VERTEX_BUFFER_DESC vertex_buffer_desc;
-		vertex_buffer_desc.vertexCollection = new OrenNayarVertex[VERTEX_COUNT];
-		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(OrenNayarVertex)* VERTEX_COUNT);
-		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
-		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
-
-		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int)* INDEX_COUNT);
-		index_buffer_desc.indexCount = INDEX_COUNT;
-
-		sphereM_desc.vertex_buffer_desc = vertex_buffer_desc;
-		sphereM_desc.index_buffer_desc = index_buffer_desc;
+		meshDesc.vertex_buffer_desc.vertexCollection = new OrenNayarVertex[VERTEX_COUNT];
+		memcpy(meshDesc.vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(OrenNayarVertex) * VERTEX_COUNT);
+		meshDesc.vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		meshDesc.vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
-		SAFE_DELETE_ARRAY(entityI_collection);
 	}
 	break;
 	case ShadingModel::FinalGathering:
 	{
 		FinalGatheringVertex* entityV_collection = new FinalGatheringVertex[VERTEX_COUNT];
-		int* entityI_collection = new int[INDEX_COUNT];
-
-		float slicesF = static_cast<float>(sphere_desc.slices);
-		float stacksF = static_cast<float>(sphere_desc.stacks);
 
 		for (int i = 0; i < sphere_desc.stacks + 1; ++i)
 		{
@@ -824,9 +755,9 @@ void Engine::CreateSphere(Entity& entity, SPHERE_DESC& sphere_desc, MATERIAL_DES
 
 				float sinPhi = sinf(phi);
 
-				float x = cosf(theta) * sinPhi;
+				float z = cosf(theta) * sinPhi; //reverse x/z formula to fit drawing order
 				float y = cosf(phi);
-				float z = sinf(theta) * sinPhi;
+				float x = sinf(theta) * sinPhi;
 
 				int index = j + i * (sphere_desc.slices + 1);
 				entityV_collection[index].position = DirectX::XMFLOAT4(x * sphere_desc.radius, y * sphere_desc.radius, z * sphere_desc.radius, 1.0f);
@@ -835,41 +766,65 @@ void Engine::CreateSphere(Entity& entity, SPHERE_DESC& sphere_desc, MATERIAL_DES
 			}
 		}
 
-		int index = 0;
-		for (int i = 0; i < sphere_desc.slices * sphere_desc.stacks + sphere_desc.slices; ++i)
-		{
-			entityI_collection[index] = i;
-			entityI_collection[index + 1] = i + sphere_desc.slices + 1;
-			entityI_collection[index + 2] = i + sphere_desc.slices;
-			entityI_collection[index + 3] = i + sphere_desc.slices + 1;
-			entityI_collection[index + 4] = i;
-			entityI_collection[index + 5] = i + 1;
-
-			index += 6;
-		}
-
-		VERTEX_BUFFER_DESC vertex_buffer_desc;
-		vertex_buffer_desc.vertexCollection = new FinalGatheringVertex[VERTEX_COUNT];
-		memcpy(vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(FinalGatheringVertex) * VERTEX_COUNT);
-		vertex_buffer_desc.vertexCount = VERTEX_COUNT;
-		vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
-
-		INDEX_BUFFER_DESC index_buffer_desc;
-		index_buffer_desc.indexCollection = new int[INDEX_COUNT];
-		memcpy(index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
-		index_buffer_desc.indexCount = INDEX_COUNT;
-
-		sphereM_desc.vertex_buffer_desc = vertex_buffer_desc;
-		sphereM_desc.index_buffer_desc = index_buffer_desc;
+		meshDesc.vertex_buffer_desc.vertexCollection = new FinalGatheringVertex[VERTEX_COUNT];
+		memcpy(meshDesc.vertex_buffer_desc.vertexCollection, entityV_collection, sizeof(FinalGatheringVertex) * VERTEX_COUNT);
+		meshDesc.vertex_buffer_desc.vertexCount = VERTEX_COUNT;
+		meshDesc.vertex_buffer_desc.topology = Topology::TRIANGLESTRIP;
 
 		SAFE_DELETE_ARRAY(entityV_collection);
-		SAFE_DELETE_ARRAY(entityI_collection);
 	}
 	break;
-	}	
+	}
+	
+	//entityV_collection[0].position = DirectX::XMFLOAT4(0.0f, sphere_desc.radius, 0.0f, 1.0f);
+	//entityV_collection[0].normal = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
+	//entityV_collection[0].uv = DirectX::XMFLOAT2(0.0f, 0.0f);
+
+	//float phiStep = DirectX::XM_PI / sphere_desc.stacks;
+	//float thetaStep = DirectX::XM_2PI / sphere_desc.slices;
+
+	//for (int i = 1; i <= sphere_desc.stacks - 1; ++i)
+	//{
+	//	float phi = i * phiStep;
+	//	for (int j = 0; j <= sphere_desc.slices; ++j) 
+	//	{
+	//		float theta = j * thetaStep;
+
+	//		float z = sinf(phi) * cosf(theta); //reverse x/z position to fit drawing order
+	//		float y = cosf(phi);
+	//		float x = sinf(phi) * sinf(theta);
+
+	//		int index = j + i * (sphere_desc.slices);
+	//		entityV_collection[index].position = DirectX::XMFLOAT4(x * sphere_desc.radius, y * sphere_desc.radius, z * sphere_desc.radius, 1.0f);
+	//		entityV_collection[index].normal = DirectX::XMFLOAT4(x, y, z, 0.0f);
+	//		entityV_collection[index].uv = DirectX::XMFLOAT2(theta / DirectX::XM_2PI, phi / DirectX::XM_PI);
+	//	}
+	//}
+	//entityV_collection[VERTEX_COUNT - 1].position = DirectX::XMFLOAT4(0.0f, -sphere_desc.radius, 0.0f, 1.0f);
+	//entityV_collection[VERTEX_COUNT - 1].normal = DirectX::XMFLOAT4(0.0f, -1.0f, 0.0f, 0.0f);
+	//entityV_collection[VERTEX_COUNT - 1].uv = DirectX::XMFLOAT2(0.0f, 1.0f);
+
+	int index = 0;
+	for (int i = 0; i < sphere_desc.slices * sphere_desc.stacks + sphere_desc.slices; ++i)
+	{
+		entityI_collection[index] = i;
+		entityI_collection[index + 1] = i + sphere_desc.slices + 1;
+		entityI_collection[index + 2] = i + sphere_desc.slices;
+		entityI_collection[index + 3] = i + sphere_desc.slices + 1;
+		entityI_collection[index + 4] = i;
+		entityI_collection[index + 5] = i + 1;
+
+		index += 6;
+	}
+
+	meshDesc.index_buffer_desc.indexCollection = new int[INDEX_COUNT];
+	memcpy(meshDesc.index_buffer_desc.indexCollection, entityI_collection, sizeof(int) * INDEX_COUNT);
+	meshDesc.index_buffer_desc.indexCount = INDEX_COUNT;
+
+	SAFE_DELETE_ARRAY(entityI_collection);
 
 	entity.SetModel(
-		*m_pRenderer->GetGraphicsContext(), sphereM_desc, material_desc);
+		*m_pRenderer->GetGraphicsContext(), meshDesc, material_desc);
 }
 
 LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
