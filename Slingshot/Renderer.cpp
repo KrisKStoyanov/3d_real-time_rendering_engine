@@ -112,6 +112,12 @@ void Renderer::Draw(Scene& scene)
 	perFrameDataVS.lightPos = scene.GetLights()->GetTransform()->GetPosition();
 
 	PerFrameDataPS_DI perFrameDataPS;
+	perFrameDataPS.camPos = DirectX::XMVector4Transform(
+		scene.GetCamera(scene.GetMainCameraID())->GetTransform()->GetPosition(),
+		DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetTransform()->GetWorldMatrix()));
+	perFrameDataPS.lightPos = DirectX::XMVector4Transform(
+		scene.GetLights()->GetTransform()->GetPosition(),
+		DirectX::XMMatrixTranspose((scene.GetEntityCollection() + 1)->GetTransform()->GetWorldMatrix()));
 	perFrameDataPS.ambientColor = DirectX::XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	perFrameDataPS.diffuseColor = scene.GetLights()->GetLight()->GetColor();
 

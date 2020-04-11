@@ -17,6 +17,8 @@ struct PerDrawCallDataVS_DI
 
 struct PerFrameDataPS_DI
 {
+	DirectX::XMVECTOR camPos;
+	DirectX::XMVECTOR lightPos;
 	DirectX::XMFLOAT4 ambientColor;
 	DirectX::XMFLOAT4 diffuseColor;
 };
