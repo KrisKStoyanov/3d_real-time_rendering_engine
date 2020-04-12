@@ -6,17 +6,15 @@ D3D11DepthMap* D3D11DepthMap::Create(D3D11Context& context)
 }
 
 D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
-	m_cbufferVSRegCounter(0), m_cbufferGSRegCounter(0)
+	m_cbufferVSRegCounter(0)
 {
-	char* bytecodeVS = nullptr, *bytecodeGS = nullptr, * bytecodePS = nullptr;
-	size_t sizeVS, sizeGS, sizePS;
+	char* bytecodeVS = nullptr, * bytecodePS = nullptr;
+	size_t sizeVS, sizePS;
 
 	bytecodeVS = GetBytecode("DepthMapVS.cso", sizeVS);
-	bytecodeGS = GetBytecode("DepthMapGS.cso", sizeGS);
 	bytecodePS = GetBytecode("DepthMapPS.cso", sizePS);
 
 	context.GetDevice()->CreateVertexShader(bytecodeVS, sizeVS, nullptr, &m_pVS);
-	context.GetDevice()->CreateGeometryShader(bytecodeGS, sizeGS, nullptr, &m_pGS);
 	context.GetDevice()->CreatePixelShader(bytecodePS, sizePS, nullptr, &m_pPS);
 
 	D3D11_INPUT_ELEMENT_DESC inputDesc[1];
@@ -32,48 +30,45 @@ D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 	context.GetDevice()->CreateInputLayout(inputDesc, 1, bytecodeVS, sizeVS, &m_pIL);
 
 	SAFE_DELETE_ARRAY(bytecodeVS);
-	SAFE_DELETE_ARRAY(bytecodeGS);
 	SAFE_DELETE_ARRAY(bytecodePS);
 
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
 	context.GetSwapChain()->GetDesc1(&swapChainDesc);
 
-	for (int i = 0; i < 6; ++i)
-	{
-		ID3D11Texture2D* renderTexture;
+	ID3D11Texture2D* renderTexture;
 
-		D3D11_TEXTURE2D_DESC textureDesc;
-		ZeroMemory(&textureDesc, sizeof(textureDesc));
-		textureDesc.Width = swapChainDesc.Width;
-		textureDesc.Height = swapChainDesc.Height;
-		textureDesc.MipLevels = 1;
-		textureDesc.ArraySize = 1;
-		textureDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
-		textureDesc.SampleDesc.Count = 1;
-		textureDesc.Usage = D3D11_USAGE_DEFAULT;
-		textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-		textureDesc.CPUAccessFlags = 0;
-		textureDesc.MiscFlags = 0;
-		DX::ThrowIfFailed(
-			context.GetDevice()->CreateTexture2D(&textureDesc, nullptr, &renderTexture));
+	D3D11_TEXTURE2D_DESC textureDesc;
+	ZeroMemory(&textureDesc, sizeof(textureDesc));
+	textureDesc.Width = swapChainDesc.Width;
+	textureDesc.Height = swapChainDesc.Height;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+	DX::ThrowIfFailed(
+		context.GetDevice()->CreateTexture2D(&textureDesc, nullptr, &renderTexture));
 
-		D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
-		rtvDesc.Format = textureDesc.Format;
-		rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-		rtvDesc.Texture2D.MipSlice = 0;
-		DX::ThrowIfFailed(
-			context.GetDevice()->CreateRenderTargetView(renderTexture, &rtvDesc, &m_pDepthMapsRTV[i]));
+	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
+	rtvDesc.Format = textureDesc.Format;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	rtvDesc.Texture2D.MipSlice = 0;
+	DX::ThrowIfFailed(
+		context.GetDevice()->CreateRenderTargetView(renderTexture, &rtvDesc, &m_pDepthMapsRTV));
 
-		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-		srvDesc.Format = textureDesc.Format;
-		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.MipLevels = 1;
-		DX::ThrowIfFailed(
-			context.GetDevice()->CreateShaderResourceView(renderTexture, &srvDesc, &m_pDepthMapsSRV[i]));
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = textureDesc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = 1;
+	DX::ThrowIfFailed(
+		context.GetDevice()->CreateShaderResourceView(renderTexture, &srvDesc, &m_pDepthMapsSRV));
 
-		SAFE_RELEASE(renderTexture);
-	}
+	SAFE_RELEASE(renderTexture);
 
 	ID3D11Texture2D* depthStencilBuffer;
 
@@ -145,10 +140,10 @@ D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 	CONSTANT_BUFFER_DESC desc0;
 	desc0.cbufferData = &m_perFrameDataGS;
 	desc0.cbufferSize = sizeof(m_perFrameDataGS);
-	desc0.shaderType = ShaderType::GEOMETRY_SHADER;
-	desc0.registerSlot = m_cbufferGSRegCounter;
+	desc0.shaderType = ShaderType::VERTEX_SHADER;
+	desc0.registerSlot = m_cbufferVSRegCounter;
 	m_pPerFrameCBufferGS = D3D11ConstantBuffer::Create(*context.GetDevice(), desc0);
-	m_cbufferGSRegCounter++;
+	m_cbufferVSRegCounter++;
 
 	CONSTANT_BUFFER_DESC desc1;
 	desc1.cbufferData = &m_perDrawCallDataVS;
@@ -169,11 +164,8 @@ void D3D11DepthMap::Shutdown()
 	SAFE_RELEASE(m_pDepthStencilState);
 	SAFE_RELEASE(m_pRasterizerState);
 
-	for (int i = 0; i < 6; ++i)
-	{
-		SAFE_RELEASE(m_pDepthMapsRTV[i]);
-		SAFE_RELEASE(m_pDepthMapsSRV[i]);
-	}
+	SAFE_RELEASE(m_pDepthMapsRTV);
+	SAFE_RELEASE(m_pDepthMapsSRV);
 	SAFE_RELEASE(m_pDepthStencilView);
 
 	SAFE_DESTROY(m_pPerFrameCBufferGS);
@@ -189,18 +181,14 @@ void D3D11DepthMap::UpdatePerFrame(ID3D11DeviceContext& deviceContext)
 {
 	deviceContext.IASetInputLayout(m_pIL);
 	deviceContext.VSSetShader(m_pVS, nullptr, 0);
-	deviceContext.GSSetShader(m_pGS, nullptr, 0);
 	deviceContext.PSSetShader(m_pPS, nullptr, 0);
 	deviceContext.OMSetDepthStencilState(m_pDepthStencilState, 1);
 	deviceContext.RSSetState(m_pRasterizerState);
 
-	for (int i = 0; i < 6; ++i)
-	{
-		deviceContext.ClearRenderTargetView(m_pDepthMapsRTV[i], m_clearColor);
-	}
+	deviceContext.ClearRenderTargetView(m_pDepthMapsRTV, m_clearColor);
 	deviceContext.ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	deviceContext.OMSetRenderTargets(6,
-		m_pDepthMapsRTV,
+	deviceContext.OMSetRenderTargets(1,
+		&m_pDepthMapsRTV,
 		m_pDepthStencilView);
 }
 

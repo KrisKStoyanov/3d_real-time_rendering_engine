@@ -4,11 +4,11 @@
 struct PerFrameDataGS_DM
 {
 	DirectX::XMMATRIX viewMatrix0;
-	DirectX::XMMATRIX viewMatrix1;
-	DirectX::XMMATRIX viewMatrix2;
-	DirectX::XMMATRIX viewMatrix3;
-	DirectX::XMMATRIX viewMatrix4;
-	DirectX::XMMATRIX viewMatrix5;
+	//DirectX::XMMATRIX viewMatrix1;
+	//DirectX::XMMATRIX viewMatrix2;
+	//DirectX::XMMATRIX viewMatrix3;
+	//DirectX::XMMATRIX viewMatrix4;
+	//DirectX::XMMATRIX viewMatrix5;
 
 	DirectX::XMMATRIX projectionMatrix;
 };
@@ -33,7 +33,7 @@ public:
 
 	inline ID3D11ShaderResourceView* GetShaderResourceView()
 	{
-		return m_pDepthMapsSRV[0];
+		return m_pDepthMapsSRV;
 	}
 private:
 	D3D11DepthMap(D3D11Context& context);
@@ -48,8 +48,8 @@ private:
 	ID3D11RasterizerState* m_pRasterizerState;
 	ID3D11DepthStencilState* m_pDepthStencilState;
 
-	ID3D11RenderTargetView* m_pDepthMapsRTV[6];
-	ID3D11ShaderResourceView* m_pDepthMapsSRV[6];
+	ID3D11RenderTargetView* m_pDepthMapsRTV;
+	ID3D11ShaderResourceView* m_pDepthMapsSRV;
 
 	ID3D11DepthStencilView* m_pDepthStencilView;
 
@@ -60,6 +60,5 @@ private:
 	PerDrawCallDataVS_DM m_perDrawCallDataVS;
 
 	unsigned int m_cbufferVSRegCounter;
-	unsigned int m_cbufferGSRegCounter;
 };
 

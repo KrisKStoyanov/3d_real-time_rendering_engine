@@ -47,35 +47,10 @@ void Renderer::Draw(Scene& scene)
 	// Depth Pre-pass
 	m_pDepthMap->UpdatePerFrame(*m_pGraphicsContext->GetContext());
 
-	DirectX::XMMATRIX lightFrontView;
-	DirectX::XMMATRIX lightBackView;
-	DirectX::XMMATRIX lightLeftView;
-	DirectX::XMMATRIX lightRightView;
-	DirectX::XMMATRIX lightTopView;
-	DirectX::XMMATRIX lightBottomView;
-
-	scene.GetLights()->GetTransform()->GeneratePanoramicView(
-		lightFrontView, 
-		lightBackView, 
-		lightLeftView, 
-		lightRightView, 
-		lightTopView, 
-		lightBottomView);
-
-	lightFrontView = DirectX::XMMatrixTranspose(lightFrontView);
-	lightBackView = DirectX::XMMatrixTranspose(lightBackView);
-	lightLeftView = DirectX::XMMatrixTranspose(lightLeftView);
-	lightRightView = DirectX::XMMatrixTranspose(lightRightView);
-	lightTopView = DirectX::XMMatrixTranspose(lightTopView);
-	lightBottomView = DirectX::XMMatrixTranspose(lightBottomView);
+	DirectX::XMMATRIX lightFrontView = DirectX::XMMatrixTranspose(scene.GetLights()->GetTransform()->GetViewMatrix());
 
 	PerFrameDataGS_DM perFrameDataGS_DM;
 	perFrameDataGS_DM.viewMatrix0 = lightFrontView;
-	perFrameDataGS_DM.viewMatrix1 = lightBackView;
-	perFrameDataGS_DM.viewMatrix2 = lightLeftView;
-	perFrameDataGS_DM.viewMatrix3 = lightRightView;
-	perFrameDataGS_DM.viewMatrix4 = lightTopView;
-	perFrameDataGS_DM.viewMatrix5 = lightBottomView;
 	perFrameDataGS_DM.projectionMatrix = cameraProjMatrix;
 
 	m_pDepthMap->UpdateBuffersPerFrame(perFrameDataGS_DM);
@@ -118,7 +93,7 @@ void Renderer::Draw(Scene& scene)
 	perFrameDataPS.lightPos = DirectX::XMVector4Transform(
 		scene.GetLights()->GetTransform()->GetPosition(),
 		DirectX::XMMatrixTranspose((scene.GetEntityCollection() + 1)->GetTransform()->GetWorldMatrix()));
-	perFrameDataPS.ambientColor = DirectX::XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	perFrameDataPS.ambientColor = DirectX::XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	perFrameDataPS.diffuseColor = scene.GetLights()->GetLight()->GetColor();
 
 	m_pDirectIllumination->UpdateBuffersPerFrame(perFrameDataVS, perFrameDataPS);
