@@ -1,5 +1,11 @@
 #include "DepthMap.hlsli"
 
+struct GS_COALESCENT
+{
+    float4 position : SV_Position;
+    float4 depthPos : TEXCOORD0;
+};
+
 cbuffer PerFrameBuffer : register(b0)
 {
     float4x4 viewMatrix0;

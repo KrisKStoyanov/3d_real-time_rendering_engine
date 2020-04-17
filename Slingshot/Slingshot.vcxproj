@@ -197,6 +197,7 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="NvExtension.cpp" />
     <ClCompile Include="PhotonMap.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -227,6 +228,7 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="NvExtension.h" />
     <ClInclude Include="PhotonMap.h" />
     <ClInclude Include="PipelineState.h" />
     <ClInclude Include="Renderer.h" />
@@ -239,7 +241,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DepthMap.hlsli" />
-    <None Include="DirectIllumination.hlsli" />
+    <None Include="GoochIllumination.hlsli" />
     <None Include="FinalGathering.hlsli" />
     <None Include="GoochShading.hlsli" />
     <None Include="cpp.hint" />

@@ -204,12 +204,6 @@ bool D3D11Context::Initialize()
 {
 	m_pImmediateContext->RSSetViewports(1, &m_viewport);
 
-	InitializeNvAPI();
-	if (m_gfxCaps.bVariablePixelRateShadingSupported) 
-	{
-		SetVRS(true);
-	}
-
 	return true;
 }
 
@@ -251,11 +245,6 @@ void D3D11Context::EndFrameRender()
 
 void D3D11Context::Shutdown()
 {
-	if (m_enableNvAPI)
-	{
-		SetVRS(false);
-		ShutdownNvAPI();
-	}
 #if defined (_DEBUG)
 	m_pDebugLayer->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 	m_pDebugLayer->Release();
@@ -279,65 +268,4 @@ D3D11IndexBuffer* D3D11Context::CreateIndexBuffer(INDEX_BUFFER_DESC desc)
 D3D11ConstantBuffer* D3D11Context::CreateConstantBuffer(CONSTANT_BUFFER_DESC desc)
 {
 	return D3D11ConstantBuffer::Create(*m_pDevice.Get(), desc);
-}
-
-void D3D11Context::InitializeNvAPI()
-{
-	NvAPI_Status NvStatus = NvAPI_Initialize();
-	if (NvStatus == NVAPI_OK) 
-	{
-		m_gfxCaps = QueryGraphicsCapabilities();
-		m_enableNvAPI = true;
-	}
-}
-
-void D3D11Context::ShutdownNvAPI()
-{
-	NvAPI_Unload();
-}
-
-NV_D3D1x_GRAPHICS_CAPS D3D11Context::QueryGraphicsCapabilities()
-{
-	NV_D3D1x_GRAPHICS_CAPS caps;
-	memset(&caps, 0, sizeof(NV_D3D1x_GRAPHICS_CAPS));
-
-	NvAPI_Status NvStatus = NvAPI_D3D1x_GetGraphicsCapabilities(m_pDevice.Get(), NV_D3D1x_GRAPHICS_CAPS_VER, &caps);
-	if (NvStatus == NVAPI_OK)
-	{
-		return caps;
-	}
-	return caps; //print some kinda error (make macro)
-}
-
-void D3D11Context::SetVRS(bool enable)
-{
-	NV_D3D11_VIEWPORTS_SHADING_RATE_DESC sShadingRateDesc;
-	ZeroMemory(&sShadingRateDesc, sizeof(NV_D3D11_VIEWPORTS_SHADING_RATE_DESC));
-	if (enable) 
-	{
-		sShadingRateDesc.numViewports = 1;
-		sShadingRateDesc.pViewports =
-			(NV_D3D11_VIEWPORT_SHADING_RATE_DESC*)malloc(sizeof(NV_D3D11_VIEWPORT_SHADING_RATE_DESC));
-		if (sShadingRateDesc.pViewports)
-		{
-			sShadingRateDesc.version = NV_D3D11_VIEWPORTS_SHADING_RATE_DESC_VER;
-			sShadingRateDesc.pViewports[0].enableVariablePixelShadingRate = true;
-			for (unsigned int i = 0; i < NV_MAX_PIXEL_SHADING_RATES; i++)
-			{
-				sShadingRateDesc.pViewports[0].shadingRateTable[i] = NV_PIXEL_SHADING_RATE::NV_PIXEL_X1_PER_RASTER_PIXEL;
-			}
-			NvAPI_Status NvStatus = NvAPI_D3D11_RSSetViewportsPixelShadingRates(m_pImmediateContext.Get(), &sShadingRateDesc);
-		}
-	}
-	else 
-	{
-		sShadingRateDesc.numViewports = 0;
-		NvAPI_Status NvStatus = NvAPI_D3D11_RSSetViewportsPixelShadingRates(m_pImmediateContext.Get(), &sShadingRateDesc);
-	}
-	m_enableVRS = enable;
-}
-
-bool D3D11Context::GetVRS()
-{
-	return m_enableVRS;
 }

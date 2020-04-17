@@ -48,9 +48,6 @@ public:
 		return m_pImmediateContext.Get();
 	}
 
-	void SetVRS(bool enable);
-	bool GetVRS();
-
 	inline ContextType GetContextType() 
 	{ 
 		return ContextType::D3D11; 
@@ -84,12 +81,4 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Debug> m_pDebugLayer;
 	Microsoft::WRL::ComPtr<ID3D11InfoQueue> m_pInfoQueue;
 	Microsoft::WRL::ComPtr<IDXGIInfoQueue> m_pDXGIInfoQueue;
-
-	void InitializeNvAPI();
-	void ShutdownNvAPI();
-	NV_D3D1x_GRAPHICS_CAPS QueryGraphicsCapabilities();
-
-	NV_D3D1x_GRAPHICS_CAPS m_gfxCaps;
-	bool m_enableNvAPI;
-	bool m_enableVRS;
 };

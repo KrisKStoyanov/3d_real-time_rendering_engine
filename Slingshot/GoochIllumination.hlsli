@@ -1,3 +1,5 @@
+//GoochIllumination.hlsli
+
 struct VS_INPUT
 {
     float4 position : POSITION0;

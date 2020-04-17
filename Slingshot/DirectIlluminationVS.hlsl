@@ -1,4 +1,5 @@
-#include "DirectIllumination.hlsli"
+//GoochIlluminationVS.hlsl
+#include "GoochIllumination.hlsli"
 
 cbuffer PerFrameBuffer : register(b0)
 {

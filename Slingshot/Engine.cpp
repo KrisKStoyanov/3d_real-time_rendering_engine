@@ -46,7 +46,7 @@ bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 		pipeline_desc.PS_filename_DM = "DepthMapPS.cso";
 		m_isRunning = m_pRenderer->Initialize(pipeline_desc);	
 		GEOMETRY_DESC geo_desc = SetupScene(*m_pScene, 11);
-		m_pRenderer->SetupPhotonMap(geo_desc);
+		//m_pRenderer->SetupPhotonMap(geo_desc);
 		m_pTimer = new Timer();
 	}
 
@@ -924,6 +924,12 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 					m_pScene->GetCamera(m_pScene->GetMainCameraID())->GetTransform()->GetRightDir() *
 					m_pTimer->m_smoothstepF);
 			}
+		}
+		break;
+		case VK_F1:
+		{
+			m_pRenderer->ToggleVRS();
+			return DefWindowProc(hWnd, uMsg, wParam, lParam);
 		}
 		break;
 		case VK_ESCAPE:

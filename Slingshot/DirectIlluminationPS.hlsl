@@ -1,4 +1,6 @@
-#include "DirectIllumination.hlsli"
+//GoochIlluminationPS.hlsl
+#include "GoochIllumination.hlsli"
+
 Texture2D depthMapTexture : register(t0);
 
 SamplerState sampleTypeClamp : register(s0);

@@ -1,10 +1,5 @@
+//DepthMapPS.hlsl
 #include "DepthMap.hlsli"
-
-cbuffer PerFrameBuffer : register(b0)
-{
-    float4x4 viewMatrix0;	
-    float4x4 projectionMatrix;
-}
 
 float4 main(PS_INPUT ps_input) : SV_Target
 {

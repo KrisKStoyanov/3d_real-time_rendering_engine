@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "D3D11DepthMap.h"
 #include "D3D11DirectIllumination.h"
+#include "NvExtension.h"
 #include "PhotonMap.h"
 
 struct RENDERER_DESC 
@@ -15,16 +16,20 @@ public:
 	bool Initialize(PIPELINE_DESC pipeline_desc);
 	void Draw(Scene& scene);
 	void Shutdown();
+	void ToggleVRS();
 
 	GraphicsContext* GetGraphicsContext();
 
 	void SetupPhotonMap(GEOMETRY_DESC& desc);
+
 private:
 	Renderer(HWND hWnd, RENDERER_DESC& renderer_desc);	
 	D3D11Context* m_pGraphicsContext;
 
 	D3D11DepthMap* m_pDepthMap;
 	D3D11DirectIllumination* m_pDirectIllumination;
+
+	NvExtension* m_pNvExtension;
 
 	PhotonMap* m_pPhotonMap;
 };

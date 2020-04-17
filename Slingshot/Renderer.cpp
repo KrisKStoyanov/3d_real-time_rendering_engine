@@ -21,10 +21,6 @@ Renderer::Renderer(HWND hWnd, RENDERER_DESC& renderer_desc) :
 	}
 	break;
 	}
-
-	if (!m_pGraphicsContext) {
-		return;
-	}
 }
 
 bool Renderer::Initialize(PIPELINE_DESC pipeline_desc)
@@ -33,6 +29,13 @@ bool Renderer::Initialize(PIPELINE_DESC pipeline_desc)
 	{
 		return false;
 	}
+	m_pNvExtension = NvExtension::Create();
+	if (!m_pNvExtension->Initialize(*m_pGraphicsContext))
+	{
+		return false;
+	}
+	m_pNvExtension->SetConstantVRS(true, *m_pGraphicsContext);
+	
 	m_pDepthMap = D3D11DepthMap::Create(*m_pGraphicsContext);
 	m_pDirectIllumination = D3D11DirectIllumination::Create(*m_pGraphicsContext);
 
@@ -130,6 +133,11 @@ void Renderer::Shutdown()
 	SAFE_SHUTDOWN(m_pDepthMap);
 	SAFE_SHUTDOWN(m_pDirectIllumination);
 	m_pGraphicsContext->Shutdown();
+}
+
+void Renderer::ToggleVRS()
+{
+	m_pNvExtension->SetConstantVRS(!m_pNvExtension->GetVRS(), *m_pGraphicsContext);
 }
 
 GraphicsContext* Renderer::GetGraphicsContext()

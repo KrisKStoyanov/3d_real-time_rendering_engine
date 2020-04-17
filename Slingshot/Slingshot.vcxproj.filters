@@ -105,6 +105,9 @@
     <ClCompile Include="D3D11DirectIllumination.cpp">
       <Filter>Graphics\D3D11</Filter>
     </ClCompile>
+    <ClCompile Include="NvExtension.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Helpers.h">
@@ -197,6 +200,9 @@
     <ClInclude Include="D3D11DirectIllumination.h">
       <Filter>Graphics\D3D11</Filter>
     </ClInclude>
+    <ClInclude Include="NvExtension.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -209,10 +215,10 @@
     <None Include="FinalGathering.hlsli">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="DirectIllumination.hlsli">
+    <None Include="DepthMap.hlsli">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="DepthMap.hlsli">
+    <None Include="GoochIllumination.hlsli">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
