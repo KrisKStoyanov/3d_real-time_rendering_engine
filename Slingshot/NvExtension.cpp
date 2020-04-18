@@ -77,7 +77,7 @@ bool NvExtension::SetConstantVRS(bool enabled, D3D11Context& context)
 			if (m_enabledVRS)
 			{
 				m_constShadingRateIndex++;
-				if (m_constShadingRateIndex > 7)
+				if (m_constShadingRateIndex > 6)
 				{
 					m_constShadingRateIndex = 0;
 				}
