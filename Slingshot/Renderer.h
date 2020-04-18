@@ -16,7 +16,9 @@ public:
 	bool Initialize(PIPELINE_DESC pipeline_desc);
 	void Draw(Scene& scene);
 	void Shutdown();
-	void ToggleVRS();
+	void UpdateConstantVRS();
+	void ToggleConstantVRS();
+	void ToggleVRSwithSRS();
 
 	GraphicsContext* GetGraphicsContext();
 

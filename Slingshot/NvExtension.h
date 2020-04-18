@@ -4,7 +4,7 @@
 
 struct SHADING_RATE_LOOKUP_TABLE
 {
-	NV_PIXEL_SHADING_RATE shadingRate[16];
+	NV_PIXEL_SHADING_RATE shadingRate[NV_MAX_PIXEL_SHADING_RATES];
 };
 
 class NvExtension
@@ -24,5 +24,9 @@ private:
 	NvExtension();
 	bool m_enabledVRS;
 	NV_D3D1x_GRAPHICS_CAPS m_gfxCaps;
+	SHADING_RATE_LOOKUP_TABLE m_srlt;
+	ID3D11Texture2D* m_pSrs;
+	ID3D11NvShadingRateResourceView* m_pSrsSRRV;
+	int m_constShadingRateIndex;
 };
 

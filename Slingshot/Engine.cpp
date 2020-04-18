@@ -928,7 +928,13 @@ LRESULT Engine::HandleWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		break;
 		case VK_F1:
 		{
-			m_pRenderer->ToggleVRS();
+			m_pRenderer->UpdateConstantVRS();
+			return DefWindowProc(hWnd, uMsg, wParam, lParam);
+		}
+		break;
+		case VK_F2:
+		{
+			m_pRenderer->ToggleConstantVRS();
 			return DefWindowProc(hWnd, uMsg, wParam, lParam);
 		}
 		break;
