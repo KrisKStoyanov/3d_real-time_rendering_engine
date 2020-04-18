@@ -77,8 +77,8 @@ GEOMETRY_DESC Engine::SetupScene(Scene& scene, const int entityCount)
 	LIGHT_DESC entity1_light_desc;
 	entityCollection[1].SetLight(entity1_light_desc);
 	TRANSFORM_DESC entity1_transform_desc;
-	entity1_transform_desc.position = DirectX::XMFLOAT4(0.0f, 5.0f, -15.0f, 1.0f);//DirectX::XMFLOAT4(0.0f, 12.5f, 10.0f, 1.0f);
-	entity1_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	entity1_transform_desc.position = DirectX::XMFLOAT4(0.0f, 12.5f, 10.0f, 1.0f);
+	entity1_transform_desc.rotation = DirectX::XMFLOAT4(90.0f, 0.0f, 0.0f, 0.0f);
 	entityCollection[1].SetTransform(entity1_transform_desc);
 	//entityCollection[1].GetTransform()->RotateEulerAngles(180.0f, 0.0f, 0.0f);
 	//------------------------------
@@ -173,7 +173,7 @@ GEOMETRY_DESC Engine::SetupScene(Scene& scene, const int entityCount)
 	//------------------------------
 	//Yellow ball
 	TRANSFORM_DESC entity8_transform_desc;
-	entity8_transform_desc.position = DirectX::XMFLOAT4(0.0f, 1.0f, 13.5f, 1.0f);
+	entity8_transform_desc.position = DirectX::XMFLOAT4(0.0f, -1.5f, 6.0f, 1.0f);
 	entityCollection[8].SetTransform(entity8_transform_desc);
 	MATERIAL_DESC mat_desc6;
 	mat_desc6.shadingModel = ShadingModel::FinalGathering;
@@ -182,12 +182,12 @@ GEOMETRY_DESC Engine::SetupScene(Scene& scene, const int entityCount)
 	SPHERE_DESC sphere_desc0;
 	sphere_desc0.slices = 50;
 	sphere_desc0.stacks = 50;
-	sphere_desc0.radius = 5.5f;
+	sphere_desc0.radius = 3.5f;
 	CreateSphere(*(entityCollection + 8), sphere_desc0, mat_desc6);
 
 	//Teal ball
 	TRANSFORM_DESC entity9_transform_desc;
-	entity9_transform_desc.position = DirectX::XMFLOAT4(6.5f, 0.0f, 7.5f, 1.0f);
+	entity9_transform_desc.position = DirectX::XMFLOAT4(5.0f, 0.0f, 13.5f, 1.0f);
 	entityCollection[9].SetTransform(entity9_transform_desc);
 	MATERIAL_DESC mat_desc7;
 	mat_desc7.shadingModel = ShadingModel::FinalGathering;
@@ -196,13 +196,13 @@ GEOMETRY_DESC Engine::SetupScene(Scene& scene, const int entityCount)
 	SPHERE_DESC sphere_desc1;
 	sphere_desc1.slices = 50;
 	sphere_desc1.stacks = 50;
-	sphere_desc1.radius = 3.5f;
+	sphere_desc1.radius = 5.0f;
 	CreateSphere(*(entityCollection + 9), sphere_desc1, mat_desc7);
 	//------------------------------
 
 	//Purple Cube 
 	TRANSFORM_DESC entity10_transform_desc;
-	entity10_transform_desc.position = DirectX::XMFLOAT4(-5.0f, -0.0f, 5.5f, 1.0f);
+	entity10_transform_desc.position = DirectX::XMFLOAT4(-5.0f, 0.0f, 13.5f, 1.0f);
 	entity10_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 12.5f, 0.0f, 0.0f);
 	entityCollection[10].SetTransform(entity10_transform_desc);
 	MATERIAL_DESC mat_desc8;
@@ -210,9 +210,9 @@ GEOMETRY_DESC Engine::SetupScene(Scene& scene, const int entityCount)
 	mat_desc8.surfaceColor = DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
 	mat_desc8.roughness = 1.0f;
 	CUBE_DESC cube_desc0;
-	cube_desc0.width = 2.75f;
-	cube_desc0.height = 4.0f;
-	cube_desc0.length = 2.75f;
+	cube_desc0.width = 3.25f;
+	cube_desc0.height = 5.0f;
+	cube_desc0.length = 3.25f;
 	CreateCube(*(entityCollection + 10), cube_desc0, mat_desc8);
 	//------------------------------
 

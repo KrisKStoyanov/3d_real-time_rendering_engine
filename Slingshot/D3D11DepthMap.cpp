@@ -6,15 +6,17 @@ D3D11DepthMap* D3D11DepthMap::Create(D3D11Context& context)
 }
 
 D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
-	m_cbufferVSRegCounter(0)
+	m_cbufferVSRegCounter(0), m_cbufferGSRegCounter(0)
 {
-	char* bytecodeVS = nullptr, * bytecodePS = nullptr;
-	size_t sizeVS, sizePS;
+	char* bytecodeVS = nullptr, *bytecodeGS = nullptr, * bytecodePS = nullptr;
+	size_t sizeVS, sizeGS, sizePS;
 
 	bytecodeVS = GetBytecode("DepthMapVS.cso", sizeVS);
+	bytecodeGS = GetBytecode("DepthMapGS.cso", sizeGS);
 	bytecodePS = GetBytecode("DepthMapPS.cso", sizePS);
 
 	context.GetDevice()->CreateVertexShader(bytecodeVS, sizeVS, nullptr, &m_pVS);
+	context.GetDevice()->CreateGeometryShader(bytecodeGS, sizeGS, nullptr, &m_pGS);
 	context.GetDevice()->CreatePixelShader(bytecodePS, sizePS, nullptr, &m_pPS);
 
 	D3D11_INPUT_ELEMENT_DESC inputDesc[1];
@@ -30,6 +32,7 @@ D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 	context.GetDevice()->CreateInputLayout(inputDesc, 1, bytecodeVS, sizeVS, &m_pIL);
 
 	SAFE_DELETE_ARRAY(bytecodeVS);
+	SAFE_DELETE_ARRAY(bytecodeGS);
 	SAFE_DELETE_ARRAY(bytecodePS);
 
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
@@ -140,10 +143,10 @@ D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 	CONSTANT_BUFFER_DESC desc0;
 	desc0.cbufferData = &m_perFrameDataGS;
 	desc0.cbufferSize = sizeof(m_perFrameDataGS);
-	desc0.shaderType = ShaderType::VERTEX_SHADER;
-	desc0.registerSlot = m_cbufferVSRegCounter;
+	desc0.shaderType = ShaderType::GEOMETRY_SHADER;
+	desc0.registerSlot = m_cbufferGSRegCounter;
 	m_pPerFrameCBufferGS = D3D11ConstantBuffer::Create(*context.GetDevice(), desc0);
-	m_cbufferVSRegCounter++;
+	m_cbufferGSRegCounter++;
 
 	CONSTANT_BUFFER_DESC desc1;
 	desc1.cbufferData = &m_perDrawCallDataVS;
@@ -181,6 +184,7 @@ void D3D11DepthMap::UpdatePerFrame(ID3D11DeviceContext& deviceContext)
 {
 	deviceContext.IASetInputLayout(m_pIL);
 	deviceContext.VSSetShader(m_pVS, nullptr, 0);
+	deviceContext.GSSetShader(m_pGS, nullptr, 0);
 	deviceContext.PSSetShader(m_pPS, nullptr, 0);
 	deviceContext.OMSetDepthStencilState(m_pDepthStencilState, 1);
 	deviceContext.RSSetState(m_pRasterizerState);

@@ -1,11 +1,5 @@
 #include "DepthMap.hlsli"
 
-struct GS_COALESCENT
-{
-    float4 position : SV_Position;
-    float4 depthPos : TEXCOORD0;
-};
-
 cbuffer PerFrameBuffer : register(b0)
 {
     float4x4 viewMatrix0;
@@ -30,7 +24,7 @@ void main(triangle GS_COALESCENT gs_input[3] : SV_POSITION, inout TriangleStream
     
     for (int rtvNum = 0; rtvNum < 6; ++rtvNum)
     {
-        for (uint i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)
         {
             GS_COALESCENT element;
             element.position = mul(gs_input[i].position, vpMatrix0); //pick appropriate matrix

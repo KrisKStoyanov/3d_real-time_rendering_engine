@@ -4,11 +4,11 @@
 struct PerFrameDataGS_DM
 {
 	DirectX::XMMATRIX viewMatrix0;
-	//DirectX::XMMATRIX viewMatrix1;
-	//DirectX::XMMATRIX viewMatrix2;
-	//DirectX::XMMATRIX viewMatrix3;
-	//DirectX::XMMATRIX viewMatrix4;
-	//DirectX::XMMATRIX viewMatrix5;
+	DirectX::XMMATRIX viewMatrix1;
+	DirectX::XMMATRIX viewMatrix2;
+	DirectX::XMMATRIX viewMatrix3;
+	DirectX::XMMATRIX viewMatrix4;
+	DirectX::XMMATRIX viewMatrix5;
 
 	DirectX::XMMATRIX projectionMatrix;
 };
@@ -60,5 +60,6 @@ private:
 	PerDrawCallDataVS_DM m_perDrawCallDataVS;
 
 	unsigned int m_cbufferVSRegCounter;
+	unsigned int m_cbufferGSRegCounter;
 };
 
