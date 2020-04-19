@@ -13,11 +13,22 @@ D3D11DirectIllumination::D3D11DirectIllumination(D3D11Context& context) :
 	m_clearColor[2] = 0.0f;
 	m_clearColor[3] = 1.0f;
 
+	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
+	context.GetSwapChain()->GetDesc1(&swapChainDesc);
+
+	ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
+	m_viewport.Width = static_cast<float>(swapChainDesc.Width);
+	m_viewport.Height = static_cast<float>(swapChainDesc.Height);
+	m_viewport.MinDepth = 0.0f;
+	m_viewport.MaxDepth = 1.0f;
+	m_viewport.TopLeftX = 0.0f;
+	m_viewport.TopLeftY = 0.0f;
+
 	char* bytecodeVS = nullptr, * bytecodePS = nullptr;
 	size_t sizeVS, sizePS;
 
-	bytecodeVS = GetBytecode("DirectIlluminationVS.cso", sizeVS);
-	bytecodePS = GetBytecode("DirectIlluminationPS.cso", sizePS);
+	bytecodeVS = GetBytecode("GoochIlluminationVS.cso", sizeVS);
+	bytecodePS = GetBytecode("GoochIlluminationPS.cso", sizePS);
 
 	context.GetDevice()->CreateVertexShader(bytecodeVS, sizeVS, nullptr, &m_pVS);
 	context.GetDevice()->CreatePixelShader(bytecodePS, sizePS, nullptr, &m_pPS);
@@ -60,9 +71,6 @@ D3D11DirectIllumination::D3D11DirectIllumination(D3D11Context& context) :
 		SAFE_RELEASE(pBackBuffer);
 	}
 
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
-	context.GetSwapChain()->GetDesc1(&swapChainDesc);
-
 	ID3D11Texture2D* depthStencilBuffer;
 	D3D11_TEXTURE2D_DESC depthStencilBufferDesc;
 	ZeroMemory(&depthStencilBufferDesc, sizeof(depthStencilBufferDesc));
@@ -79,6 +87,55 @@ D3D11DirectIllumination::D3D11DirectIllumination(D3D11Context& context) :
 	depthStencilBufferDesc.MiscFlags = 0;
 	DX::ThrowIfFailed(
 		context.GetDevice()->CreateTexture2D(&depthStencilBufferDesc, nullptr, &depthStencilBuffer));
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	DX::ThrowIfFailed(
+		context.GetDevice()->CreateDepthStencilView(
+			depthStencilBuffer,
+			&depthStencilViewDesc,
+			&m_pDepthStencilView));
+
+	SAFE_RELEASE(depthStencilBuffer);
+
+	D3D11_SAMPLER_DESC samplerDesc;
+	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;//D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT; 
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS; //D3D11_COMPARISON_LESS_EQUAL;
+	samplerDesc.BorderColor[0] = 0.0f;
+	samplerDesc.BorderColor[1] = 0.0f;
+	samplerDesc.BorderColor[2] = 0.0f;
+	samplerDesc.BorderColor[3] = 0.0f;
+	samplerDesc.MinLOD = 0.0f;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	DX::ThrowIfFailed(
+		context.GetDevice()->CreateSamplerState(&samplerDesc, &m_pShadowMapSamplerState));
+
+	D3D11_RASTERIZER_DESC rsStateDesc;
+	ZeroMemory(&rsStateDesc, sizeof(rsStateDesc));
+	rsStateDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
+	rsStateDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
+	rsStateDesc.FrontCounterClockwise = false;
+	rsStateDesc.DepthBias = 0;
+	rsStateDesc.DepthBiasClamp = 0.0f;
+	rsStateDesc.SlopeScaledDepthBias = 0.0f;
+	rsStateDesc.DepthClipEnable = true;
+	rsStateDesc.ScissorEnable = false;
+	rsStateDesc.MultisampleEnable = false;
+	rsStateDesc.AntialiasedLineEnable = false;
+
+	DX::ThrowIfFailed(
+		context.GetDevice()->CreateRasterizerState(&rsStateDesc, &m_pRasterizerState));
 
 	D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc;
 	depthStencilStateDesc.DepthEnable = true;
@@ -97,56 +154,6 @@ D3D11DirectIllumination::D3D11DirectIllumination(D3D11Context& context) :
 	depthStencilStateDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 	DX::ThrowIfFailed(
 		context.GetDevice()->CreateDepthStencilState(&depthStencilStateDesc, &m_pDepthStencilState));
-
-	if (depthStencilBuffer)
-	{
-		D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
-		ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
-		depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-		depthStencilViewDesc.Texture2D.MipSlice = 0;
-
-		DX::ThrowIfFailed(
-			context.GetDevice()->CreateDepthStencilView(
-				depthStencilBuffer,
-				&depthStencilViewDesc,
-				&m_pDepthStencilView));
-
-		SAFE_RELEASE(depthStencilBuffer);
-	}
-
-	D3D11_RASTERIZER_DESC rasterizer_desc;
-	rasterizer_desc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
-	rasterizer_desc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
-	rasterizer_desc.FrontCounterClockwise = false;
-	rasterizer_desc.DepthBias = false;
-	rasterizer_desc.DepthBiasClamp = 0;
-	rasterizer_desc.SlopeScaledDepthBias = 0;
-	rasterizer_desc.DepthClipEnable = true;
-	rasterizer_desc.ScissorEnable = false;
-	rasterizer_desc.MultisampleEnable = false;
-	rasterizer_desc.AntialiasedLineEnable = false;
-
-	DX::ThrowIfFailed(
-		context.GetDevice()->CreateRasterizerState(&rasterizer_desc, &m_pRasterizerState));
-
-	D3D11_SAMPLER_DESC samplerDesc;
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.MipLODBias = 0.0f;
-	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-	samplerDesc.BorderColor[0] = 0;
-	samplerDesc.BorderColor[1] = 0;
-	samplerDesc.BorderColor[2] = 0;
-	samplerDesc.BorderColor[3] = 0;
-	samplerDesc.MinLOD = 0;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	DX::ThrowIfFailed(
-		context.GetDevice()->CreateSamplerState(&samplerDesc, &m_pSampleStateWrap));
 
 	CONSTANT_BUFFER_DESC desc0;
 	desc0.cbufferData = &m_perFrameDataVS;
@@ -193,7 +200,7 @@ void D3D11DirectIllumination::Shutdown()
 	SAFE_RELEASE(m_pRenderTargetView);
 	SAFE_RELEASE(m_pDepthStencilView);
 
-	SAFE_RELEASE(m_pSampleStateWrap);
+	SAFE_RELEASE(m_pShadowMapSamplerState);
 
 	SAFE_DESTROY(m_pPerFrameCBufferVS);
 	SAFE_DESTROY(m_pPerFrameCBufferPS);
@@ -211,11 +218,11 @@ void D3D11DirectIllumination::UpdatePerFrame(ID3D11DeviceContext& deviceContext,
 	deviceContext.VSSetShader(m_pVS, nullptr, 0);
 	deviceContext.GSSetShader(nullptr, nullptr, 0);
 	deviceContext.PSSetShader(m_pPS, nullptr, 0);
-	deviceContext.PSSetSamplers(0, 1, &m_pSampleStateWrap);
-	deviceContext.OMSetDepthStencilState(m_pDepthStencilState, 1);
-	deviceContext.RSSetState(m_pRasterizerState);
-
+	deviceContext.PSSetSamplers(0, 1, &m_pShadowMapSamplerState);
 	deviceContext.PSSetShaderResources(0, 1, &depthMap);
+	deviceContext.RSSetState(m_pRasterizerState);
+	//deviceContext.RSSetViewports(1, &m_viewport);
+	//deviceContext.OMSetDepthStencilState(m_pDepthStencilState, 1);
 
 	deviceContext.ClearRenderTargetView(m_pRenderTargetView, m_clearColor);
 	deviceContext.ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);

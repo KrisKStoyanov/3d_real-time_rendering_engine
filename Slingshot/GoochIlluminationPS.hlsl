@@ -1,9 +1,8 @@
 //GoochIlluminationPS.hlsl
 #include "GoochIllumination.hlsli"
 
-Texture2D depthMapTexture : register(t0);
-
-SamplerState sampleTypeClamp : register(s0);
+Texture2D shadowMap : register(t0);
+SamplerState samplerShadowMap : register(s0);
 
 cbuffer PerFrameBuffer : register(b0)
 {
@@ -21,25 +20,25 @@ cbuffer PerDrawCallBuffer : register(b1)
 float4 main(PS_INPUT ps_input) : SV_Target
 {
     float bias = 0.01f;
-    float4 color = ambientColor;
+    float4 lightColor = ambientColor;
     float4 normal = normalize(ps_input.normalWorld);
     
     float2 projectTexCoord;
-    projectTexCoord.x = ps_input.lightViewPos.x / ps_input.lightViewPos.w / 2.0f + 0.5f;
-    projectTexCoord.y = -ps_input.lightViewPos.y / ps_input.lightViewPos.w / 2.0f + 0.5f;
+    projectTexCoord.x = 0.5f + (ps_input.posLightWorld.x / ps_input.posLightWorld.w * 0.5f);
+    projectTexCoord.y = 0.5f - (ps_input.posLightWorld.y / ps_input.posLightWorld.w * 0.5f);
+    float lightDepthValue = (ps_input.posLightWorld.z / ps_input.posLightWorld.w) - bias;
     
-    if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
+    if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y) && (lightDepthValue > 0.0f))
     {
-        float depthValue = depthMapTexture.Sample(sampleTypeClamp, projectTexCoord).r;
-        float lightDepthValue = (ps_input.lightViewPos.z / ps_input.lightViewPos.w) - bias;
+        float depthValue = shadowMap.Sample(samplerShadowMap, projectTexCoord).r;
         
         if (lightDepthValue < depthValue)
         {
-            float lightIntensity = saturate(dot(normal, ps_input.lightDir));
+            float lightIntensity = saturate(dot(normal, ps_input.lightRay));
             if (lightIntensity > 0.0f)
             {
-                color += (diffuseColor * lightIntensity);
-                color = saturate(color);
+                lightColor += (diffuseColor * lightIntensity);
+                lightColor = saturate(lightColor);
             }
         }
     }
@@ -59,5 +58,5 @@ float4 main(PS_INPUT ps_input) : SV_Target
     
     float4 blendColor = 0.5f * coolColor + max(dot(normal, lightDir), 0.0f) * diffuseColor * (s * highlightColor + (1.0f - s) * warmColor);
 
-    return color * blendColor;
+    return lightColor * blendColor;
 }

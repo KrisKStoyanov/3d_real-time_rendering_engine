@@ -46,41 +46,21 @@ void Renderer::Draw(Scene& scene)
 	DirectX::XMMATRIX cameraViewMatrix = DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetTransform()->GetViewMatrix());
 	DirectX::XMMATRIX cameraProjMatrix = DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetCamera()->GetProjectionMatrix());
 
+	DirectX::XMMATRIX lightViewMatrix = DirectX::XMMatrixTranspose(scene.GetLights()->GetTransform()->GetViewMatrix());
+	DirectX::XMMATRIX lightProjMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixPerspectiveFovLH(
+		DirectX::XMConvertToRadians(90.0f),
+		1.0f,
+		1.0f,
+		1000.0f)); //represent point light influence radius
+
 	// Depth Pre-pass
 	m_pDepthMap->UpdatePerFrame(*m_pGraphicsContext->GetContext());
 
-	DirectX::XMMATRIX lightFrontView;
-	DirectX::XMMATRIX lightBackView;
-	DirectX::XMMATRIX lightLeftView;
-	DirectX::XMMATRIX lightRightView;
-	DirectX::XMMATRIX lightTopView;
-	DirectX::XMMATRIX lightBottomView;
-
-	scene.GetLights()->GetTransform()->GeneratePanoramicView(
-		lightFrontView,
-		lightBackView,
-		lightLeftView,
-		lightRightView,
-		lightTopView,
-		lightBottomView);
-
-	lightFrontView = DirectX::XMMatrixTranspose(lightFrontView);
-	lightBackView = DirectX::XMMatrixTranspose(lightBackView);
-	lightLeftView = DirectX::XMMatrixTranspose(lightLeftView);
-	lightRightView = DirectX::XMMatrixTranspose(lightRightView);
-	lightTopView = DirectX::XMMatrixTranspose(lightTopView);
-	lightBottomView = DirectX::XMMatrixTranspose(lightBottomView);
-
-	PerFrameDataGS_DM perFrameDataGS_DM;
-	perFrameDataGS_DM.viewMatrix0 = lightFrontView;
-	perFrameDataGS_DM.viewMatrix1 = lightBackView;
-	perFrameDataGS_DM.viewMatrix2 = lightLeftView;
-	perFrameDataGS_DM.viewMatrix3 = lightRightView;
-	perFrameDataGS_DM.viewMatrix4 = lightTopView;
-	perFrameDataGS_DM.viewMatrix5 = lightBottomView;
-	perFrameDataGS_DM.projectionMatrix = cameraProjMatrix;
-
-	m_pDepthMap->UpdateBuffersPerFrame(perFrameDataGS_DM);
+	PerFrameDataVS_DM perFrameDataVS_DM;
+	perFrameDataVS_DM.viewMatrix = lightViewMatrix;
+	perFrameDataVS_DM.projectionMatrix = lightProjMatrix;
+	
+	m_pDepthMap->UpdateBuffersPerFrame(perFrameDataVS_DM);
 
 	for (int i = 0; i < scene.GetEntityCount(); ++i)
 	{
@@ -103,15 +83,15 @@ void Renderer::Draw(Scene& scene)
 
 	// Direct Illumination
 	m_pGraphicsContext->SetBackBufferRender();
-
 	m_pDirectIllumination->UpdatePerFrame(*m_pGraphicsContext->GetContext(), m_pDepthMap->GetShaderResourceView());
 
 	PerFrameDataVS_DI perFrameDataVS;
 	perFrameDataVS.cameraViewMatrix = cameraViewMatrix;
 	perFrameDataVS.cameraProjMatrix = cameraProjMatrix;
-	perFrameDataVS.lightViewMatrix = lightFrontView;
-	perFrameDataVS.lightProjMatrix = cameraProjMatrix;
-	perFrameDataVS.lightPos = scene.GetLights()->GetTransform()->GetPosition();
+	perFrameDataVS.lightViewMatrix = lightViewMatrix;
+	perFrameDataVS.lightProjMatrix = lightProjMatrix;
+	perFrameDataVS.camPos = scene.GetCamera(scene.GetMainCameraID())->GetTransform()->GetPosition(); // may need conversion to world space
+	perFrameDataVS.lightPos = scene.GetLights()->GetTransform()->GetPosition(); // may need conversion to world space
 
 	PerFrameDataPS_DI perFrameDataPS;
 	perFrameDataPS.camPos = DirectX::XMVector4Transform(

@@ -63,19 +63,16 @@ private:
 		HWND hWnd, UINT winWidth, UINT winHeight);
 	void CreatePrimaryResources();
 
-	void SetupViewport(UINT winWidth, UINT winHeight);
 	void SetupDebugLayer();
 
 	float m_clearColor[4];
-
+	D3D11_VIEWPORT m_viewport;
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pImmediateContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> m_pSwapChain;
 
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_pBackBufferRTV;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_pDepthBufferDSV;
-
-	D3D11_VIEWPORT m_viewport;
 
 	//Debugging Tools
 	Microsoft::WRL::ComPtr<ID3D11Debug> m_pDebugLayer;

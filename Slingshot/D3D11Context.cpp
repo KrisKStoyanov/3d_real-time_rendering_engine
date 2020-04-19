@@ -18,8 +18,6 @@ D3D11Context::D3D11Context(HWND hWnd)
 		hWnd, winWidth, winHeight);
 
 	CreatePrimaryResources();
-
-	SetupViewport(winWidth, winHeight);
 }
 
 std::vector<IDXGIAdapter*> D3D11Context::QueryAdapters()
@@ -168,17 +166,6 @@ void D3D11Context::CreatePrimaryResources()
 	SAFE_RELEASE(depthStencilBuffer);
 }
 
-void D3D11Context::SetupViewport(UINT winWidth, UINT winHeight)
-{
-	ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
-	m_viewport.Width = static_cast<float>(winWidth);
-	m_viewport.Height = static_cast<float>(winHeight);
-	m_viewport.MinDepth = 0.0f;
-	m_viewport.MaxDepth = 1.0f;
-	m_viewport.TopLeftX = 0.0f;
-	m_viewport.TopLeftY = 0.0f;
-}
-
 void D3D11Context::SetupDebugLayer()
 {
 	DX::ThrowIfFailed(m_pDevice.As(&m_pDebugLayer));
@@ -202,8 +189,17 @@ void D3D11Context::SetupDebugLayer()
 
 bool D3D11Context::Initialize()
 {
-	m_pImmediateContext->RSSetViewports(1, &m_viewport);
+	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
+	m_pSwapChain->GetDesc1(&swapChainDesc);
 
+	ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
+	m_viewport.Width = static_cast<float>(swapChainDesc.Width);
+	m_viewport.Height = static_cast<float>(swapChainDesc.Height);
+	m_viewport.MinDepth = 0.0f;
+	m_viewport.MaxDepth = 1.0f;
+	m_viewport.TopLeftX = 0.0f;
+	m_viewport.TopLeftY = 0.0f;
+	m_pImmediateContext->RSSetViewports(1, &m_viewport);
 	return true;
 }
 

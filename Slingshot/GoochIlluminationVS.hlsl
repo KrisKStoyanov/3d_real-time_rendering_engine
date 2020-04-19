@@ -7,6 +7,7 @@ cbuffer PerFrameBuffer : register(b0)
     float4x4 cameraProjMatrix;
     float4x4 lightViewMatrix;
     float4x4 lightProjMatrix;
+    float4 camPos;
     float4 lightPos;
 };
 
@@ -23,14 +24,14 @@ PS_INPUT main(VS_INPUT vs_input)
     float4x4 wvpLightMatrix = mul(worldMatrix, mul(lightViewMatrix, lightProjMatrix));
     
     vs_output.position = mul(vs_input.position, wvpMatrix);
-    vs_output.lightViewPos = mul(vs_input.position, wvpLightMatrix);
+    vs_output.posLightWorld = mul(vs_input.position, wvpLightMatrix);
     
     vs_output.uv = vs_input.uv;
     vs_output.posWorld = mul(vs_input.position, worldMatrix);
     vs_output.normalWorld = mul(vs_input.normal, worldMatrix);
     
     float4 worldPos = mul(vs_input.position, worldMatrix);
-    vs_output.lightDir = normalize(lightPos - worldPos);
+    vs_output.lightRay = normalize(lightPos - worldPos);
     
     return vs_output;
 }

@@ -209,12 +209,6 @@
     <None Include="GoochShading.hlsli">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="OrenNayar.hlsli">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="FinalGathering.hlsli">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="DepthMap.hlsli">
       <Filter>Shaders</Filter>
     </None>
@@ -229,24 +223,6 @@
     <FxCompile Include="GoochVS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="OrenNayarVS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="OrenNayarPS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="FinalGatheringVS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="FinalGatheringPS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="DirectIlluminationPS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="DirectIlluminationVS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="DepthMapPS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
@@ -254,6 +230,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="DepthMapGS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="GoochIlluminationVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="GoochIlluminationPS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

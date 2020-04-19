@@ -77,10 +77,9 @@ GEOMETRY_DESC Engine::SetupScene(Scene& scene, const int entityCount)
 	LIGHT_DESC entity1_light_desc;
 	entityCollection[1].SetLight(entity1_light_desc);
 	TRANSFORM_DESC entity1_transform_desc;
-	entity1_transform_desc.position = DirectX::XMFLOAT4(0.0f, 12.5f, 10.0f, 1.0f);
-	entity1_transform_desc.rotation = DirectX::XMFLOAT4(90.0f, 0.0f, 0.0f, 0.0f);
+	entity1_transform_desc.position = DirectX::XMFLOAT4(0.0f, 5.0f, -10.0f, 1.0f); //DirectX::XMFLOAT4(0.0f, 12.5f, 10.0f, 1.0f);
+	//entity1_transform_desc.rotation = DirectX::XMFLOAT4(90.0f, 0.0f, 0.0f, 0.0f);
 	entityCollection[1].SetTransform(entity1_transform_desc);
-	//entityCollection[1].GetTransform()->RotateEulerAngles(180.0f, 0.0f, 0.0f);
 	//------------------------------
 
 	//	CORNEL BOX

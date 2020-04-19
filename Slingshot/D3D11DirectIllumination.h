@@ -7,6 +7,7 @@ struct PerFrameDataVS_DI
 	DirectX::XMMATRIX cameraProjMatrix;
 	DirectX::XMMATRIX lightViewMatrix;
 	DirectX::XMMATRIX lightProjMatrix;
+	DirectX::XMVECTOR camPos;
 	DirectX::XMVECTOR lightPos;
 };
 
@@ -47,6 +48,7 @@ private:
 	D3D11DirectIllumination(D3D11Context& context);
 
 	float m_clearColor[4];
+	D3D11_VIEWPORT m_viewport;
 
 	ID3D11InputLayout* m_pIL;
 	ID3D11VertexShader* m_pVS;
@@ -58,7 +60,7 @@ private:
 	ID3D11RenderTargetView* m_pRenderTargetView;
 	ID3D11DepthStencilView* m_pDepthStencilView;
 
-	ID3D11SamplerState* m_pSampleStateWrap;
+	ID3D11SamplerState* m_pShadowMapSamplerState;
 
 	D3D11ConstantBuffer* m_pPerFrameCBufferVS;
 	D3D11ConstantBuffer* m_pPerDrawCallCBufferVS;
