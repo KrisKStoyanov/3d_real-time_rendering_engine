@@ -1,8 +1,8 @@
 //GoochIlluminationPS.hlsl
 #include "GoochIllumination.hlsli"
 
-TextureCube<float> shadowMap : register(t0);
-SamplerComparisonState samplerShadowMap : register(s0);
+Texture2D shadowMap : register(t0);
+SamplerState samplerShadowMap : register(s0);
 
 cbuffer PerFrameBuffer : register(b0)
 {
@@ -17,11 +17,11 @@ cbuffer PerDrawCallBuffer : register(b1)
     float4 surfaceColor;
 }
 
-float vecToDepth(float4 vec, float n, float f)
+float vecToDepth(float4 vec, float nearZ, float farZ)
 {
     float4 absVec = abs(vec);
     float localZComp = max(absVec.x, max(absVec.y, absVec.z));
-    float normZComp = (f + n) / (f - n) - (2.0f * f * n) / (f - n) / localZComp;
+    float normZComp = (farZ + nearZ) / (farZ - nearZ) - (2.0f * farZ * nearZ) / (farZ - nearZ) / localZComp;
     return (normZComp + 1.0f) * 0.5f;
 }
 
@@ -30,34 +30,34 @@ float4 main(PS_INPUT ps_input) : SV_Target
     float bias = 0.01f;
     float4 lightColor = ambientColor;
     float4 normal = normalize(ps_input.normalWorld);
-
-    float4 lightRay = ps_input.posWorld - lightPos;
-    float4 lightRayDir = normalize(lightRay);
-    float sampledDepth = vecToDepth(lightRay, 1.0f, 1000.0f);
     
-    lightColor = shadowMap.SampleCmpLevelZero(samplerShadowMap, float3(lightRayDir.x, lightRayDir.y, -lightRayDir.z), sampledDepth).r;
-    //float2 projectTexCoord;
-    //projectTexCoord.x = 0.5f + (ps_input.posLightWorld.x / ps_input.posLightWorld.w * 0.5f);
-    //projectTexCoord.y = 0.5f - (ps_input.posLightWorld.y / ps_input.posLightWorld.w * 0.5f);
-    //float lightDepthValue = (ps_input.posLightWorld.z / ps_input.posLightWorld.w) - bias;
-    //if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y) && (lightDepthValue > 0.0f))
-    //{
-        //float margin = acos(saturate(ps_input.lightRay));
-        //float epsilon = 0.0005f / margin;
-        //epsilon = clamp(epsilon, 0.0f, 0.1f);
+    //float4 fragToLight = ps_input.posWorld - lightPos;
+    //float depthSample = vecToDepth(fragToLight, 0.1f, 20.0f);
+    //float shadowSample = shadowMap.SampleCmpLevelZero(samplerShadowMap, fragToLight.xyz, depthSample).r;
+    
+    float2 projectTexCoord;
+    projectTexCoord.x = 0.5f + (ps_input.posLightWorld.x / ps_input.posLightWorld.w * 0.5f);
+    projectTexCoord.y = 0.5f - (ps_input.posLightWorld.y / ps_input.posLightWorld.w * 0.5f);
+    float lightDepthValue = (ps_input.posLightWorld.z / ps_input.posLightWorld.w) - bias;
+    
+    if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y) && (lightDepthValue > 0.0f))
+    {
+        float margin = acos(saturate(ps_input.lightRay));
+        float epsilon = 0.0005f / margin;
+        epsilon = clamp(epsilon, 0.0f, 0.1f);
         
-        //float depthValue = shadowMap.SampleCmpLevelZero(samplerShadowMap, projectTexCoord, (lightDepthValue + epsilon)).r;
+        float depthValue = shadowMap.Sample(samplerShadowMap, projectTexCoord).r;
         
-        //if (lightDepthValue < depthValue)
-        //{
-        //    float lightIntensity = saturate(dot(normal, ps_input.lightRay));
-        //    if (lightIntensity > 0.0f)
-        //    {
-        //        lightColor += (diffuseColor * lightIntensity);
-        //        lightColor = saturate(lightColor);
-        //    }
-        //}
-    //}
+        if (lightDepthValue < depthValue)
+        {
+            float lightIntensity = saturate(dot(normal, ps_input.lightRay));
+            if (lightIntensity > 0.0f)
+            {
+                lightColor += (diffuseColor * lightIntensity);
+                lightColor = saturate(lightColor);
+            }
+        }
+    }
     
     float4 viewDir = float4(normalize(camPos.xyz - ps_input.posWorld.xyz), 0.0f);
     float4 lightDir = float4(normalize(lightPos.xyz - ps_input.posWorld.xyz), 0.0f);
@@ -74,6 +74,7 @@ float4 main(PS_INPUT ps_input) : SV_Target
     float4 blendColor = 0.5f * coolColor + max(dot(normal, lightDir), 0.0f) * diffuseColor * (s * highlightColor + (1.0f - s) * warmColor);
     return lightColor * blendColor;
     
+    //---------
     //oren-nayar
     //half VDotN = dot(viewDir, normal);
     //half LDotN = dot(lightDir, normal);

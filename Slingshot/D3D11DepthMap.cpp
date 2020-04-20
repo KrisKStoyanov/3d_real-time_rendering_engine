@@ -12,7 +12,7 @@ D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 	ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
 	m_viewport.Width = static_cast<float>(shadowMapWidth);
 	m_viewport.Height = static_cast<float>(shadowMapHeight);
-	m_viewport.MinDepth = 0.1f;
+	m_viewport.MinDepth = 0.0f;
 	m_viewport.MaxDepth = 1.0f;
 
 	char* bytecodeVS = nullptr, *bytecodeGS = nullptr, * bytecodePS = nullptr;
@@ -52,14 +52,14 @@ D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 	smDesc.Width = shadowMapWidth;
 	smDesc.Height = shadowMapHeight;
 	smDesc.MipLevels = 1;
-	smDesc.ArraySize = 6;
+	smDesc.ArraySize = 1; //6;
 	smDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 	smDesc.SampleDesc.Count = 1;
 	smDesc.SampleDesc.Quality = 0;
 	smDesc.Usage = D3D11_USAGE_DEFAULT;
 	smDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	smDesc.CPUAccessFlags = 0;
-	smDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+	smDesc.MiscFlags = 0; //D3D11_RESOURCE_MISC_TEXTURECUBE;
 	DX::ThrowIfFailed(
 		context.GetDevice()->CreateTexture2D(
 			&smDesc, 
@@ -69,10 +69,11 @@ D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
 	ZeroMemory(&dsvDesc, sizeof(dsvDesc));
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
-	dsvDesc.Texture2DArray.ArraySize = 6;
-	dsvDesc.Texture2DArray.FirstArraySlice = 0;
-	dsvDesc.Texture2DArray.MipSlice = 0;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D; //D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+	dsvDesc.Texture2D.MipSlice = 0;
+	//dsvDesc.Texture2DArray.ArraySize = 6;
+	//dsvDesc.Texture2DArray.FirstArraySlice = 0;
+	//dsvDesc.Texture2DArray.MipSlice = 0;
 	DX::ThrowIfFailed(
 		context.GetDevice()->CreateDepthStencilView(
 			shadowMap,
@@ -82,11 +83,13 @@ D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	ZeroMemory(&srvDesc, sizeof(srvDesc));
 	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
-	srvDesc.Texture2DArray.ArraySize = 6;
-	srvDesc.Texture2DArray.FirstArraySlice = 0;
-	srvDesc.Texture2DArray.MostDetailedMip = 0;
-	srvDesc.Texture2DArray.MipLevels = 1;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D; //D3D11_SRV_DIMENSION_TEXTURECUBE;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	//srvDesc.Texture2DArray.ArraySize = 6;
+	//srvDesc.Texture2DArray.FirstArraySlice = 0;
+	//srvDesc.Texture2DArray.MostDetailedMip = 0;
+	//srvDesc.Texture2DArray.MipLevels = 1;
 	DX::ThrowIfFailed(
 		context.GetDevice()->CreateShaderResourceView(
 			shadowMap, 
@@ -110,13 +113,21 @@ D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 
 	context.GetDevice()->CreateRasterizerState(&rsStateDesc, &m_pRasterizerState);
 
+	//CONSTANT_BUFFER_DESC desc0;
+	//desc0.cbufferData = &m_perFrameDataGS;
+	//desc0.cbufferSize = sizeof(m_perFrameDataGS);
+	//desc0.shaderType = ShaderType::GEOMETRY_SHADER;
+	//desc0.registerSlot = m_cbufferGSRegCounter;
+	//m_pPerFrameCBufferGS = D3D11ConstantBuffer::Create(*context.GetDevice(), desc0);
+	//m_cbufferGSRegCounter++;
+
 	CONSTANT_BUFFER_DESC desc0;
-	desc0.cbufferData = &m_perFrameDataGS;
-	desc0.cbufferSize = sizeof(m_perFrameDataGS);
-	desc0.shaderType = ShaderType::GEOMETRY_SHADER;
-	desc0.registerSlot = m_cbufferGSRegCounter;
-	m_pPerFrameCBufferGS = D3D11ConstantBuffer::Create(*context.GetDevice(), desc0);
-	m_cbufferGSRegCounter++;
+	desc0.cbufferData = &m_perFrameDataVS;
+	desc0.cbufferSize = sizeof(m_perFrameDataVS);
+	desc0.shaderType = ShaderType::VERTEX_SHADER;
+	desc0.registerSlot = m_cbufferVSRegCounter;
+	m_pPerFrameCBufferVS = D3D11ConstantBuffer::Create(*context.GetDevice(), desc0);
+	m_cbufferVSRegCounter++;
 
 	CONSTANT_BUFFER_DESC desc1;
 	desc1.cbufferData = &m_perDrawCallDataVS;
@@ -137,6 +148,7 @@ void D3D11DepthMap::Shutdown()
 	SAFE_RELEASE(m_pRasterizerState);
 
 	SAFE_DESTROY(m_pPerFrameCBufferGS);
+	SAFE_DESTROY(m_pPerFrameCBufferVS);
 	SAFE_DESTROY(m_pPerDrawCallCBufferVS);
 }
 
@@ -149,7 +161,7 @@ void D3D11DepthMap::UpdatePerFrame(ID3D11DeviceContext& deviceContext)
 {
 	deviceContext.IASetInputLayout(m_pIL);
 	deviceContext.VSSetShader(m_pVS, nullptr, 0);
-	deviceContext.GSSetShader(m_pGS, nullptr, 0);
+	//deviceContext.GSSetShader(m_pGS, nullptr, 0);
 	deviceContext.PSSetShader(m_pPS, nullptr, 0);
 	deviceContext.RSSetState(m_pRasterizerState);
 	deviceContext.RSSetViewports(1, &m_viewport);
@@ -162,9 +174,9 @@ void D3D11DepthMap::UpdatePerFrame(ID3D11DeviceContext& deviceContext)
 	deviceContext.PSSetShaderResources(0, 0, nullptr);
 }
 
-void D3D11DepthMap::UpdateBuffersPerFrame(PerFrameDataGS_DM& data)
+void D3D11DepthMap::UpdateBuffersPerFrame(PerFrameDataVS_DM& data)
 {
-	m_perFrameDataGS = data;
+	m_perFrameDataVS = data;
 }
 
 void D3D11DepthMap::UpdateBuffersPerDrawCall(PerDrawCallDataVS_DM& data)
@@ -175,5 +187,6 @@ void D3D11DepthMap::UpdateBuffersPerDrawCall(PerDrawCallDataVS_DM& data)
 void D3D11DepthMap::BindConstantBuffers(ID3D11DeviceContext& deviceContext)
 {
 	m_pPerDrawCallCBufferVS->Bind(deviceContext, &m_perDrawCallDataVS);
-	m_pPerFrameCBufferGS->Bind(deviceContext, &m_perFrameDataGS);
+	m_pPerFrameCBufferVS->Bind(deviceContext, &m_perFrameDataVS);
+	//m_pPerFrameCBufferGS->Bind(deviceContext, &m_perFrameDataGS);
 }

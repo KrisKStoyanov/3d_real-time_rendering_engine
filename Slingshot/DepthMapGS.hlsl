@@ -7,7 +7,7 @@ cbuffer PerFrameBuffer : register(b0)
 }
 
 [maxvertexcount(18)]
-void main(triangle GS_INPUT gs_input[3] : SV_POSITION, inout TriangleStream<PS_INPUT> gs_output)
+void main(triangle GS_INPUT gs_input[3], inout TriangleStream<PS_INPUT> gs_output)
 {   
     [unroll]
     for (int rtNum = 0; rtNum < 6; ++rtNum)

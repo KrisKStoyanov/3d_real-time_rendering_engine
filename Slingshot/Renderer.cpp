@@ -56,7 +56,7 @@ void Renderer::Draw(Scene& scene)
 	// Depth Pre-pass
 	m_pDepthMap->UpdatePerFrame(*m_pGraphicsContext->GetContext());
 
-	DirectX::XMMATRIX lightFrontView;
+	/*DirectX::XMMATRIX lightFrontView;
 	DirectX::XMMATRIX lightBackView;
 	DirectX::XMMATRIX lightLeftView;
 	DirectX::XMMATRIX lightRightView;
@@ -85,8 +85,14 @@ void Renderer::Draw(Scene& scene)
 	perFrameDataGS_DM.viewMatrix[3] = lightBottomView;
 	perFrameDataGS_DM.viewMatrix[4] = lightFrontView;
 	perFrameDataGS_DM.viewMatrix[5] = lightBackView;
-	perFrameDataGS_DM.projectionMatrix = lightProjMatrix;
-	m_pDepthMap->UpdateBuffersPerFrame(perFrameDataGS_DM);
+	perFrameDataGS_DM.projectionMatrix = lightProjMatrix;*/
+	//m_pDepthMap->UpdateBuffersPerFrame(perFrameDataGS_DM);
+
+	PerFrameDataVS_DM perFrameDataVS_DM;
+	perFrameDataVS_DM.viewMatrix = lightViewMatrix;
+	perFrameDataVS_DM.projectionMatrix = lightProjMatrix;
+
+	m_pDepthMap->UpdateBuffersPerFrame(perFrameDataVS_DM);
 
 	for (int i = 0; i < scene.GetEntityCount(); ++i)
 	{
@@ -125,7 +131,7 @@ void Renderer::Draw(Scene& scene)
 		DirectX::XMMatrixTranspose(scene.GetCamera(scene.GetMainCameraID())->GetTransform()->GetWorldMatrix()));
 	perFrameDataPS.lightPos = DirectX::XMVector4Transform(
 		scene.GetLights()->GetTransform()->GetPosition(),
-		DirectX::XMMatrixTranspose((scene.GetEntityCollection() + 1)->GetTransform()->GetWorldMatrix()));
+		DirectX::XMMatrixTranspose((scene.GetLights())->GetTransform()->GetWorldMatrix()));
 	perFrameDataPS.ambientColor = DirectX::XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	perFrameDataPS.diffuseColor = scene.GetLights()->GetLight()->GetColor();
 

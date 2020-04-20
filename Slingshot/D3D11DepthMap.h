@@ -7,6 +7,12 @@ struct PerFrameDataGS_DM
 	DirectX::XMMATRIX projectionMatrix;
 };
 
+struct PerFrameDataVS_DM
+{
+	DirectX::XMMATRIX viewMatrix;
+	DirectX::XMMATRIX projectionMatrix;
+};
+
 struct PerDrawCallDataVS_DM
 {
 	DirectX::XMMATRIX worldMatrix;
@@ -21,7 +27,7 @@ public:
 	void UpdatePerConfig(ID3D11DeviceContext& deviceContext);
 	void UpdatePerFrame(ID3D11DeviceContext& deviceContext);
 
-	void UpdateBuffersPerFrame(PerFrameDataGS_DM& data);
+	void UpdateBuffersPerFrame(PerFrameDataVS_DM& data);
 	void UpdateBuffersPerDrawCall(PerDrawCallDataVS_DM& data);
 	void BindConstantBuffers(ID3D11DeviceContext& deviceContext);
 	inline ID3D11ShaderResourceView* GetShaderResourceView()
@@ -44,9 +50,11 @@ private:
 	ID3D11DepthStencilView* m_pShadowMapDSV;
 
 	D3D11ConstantBuffer* m_pPerFrameCBufferGS;
+	D3D11ConstantBuffer* m_pPerFrameCBufferVS;
 	D3D11ConstantBuffer* m_pPerDrawCallCBufferVS;
 
 	PerFrameDataGS_DM m_perFrameDataGS;
+	PerFrameDataVS_DM m_perFrameDataVS;
 	PerDrawCallDataVS_DM m_perDrawCallDataVS;
 
 	unsigned int m_cbufferVSRegCounter;
