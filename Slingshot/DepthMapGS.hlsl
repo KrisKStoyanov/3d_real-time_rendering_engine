@@ -9,15 +9,20 @@ cbuffer PerFrameBuffer : register(b0)
 [maxvertexcount(18)]
 void main(triangle GS_INPUT gs_input[3] : SV_POSITION, inout TriangleStream<PS_INPUT> gs_output)
 {   
-    for (int rtvNum = 0; rtvNum < 6; ++rtvNum)
+    [unroll]
+    for (int rtNum = 0; rtNum < 6; ++rtNum)
     {
-        for (int i = 0; i < 3; i++)
         {
-            PS_INPUT element;
-            element.position = mul(gs_input[i].position, mul(viewMatrix[rtvNum], projectionMatrix));
-            //element.depthPos = element.position;
-            gs_output.Append(element);
+            PS_INPUT output = (PS_INPUT)0;
+            output.RTAIndex = rtNum;
+            
+            [unroll]
+            for (int vertNum = 0; vertNum < 3; ++vertNum)
+            {
+                output.position = mul(gs_input[vertNum].position, mul(viewMatrix[rtNum], projectionMatrix));
+                gs_output.Append(output);
+            }
+            gs_output.RestartStrip();
         }
-        gs_output.RestartStrip();
     }
 }

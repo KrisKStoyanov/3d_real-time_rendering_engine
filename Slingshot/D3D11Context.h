@@ -66,7 +66,6 @@ private:
 	void SetupDebugLayer();
 
 	float m_clearColor[4];
-	D3D11_VIEWPORT m_viewport;
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pImmediateContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> m_pSwapChain;

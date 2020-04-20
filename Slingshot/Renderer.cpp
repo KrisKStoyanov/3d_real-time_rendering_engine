@@ -56,11 +56,37 @@ void Renderer::Draw(Scene& scene)
 	// Depth Pre-pass
 	m_pDepthMap->UpdatePerFrame(*m_pGraphicsContext->GetContext());
 
-	PerFrameDataVS_DM perFrameDataVS_DM;
-	perFrameDataVS_DM.viewMatrix = lightViewMatrix;
-	perFrameDataVS_DM.projectionMatrix = lightProjMatrix;
-	
-	m_pDepthMap->UpdateBuffersPerFrame(perFrameDataVS_DM);
+	DirectX::XMMATRIX lightFrontView;
+	DirectX::XMMATRIX lightBackView;
+	DirectX::XMMATRIX lightLeftView;
+	DirectX::XMMATRIX lightRightView;
+	DirectX::XMMATRIX lightTopView;
+	DirectX::XMMATRIX lightBottomView;
+
+	scene.GetLights()->GetTransform()->GeneratePanoramicView(
+		lightFrontView,
+		lightBackView,
+		lightLeftView,
+		lightRightView,
+		lightTopView,
+		lightBottomView);
+
+	lightFrontView = DirectX::XMMatrixTranspose(lightFrontView);
+	lightBackView = DirectX::XMMatrixTranspose(lightBackView);
+	lightLeftView = DirectX::XMMatrixTranspose(lightLeftView);
+	lightRightView = DirectX::XMMatrixTranspose(lightRightView);
+	lightTopView = DirectX::XMMatrixTranspose(lightTopView);
+	lightBottomView = DirectX::XMMatrixTranspose(lightBottomView);
+
+	PerFrameDataGS_DM perFrameDataGS_DM;
+	perFrameDataGS_DM.viewMatrix[0] = lightRightView;
+	perFrameDataGS_DM.viewMatrix[1] = lightLeftView;
+	perFrameDataGS_DM.viewMatrix[2] = lightTopView;
+	perFrameDataGS_DM.viewMatrix[3] = lightBottomView;
+	perFrameDataGS_DM.viewMatrix[4] = lightFrontView;
+	perFrameDataGS_DM.viewMatrix[5] = lightBackView;
+	perFrameDataGS_DM.projectionMatrix = lightProjMatrix;
+	m_pDepthMap->UpdateBuffersPerFrame(perFrameDataGS_DM);
 
 	for (int i = 0; i < scene.GetEntityCount(); ++i)
 	{

@@ -13,4 +13,5 @@ struct GS_INPUT
 struct PS_INPUT
 {
     float4 position : SV_Position;
+    uint RTAIndex : SV_RenderTargetArrayIndex;
 };

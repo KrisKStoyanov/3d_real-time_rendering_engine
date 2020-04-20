@@ -18,7 +18,7 @@ cbuffer PerDrawCall : register(b1)
 
 PS_INPUT main(VS_INPUT vs_input)
 {
-    PS_INPUT vs_output;
+    PS_INPUT vs_output = (PS_INPUT)0;
  
     float4x4 wvpMatrix = mul(worldMatrix, mul(cameraViewMatrix, cameraProjMatrix));
     float4x4 wvpLightMatrix = mul(worldMatrix, mul(lightViewMatrix, lightProjMatrix));
@@ -32,6 +32,7 @@ PS_INPUT main(VS_INPUT vs_input)
     
     float4 worldPos = mul(vs_input.position, worldMatrix);
     vs_output.lightRay = normalize(lightPos - worldPos);
+    vs_output.incRay = camPos - worldPos;
     
     return vs_output;
 }

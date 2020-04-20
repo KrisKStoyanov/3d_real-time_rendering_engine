@@ -104,17 +104,17 @@ D3D11DirectIllumination::D3D11DirectIllumination(D3D11Context& context) :
 
 	D3D11_SAMPLER_DESC samplerDesc;
 	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;//D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT; 
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;//D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT; D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 	samplerDesc.MipLODBias = 0.0f;
-	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS; //D3D11_COMPARISON_LESS_EQUAL;
-	samplerDesc.BorderColor[0] = 0.0f;
-	samplerDesc.BorderColor[1] = 0.0f;
-	samplerDesc.BorderColor[2] = 0.0f;
-	samplerDesc.BorderColor[3] = 0.0f;
+	samplerDesc.MaxAnisotropy = 0;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS; //D3D11_COMPARISON_LESS_EQUAL;
+	samplerDesc.BorderColor[0] = 1.0f;
+	samplerDesc.BorderColor[1] = 1.0f;
+	samplerDesc.BorderColor[2] = 1.0f;
+	samplerDesc.BorderColor[3] = 1.0f;
 	samplerDesc.MinLOD = 0.0f;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
@@ -219,9 +219,8 @@ void D3D11DirectIllumination::UpdatePerFrame(ID3D11DeviceContext& deviceContext,
 	deviceContext.GSSetShader(nullptr, nullptr, 0);
 	deviceContext.PSSetShader(m_pPS, nullptr, 0);
 	deviceContext.PSSetSamplers(0, 1, &m_pShadowMapSamplerState);
-	deviceContext.PSSetShaderResources(0, 1, &depthMap);
 	deviceContext.RSSetState(m_pRasterizerState);
-	//deviceContext.RSSetViewports(1, &m_viewport);
+	deviceContext.RSSetViewports(1, &m_viewport);
 	//deviceContext.OMSetDepthStencilState(m_pDepthStencilState, 1);
 
 	deviceContext.ClearRenderTargetView(m_pRenderTargetView, m_clearColor);
@@ -229,6 +228,8 @@ void D3D11DirectIllumination::UpdatePerFrame(ID3D11DeviceContext& deviceContext,
 	deviceContext.OMSetRenderTargets(1,
 		&m_pRenderTargetView,
 		m_pDepthStencilView);
+
+	deviceContext.PSSetShaderResources(0, 1, &depthMap);
 }
 
 void D3D11DirectIllumination::UpdateBuffersPerFrame(PerFrameDataVS_DI& dataVS, PerFrameDataPS_DI& dataPS)
