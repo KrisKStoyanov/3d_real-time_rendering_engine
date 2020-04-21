@@ -22,6 +22,7 @@ struct PerFrameDataPS_DI
 	DirectX::XMVECTOR lightPos;
 	DirectX::XMFLOAT4 ambientColor;
 	DirectX::XMFLOAT4 diffuseColor;
+	DirectX::XMVECTOR shadowMapResPlusPadding;
 };
 
 struct PerDrawCallDataPS_DI

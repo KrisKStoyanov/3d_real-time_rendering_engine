@@ -10,6 +10,7 @@ cbuffer PerFrameBuffer : register(b0)
     float4 lightPos;
     float4 ambientColor;
     float4 diffuseColor;
+    float4 shadowMapResPlusPadding;
 }
 
 cbuffer PerDrawCallBuffer : register(b1)
@@ -27,7 +28,7 @@ float vecToDepth(float4 vec, float nearZ, float farZ)
 
 float2 texelOffset(float u, float v)
 {
-    return float2(u * 1.0f / 512.0f, v * 1.0f / 512.0f);
+    return float2(u * 1.0f / shadowMapResPlusPadding.x, v * 1.0f / shadowMapResPlusPadding.y);
 }
 
 float4 main(PS_INPUT ps_input) : SV_Target
@@ -49,9 +50,20 @@ float4 main(PS_INPUT ps_input) : SV_Target
     float3 shadowTexCoord = ps_input.posLightWorld.xyz / ps_input.posLightWorld.w;
     shadowTexCoord.x = 0.5f + (shadowTexCoord.x * 0.5f);
     shadowTexCoord.y = 0.5f - (shadowTexCoord.y * 0.5f);
-    float depthSample = shadowMap.SampleCmpLevelZero(samplerShadowMap, shadowTexCoord.xy, shadowTexCoord.z).r;
+    float depthSample = 0.0f;
+    float smTexelXCoord, smTexelYCoord;
+    
+    //3x3 HPCF
+    for (smTexelYCoord = -1.5f; smTexelYCoord <= 1.5f; smTexelYCoord += 1.5f)
+    {
+        for (smTexelXCoord = -1.5f; smTexelXCoord <= 1.5f; smTexelXCoord += 1.5f)
+        {
+            depthSample += shadowMap.SampleCmpLevelZero(samplerShadowMap, shadowTexCoord.xy + texelOffset(smTexelXCoord, smTexelYCoord), shadowTexCoord.z);
+        }
+    }
+    depthSample /= 9.0f;
     float lightIntensity = saturate(dot(normal, lightDir));
-    float4 lightColor = ambientColor * depthSample + diffuseColor * lightIntensity;
+    float4 lightColor = (depthSample * ambientColor) + (diffuseColor * lightIntensity);
     lightColor = saturate(lightColor);
      
     return lightColor * blendColor;
@@ -81,19 +93,6 @@ float4 main(PS_INPUT ps_input) : SV_Target
     //    lightColor += (diffuseColor * lightIntensity) * shadowProjCoord.z;
     //    lightColor = saturate(lightColor);
     //}
-    
-    //float sum = 0;
-    //float x, y;
- 
-    //    //4x4 Bilinear HPCF
-    //for (y = -1.5f; y <= 1.5f; y += 1.0f);
-    //    {
-    //    for (x = -1.5f; x <= 1.5f; x += 1.0f)
-    //    {
-    //        sum += shadowMap.SampleCmpLevelZero(samplerShadowMap, ps_input.posLightWorld.xy + texelOffset(x, y), ps_input.posLightWorld.z);
-    //    }
-    //}
-    //lightColor = (sum / 16.0f) * ambientColor;
 
     //---------
     //oren-nayar

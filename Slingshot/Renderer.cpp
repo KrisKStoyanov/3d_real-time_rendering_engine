@@ -134,6 +134,7 @@ void Renderer::Draw(Scene& scene)
 		DirectX::XMMatrixTranspose((scene.GetLights())->GetTransform()->GetWorldMatrix()));
 	perFrameDataPS.ambientColor = DirectX::XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	perFrameDataPS.diffuseColor = scene.GetLights()->GetLight()->GetColor();
+	perFrameDataPS.shadowMapResPlusPadding = m_pDepthMap->GetShadowMap2DResolution();
 
 	m_pDirectIllumination->UpdateBuffersPerFrame(perFrameDataVS, perFrameDataPS);
 

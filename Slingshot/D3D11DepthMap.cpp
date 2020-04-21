@@ -6,12 +6,12 @@ D3D11DepthMap* D3D11DepthMap::Create(D3D11Context& context)
 }
 
 D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
+	m_shadowMapResX(512), m_shadowMapResY(512),
 	m_cbufferVSRegCounter(0), m_cbufferGSRegCounter(0)
 {
-	UINT shadowMapWidth = 512, shadowMapHeight = 512;
 	ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
-	m_viewport.Width = static_cast<float>(shadowMapWidth);
-	m_viewport.Height = static_cast<float>(shadowMapHeight);
+	m_viewport.Width = static_cast<float>(m_shadowMapResX);
+	m_viewport.Height = static_cast<float>(m_shadowMapResY);
 	m_viewport.MinDepth = 0.0f;
 	m_viewport.MaxDepth = 1.0f;
 
@@ -49,8 +49,8 @@ D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 
 	D3D11_TEXTURE2D_DESC smDesc;
 	ZeroMemory(&smDesc, sizeof(smDesc));
-	smDesc.Width = shadowMapWidth;
-	smDesc.Height = shadowMapHeight;
+	smDesc.Width = m_shadowMapResX;
+	smDesc.Height = m_shadowMapResY;
 	smDesc.MipLevels = 1;
 	smDesc.ArraySize = 1; //6;
 	smDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
@@ -104,8 +104,8 @@ D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 	rsStateDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
 	rsStateDesc.FrontCounterClockwise = false;
 	rsStateDesc.DepthBias = 1;
-	rsStateDesc.DepthBiasClamp = 0.0f;
-	rsStateDesc.SlopeScaledDepthBias = 1.0f;
+	rsStateDesc.DepthBiasClamp = 3.0f;
+	rsStateDesc.SlopeScaledDepthBias = 10.0f;
 	rsStateDesc.DepthClipEnable = true;
 	rsStateDesc.ScissorEnable = false;
 	rsStateDesc.MultisampleEnable = false;

@@ -34,6 +34,13 @@ public:
 	{
 		return m_pShadowMapSRV;
 	}
+	inline DirectX::XMVECTOR GetShadowMap2DResolution()
+	{
+		return DirectX::XMVectorSet(
+			static_cast<float>(m_shadowMapResX), 
+			static_cast<float>(m_shadowMapResY), 
+			0.0f, 0.0f);
+	}
 private:
 	D3D11DepthMap(D3D11Context& context);
 
@@ -57,7 +64,7 @@ private:
 	PerFrameDataVS_DM m_perFrameDataVS;
 	PerDrawCallDataVS_DM m_perDrawCallDataVS;
 
-	unsigned int m_cbufferVSRegCounter;
-	unsigned int m_cbufferGSRegCounter;
+	unsigned int m_cbufferVSRegCounter, m_cbufferGSRegCounter;
+	unsigned int m_shadowMapResX, m_shadowMapResY;
 };
 
