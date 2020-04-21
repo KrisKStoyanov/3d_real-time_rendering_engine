@@ -2,7 +2,7 @@
 #include "GoochIllumination.hlsli"
 
 Texture2D shadowMap : register(t0);
-SamplerState samplerShadowMap : register(s0);
+SamplerComparisonState samplerShadowMap : register(s0);
 
 cbuffer PerFrameBuffer : register(b0)
 {
@@ -46,7 +46,7 @@ float4 main(PS_INPUT ps_input) : SV_Target
         float epsilon = 0.0005f / margin;
         epsilon = clamp(epsilon, 0.0f, 0.1f);
         
-        float depthValue = shadowMap.Sample(samplerShadowMap, projectTexCoord).r;
+        float depthValue = shadowMap.SampleCmpLevelZero(samplerShadowMap, projectTexCoord, (lightDepthValue + epsilon)).r;
         
         if (lightDepthValue < depthValue)
         {
@@ -73,7 +73,6 @@ float4 main(PS_INPUT ps_input) : SV_Target
     
     float4 blendColor = 0.5f * coolColor + max(dot(normal, lightDir), 0.0f) * diffuseColor * (s * highlightColor + (1.0f - s) * warmColor);
     return lightColor * blendColor;
-    
     //---------
     //oren-nayar
     //half VDotN = dot(viewDir, normal);

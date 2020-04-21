@@ -51,7 +51,7 @@ void Renderer::Draw(Scene& scene)
 		DirectX::XMConvertToRadians(90.0f),
 		1.0f,
 		1.0f,
-		1000.0f)); //represent point light influence radius
+		25.0f)); //represent point light influence radius
 
 	// Depth Pre-pass
 	m_pDepthMap->UpdatePerFrame(*m_pGraphicsContext->GetContext());

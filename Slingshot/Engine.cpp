@@ -172,7 +172,7 @@ GEOMETRY_DESC Engine::SetupScene(Scene& scene, const int entityCount)
 	//------------------------------
 	//Yellow ball
 	TRANSFORM_DESC entity8_transform_desc;
-	entity8_transform_desc.position = DirectX::XMFLOAT4(0.0f, -1.5f, 6.0f, 1.0f);
+	entity8_transform_desc.position = DirectX::XMFLOAT4(0.0f, -1.5f, 5.0f, 1.0f);
 	entityCollection[8].SetTransform(entity8_transform_desc);
 	MATERIAL_DESC mat_desc6;
 	mat_desc6.shadingModel = ShadingModel::FinalGathering;
@@ -202,16 +202,16 @@ GEOMETRY_DESC Engine::SetupScene(Scene& scene, const int entityCount)
 	//Purple Cube 
 	TRANSFORM_DESC entity10_transform_desc;
 	entity10_transform_desc.position = DirectX::XMFLOAT4(-5.0f, 0.0f, 13.5f, 1.0f);
-	entity10_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, 12.5f, 0.0f, 0.0f);
+	entity10_transform_desc.rotation = DirectX::XMFLOAT4(0.0f, -25.0f, 0.0f, 0.0f);
 	entityCollection[10].SetTransform(entity10_transform_desc);
 	MATERIAL_DESC mat_desc8;
 	mat_desc8.shadingModel = ShadingModel::FinalGathering;
 	mat_desc8.surfaceColor = DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);
 	mat_desc8.roughness = 1.0f;
 	CUBE_DESC cube_desc0;
-	cube_desc0.width = 3.25f;
+	cube_desc0.width = 3.5f;
 	cube_desc0.height = 5.0f;
-	cube_desc0.length = 3.25f;
+	cube_desc0.length = 3.5f;
 	CreateCube(*(entityCollection + 10), cube_desc0, mat_desc8);
 	//------------------------------
 
