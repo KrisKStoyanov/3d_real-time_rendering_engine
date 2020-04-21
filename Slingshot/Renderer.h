@@ -13,7 +13,7 @@ struct RENDERER_DESC
 class Renderer {
 public:
 	static Renderer* Create(HWND hWnd, RENDERER_DESC& renderer_desc);
-	bool Initialize(PIPELINE_DESC pipeline_desc);
+	bool Initialize();
 	void Draw(Scene& scene);
 	void Shutdown();
 	void UpdateConstantVRS();

@@ -38,15 +38,8 @@ bool Engine::Initialize(WINDOW_DESC& window_desc, RENDERER_DESC& renderer_desc)
 
 	if (m_isRunning) 
 	{
-		PIPELINE_DESC pipeline_desc;
-		pipeline_desc.shadingModel = ShadingModel::FinalGathering;
-		pipeline_desc.VS_filename_DI = "DirectIlluminationVS.cso";
-		pipeline_desc.PS_filename_DI = "DirectIlluminationPS.cso";
-		pipeline_desc.VS_filename_DM = "DepthMapVS.cso";
-		pipeline_desc.PS_filename_DM = "DepthMapPS.cso";
-		m_isRunning = m_pRenderer->Initialize(pipeline_desc);	
+		m_isRunning = m_pRenderer->Initialize();	
 		GEOMETRY_DESC geo_desc = SetupScene(*m_pScene, 11);
-		//m_pRenderer->SetupPhotonMap(geo_desc);
 		m_pTimer = new Timer();
 	}
 

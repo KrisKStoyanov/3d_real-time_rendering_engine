@@ -23,7 +23,7 @@ Renderer::Renderer(HWND hWnd, RENDERER_DESC& renderer_desc) :
 	}
 }
 
-bool Renderer::Initialize(PIPELINE_DESC pipeline_desc)
+bool Renderer::Initialize()
 {
 	if (!m_pGraphicsContext->Initialize())
 	{
@@ -51,7 +51,7 @@ void Renderer::Draw(Scene& scene)
 		DirectX::XMConvertToRadians(90.0f),
 		1.0f,
 		1.0f,
-		25.0f)); //represent point light influence radius
+		30.0f)); //represent point light influence radius
 
 	// Depth Pre-pass
 	m_pDepthMap->UpdatePerFrame(*m_pGraphicsContext->GetContext());

@@ -8,7 +8,7 @@ D3D11DepthMap* D3D11DepthMap::Create(D3D11Context& context)
 D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 	m_cbufferVSRegCounter(0), m_cbufferGSRegCounter(0)
 {
-	UINT shadowMapWidth = 800, shadowMapHeight = 800;
+	UINT shadowMapWidth = 512, shadowMapHeight = 512;
 	ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
 	m_viewport.Width = static_cast<float>(shadowMapWidth);
 	m_viewport.Height = static_cast<float>(shadowMapHeight);
@@ -103,9 +103,9 @@ D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 	rsStateDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
 	rsStateDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
 	rsStateDesc.FrontCounterClockwise = false;
-	rsStateDesc.DepthBias = 0;
+	rsStateDesc.DepthBias = 1;
 	rsStateDesc.DepthBiasClamp = 0.0f;
-	rsStateDesc.SlopeScaledDepthBias = 0.0f;
+	rsStateDesc.SlopeScaledDepthBias = 1.0f;
 	rsStateDesc.DepthClipEnable = true;
 	rsStateDesc.ScissorEnable = false;
 	rsStateDesc.MultisampleEnable = false;
