@@ -104,8 +104,8 @@ D3D11DepthMap::D3D11DepthMap(D3D11Context& context) :
 	rsStateDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
 	rsStateDesc.FrontCounterClockwise = false;
 	rsStateDesc.DepthBias = 1;
-	rsStateDesc.DepthBiasClamp = 3.0f;
-	rsStateDesc.SlopeScaledDepthBias = 10.0f;
+	rsStateDesc.DepthBiasClamp = 1.0f;
+	rsStateDesc.SlopeScaledDepthBias = 3.0f;
 	rsStateDesc.DepthClipEnable = true;
 	rsStateDesc.ScissorEnable = false;
 	rsStateDesc.MultisampleEnable = false;
