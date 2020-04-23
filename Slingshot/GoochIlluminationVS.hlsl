@@ -30,9 +30,5 @@ PS_INPUT main(VS_INPUT vs_input)
     vs_output.posWorld = mul(vs_input.position, worldMatrix);
     vs_output.normalWorld = mul(vs_input.normal, worldMatrix);
     
-    float4 worldPos = mul(vs_input.position, worldMatrix);
-    vs_output.lightRay = normalize(lightPos - worldPos);
-    vs_output.incRay = camPos - worldPos;
-    
     return vs_output;
 }

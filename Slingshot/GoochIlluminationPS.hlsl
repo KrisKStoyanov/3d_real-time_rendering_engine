@@ -53,15 +53,15 @@ float4 main(PS_INPUT ps_input) : SV_Target
     float depthSample = 0.0f;
     float smTexelXCoord, smTexelYCoord;
     
-    //3x3 HPCF
-    for (smTexelYCoord = -1.5f; smTexelYCoord <= 1.5f; smTexelYCoord += 1.5f)
+    //4x4 HPCF
+    for (smTexelYCoord = -1.5f; smTexelYCoord <= 1.5f; ++smTexelYCoord)
     {
-        for (smTexelXCoord = -1.5f; smTexelXCoord <= 1.5f; smTexelXCoord += 1.5f)
+        for (smTexelXCoord = -1.5f; smTexelXCoord <= 1.5f; ++smTexelXCoord)
         {
             depthSample += shadowMap.SampleCmpLevelZero(samplerShadowMap, shadowTexCoord.xy + texelOffset(smTexelXCoord, smTexelYCoord), shadowTexCoord.z);
         }
     }
-    depthSample /= 9.0f;
+    depthSample /= 16;
     float lightIntensity = saturate(dot(normal, lightDir));
     float4 lightColor = (depthSample * ambientColor) + (diffuseColor * lightIntensity);
     lightColor = saturate(lightColor);

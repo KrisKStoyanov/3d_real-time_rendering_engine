@@ -14,6 +14,4 @@ struct PS_INPUT
     float4 posWorld : W_POSITION;
     float4 posLightWorld : LW_POSITION;
     float4 normalWorld : NORMAL0;
-    float4 lightRay : NORMAL1;
-    float4 incRay : NORMAL2;
 };
