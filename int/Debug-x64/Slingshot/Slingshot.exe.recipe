@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>C:\Projects\github_origin\3d_real-time_rendering_engine\bin\Debug-x64\Slingshot\Slingshot.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>C:\Projects\github_origin\3d_real-time_rendering_engine\Slingshot\DepthMapGS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Projects\github_origin\3d_real-time_rendering_engine\Slingshot\DepthMapPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Projects\github_origin\3d_real-time_rendering_engine\Slingshot\DepthMapVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Projects\github_origin\3d_real-time_rendering_engine\Slingshot\GoochIlluminationVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Projects\github_origin\3d_real-time_rendering_engine\Slingshot\GoochIlluminationPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Projects\github_origin\3d_real-time_rendering_engine\Slingshot\GoochPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Projects\github_origin\3d_real-time_rendering_engine\Slingshot\GoochVS.cso</FullPath>
+    </ContentFile>
+  </ContentFiles>
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>

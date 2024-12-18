@@ -29,11 +29,11 @@ bool Renderer::Initialize()
 	{
 		return false;
 	}
-	m_pNvExtension = NvExtension::Create();
-	if (!m_pNvExtension->Initialize(*m_pGraphicsContext))
-	{
-		return false;
-	}
+	//m_pNvExtension = NvExtension::Create();
+	//if (!m_pNvExtension->Initialize(*m_pGraphicsContext))
+	//{
+	//	return false;
+	//}
 	
 	m_pDepthMap = D3D11DepthMap::Create(*m_pGraphicsContext);
 	m_pDirectIllumination = D3D11DirectIllumination::Create(*m_pGraphicsContext);
